@@ -185,6 +185,7 @@ export const getProductItems = async (req, res) => {
 
 
 export const uploadLabel = async (req, res) => {
+    let populatedBundle
     try {
         const userId = req.params.userid || req.headers['userid'];
         const { bundleId, date } = req.body;
@@ -269,7 +270,10 @@ export const uploadLabel = async (req, res) => {
         if (allSelected) {
             return res.status(200).json({
                 status: 200,
-                message: 'All products in bundle updated with label. No new bundle created.'
+                message: 'All products in bundle updated with label. No new bundle created.',
+                data: {
+                    bundle: bundleId
+                }
             });
         }
 
@@ -305,7 +309,7 @@ export const uploadLabel = async (req, res) => {
             { $pull: { products: { $in: updatedProducts } } }
         );
 
-        const populatedBundle = await ReturnBundle.findById(newBundle._id).populate('products');
+         populatedBundle = await ReturnBundle.findById(newBundle._id).populate('products');
 
         return res.status(200).json({
             status: 200,
