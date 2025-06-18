@@ -170,3 +170,29 @@ export const getAllReturnBundles = async (req, res) => {
         res.status(500).json({ error: "Internal server error", success: false });
     }
 };
+
+export const DeleteBundle = async (req,res)=>{
+    try {
+        const userId = req.params.userid || req.headers['userid'];
+        const bundleId = req.params.bundleId;
+
+        if (!userId) {
+            return res.status(200).json({ error: "User ID is required", status: 400, success: false });
+        }
+
+        if (!bundleId) {
+            return res.status(200).json({ error: "Bundle ID is required", status: 400, success: false });
+        }
+
+        const bundle = await ReturnBundle.findByIdAndDelete(bundleId);
+        if (!bundle) {
+            return res.status(200).json({ error: "Bundle not found", status: 404, success: false });
+        }
+        return res.status(200).json({ data: bundle, status: 200, success: true });
+
+    } catch (error) {
+        console.error("Error deleting bundle:", error);
+        res.status(500).json({ error: "Internal server error", success: false });
+        
+    }
+}

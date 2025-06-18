@@ -9,6 +9,7 @@ import './middlewares/passport/googleStrategy.js'
 
 import router from './routes/index.js' 
 import bundleRouter from './routes/BundleRoute.js'
+import ProductItemRoutes from './routes/productItem.js'
 
 
 dotenv.config()
@@ -35,6 +36,7 @@ app.use(passport.session())
 
 app.use('/api',router) 
 app.use('/api',bundleRouter)
+app.use('/api',ProductItemRoutes)
 
 app.get('/',(req,res)=>{
     res.send("Hello World")
