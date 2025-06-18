@@ -29,19 +29,8 @@ const productItemSchema = new mongoose.Schema({
     },
     labelName: {
         type: String,
-        required: true,
         trim: true
     },
-    labelsize: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    labelWeight: {
-        type: String,
-        required: true,
-        trim: true
-    }
 },
     {
         _id: true,
