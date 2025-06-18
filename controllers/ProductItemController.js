@@ -247,7 +247,7 @@ export const uploadLabel = async (req, res) => {
                 { new: true }
             );
 
-            const bundle = await ReturnBundle.findByIdandUpdate(
+            const bundle = await ReturnBundle.findByIdAndUpdate(
                 bundleId,
                 { status: 'processed' },
                 { new: true }
