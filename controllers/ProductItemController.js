@@ -304,7 +304,7 @@ export const uploadLabel = async (req, res) => {
             pickupTime: new Date(date),
             pickupAddress: null,
             payment: null,
-            status: 'processed'
+            status: 'pending'
         });
 
         await newBundle.save();
