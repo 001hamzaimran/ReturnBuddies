@@ -247,15 +247,16 @@ export const uploadLabel = async (req, res) => {
                 { new: true }
             );
 
-            const bundle = await ReturnBundle.findByIdAndUpdate(
-                bundleId,
-                { status: 'processed' },
-                { new: true }
-            )
+
 
             if (updated) {
                 console.log("✅ Updated:", updated._id);
                 updatedProducts.push(updated._id.toString());
+                const bundle = await ReturnBundle.findByIdAndUpdate(
+                    bundleId,
+                    { status: 'processed' },
+                    { new: true }
+                )
             } else {
                 console.log("❌ No match for:", item.productId, "with user:", userId);
             }
@@ -304,7 +305,7 @@ export const uploadLabel = async (req, res) => {
             pickupTime: new Date(date),
             pickupAddress: null,
             payment: null,
-            status: 'pending'
+            status: 'processed'
         });
 
         await newBundle.save();
@@ -315,7 +316,13 @@ export const uploadLabel = async (req, res) => {
             { $pull: { products: { $in: updatedProducts } } }
         );
 
-         populatedBundle = await ReturnBundle.findById(newBundle._id).populate('products');
+        const remainingBundle = await ReturnBundle.findById(bundleId).lean();
+        if (remainingBundle?.products?.length > 0) {
+            await ReturnBundle.findByIdAndUpdate(bundleId, { status: 'pending' });
+        }
+
+
+        populatedBundle = await ReturnBundle.findById(newBundle._id).populate('products');
 
         return res.status(200).json({
             status: 200,

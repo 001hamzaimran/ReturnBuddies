@@ -174,7 +174,7 @@ export const getAllReturnBundles = async (req, res) => {
 export const DeleteBundle = async (req,res)=>{
     try {
         const userId = req.params.userid || req.headers['userid'];
-        const bundleId = req.params.bundleId;
+        const bundleId = req.query.bundleId
 
         if (!userId) {
             return res.status(200).json({ error: "User ID is required", status: 400, success: false });

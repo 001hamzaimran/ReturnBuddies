@@ -7,6 +7,6 @@ const bundleRouter = express.Router();
 bundleRouter.post('/addbundle',upload.array("files", 10),createProductItemsAndReturnBundle);
 bundleRouter.get('/getbundle',getReturnBundle);
 bundleRouter.get('/getAllReturnBundles',getAllReturnBundles);
-bundleRouter.post('/deletebundle/:userid/:bundleId',DeleteBundle);
+bundleRouter.post('/deletebundle',DeleteBundle);
 
 export default bundleRouter
