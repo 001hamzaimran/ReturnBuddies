@@ -7,6 +7,7 @@ import jsonwebtoken from "jsonwebtoken";
 import ForgotModal from "../models/ForgotPassword.js";
 import DeleteOtpModal from "../models/DeleteOtp.js";
 import { stat } from "fs";
+import sendSms from "../middlewares/sendsms.js";
 
 const Register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -456,83 +457,142 @@ const DeleteVerifyAccount = async (req, res) => {
 
 
 const changePassword = async (req, res) => {
-    const { currentPassword, newPassword } = req.body;
-    const user = req.user; // From authentication middleware
+  const { currentPassword, newPassword } = req.body;
+  const user = req.user; // From authentication middleware
 
-    try {
-        // Validate required fields
-        if (!currentPassword || !newPassword) {
-            return res.status(200).json({
-                success: false,
-                status: 400,
-                message: 'Both current and new passwords are required'
-            });
-        }
-
-        // Verify user exists
-        if (!user) {
-            return res.status(200).json({
-                success: false,
-                status: 404,
-                message: 'User not found'
-            });
-        }
-
-        // Fetch latest user data (in case of stale req.user)
-        const currentUser = await UserModel.findById(user._id);
-        if (!currentUser) {
-            return res.status(200).json({
-                success: false,
-                status: 404,
-                message: 'User not found'
-            });
-        }
-
-        // Verify current password
-        const isMatch = await bcrypt.compare(currentPassword, currentUser.password);
-        if (!isMatch) {
-            return res.status(200).json({
-                success: false,
-                status: 400,
-                message: 'Current password is incorrect'
-            });
-        }
-
-        // Validate new password strength
-        if (newPassword.length < 8) {
-            return res.status(200).json({
-                success: false,
-                status: 400,
-                message: 'New password must be at least 8 characters'
-            });
-        }
-
-        // Hash new password
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
-        // Update password in database
-        currentUser.password = hashedPassword;
-        await currentUser.save();
-
-        return res.status(200).json({
-            success: true,
-            status: 200,
-            message: 'Password updated successfully'
-        });
-
-    } catch (error) {
-        console.error('Password change error:', error);
-        return res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
+  try {
+    // Validate required fields
+    if (!currentPassword || !newPassword) {
+      return res.status(200).json({
+        success: false,
+        status: 400,
+        message: 'Both current and new passwords are required'
+      });
     }
+
+    // Verify user exists
+    if (!user) {
+      return res.status(200).json({
+        success: false,
+        status: 404,
+        message: 'User not found'
+      });
+    }
+
+    // Fetch latest user data (in case of stale req.user)
+    const currentUser = await UserModel.findById(user._id);
+    if (!currentUser) {
+      return res.status(200).json({
+        success: false,
+        status: 404,
+        message: 'User not found'
+      });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, currentUser.password);
+    if (!isMatch) {
+      return res.status(200).json({
+        success: false,
+        status: 400,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Validate new password strength
+    if (newPassword.length < 8) {
+      return res.status(200).json({
+        success: false,
+        status: 400,
+        message: 'New password must be at least 8 characters'
+      });
+    }
+
+    // Hash new password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update password in database
+    currentUser.password = hashedPassword;
+    await currentUser.save();
+
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      message: 'Password updated successfully'
+    });
+
+  } catch (error) {
+    console.error('Password change error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
 };
 
 const updateNameandPhone = async (req, res) => {
   try {
-    const {phone,name}=req.body
+    const { phone, name } = req.body
+    const user = req.user;
+
+    if (!user) {
+      return res.status(200).json({
+        success: false,
+        status: 404,
+        message: "User not found",
+      });
+    }
+
+    if (!name || !phone) {
+      return res.status(200).json({
+        success: false,
+        status: 400,
+        message: "Name and phone are required",
+      });
+    }
+
+    const otp = crypto.randomInt(10000, 99999).toString();
+    // Upsert OTP record in ForgotModal
+    const expiresAt = new Date(Date.now() + 5 * 60 * 60 * 1000);
+
+    const users = await UserModel.findById(user._id);
+
+    // const currentUser = await UserModel.findByIdAndUpdate(
+    //   user._id,
+    //   { name, phone },
+    //   { new: true, runValidators: true }
+    // )
+    // if (!currentUser) {
+    //   return res.status(200).json({
+    //     success: false,
+    //     status: 404,
+    //     message: "User not found",
+    //   });
+    // }
+    await sendSms(phone, `Your OTP is: ${otp}`);
+
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      message: "OTP send successfully",
+      expiresAt: expiresAt,
+      users: users,
+      OTP: otp,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Internal server error",
+    })
+  }
+}
+
+const updateNameandPhoneVerification = async (req, res) => {
+  try {
+    const { phone, name } = req.body
+
     const user = req.user;
 
     if (!user) {
@@ -553,8 +613,8 @@ const updateNameandPhone = async (req, res) => {
     const currentUser = await UserModel.findByIdAndUpdate(
       user._id,
       { name, phone },
-      { new: true, runValidators: true}
-    ) 
+      { new: true, runValidators: true }
+    )
     if (!currentUser) {
       return res.status(200).json({
         success: false,
@@ -566,9 +626,10 @@ const updateNameandPhone = async (req, res) => {
     return res.status(200).json({
       success: true,
       status: 200,
-      message: "Profile updated successfully",
-      user: currentUser,
+      message: "User Updated Successfully",
+      user: currentUser
     });
+
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -588,5 +649,6 @@ export {
   DeleteAccount,
   DeleteVerifyAccount,
   changePassword,
+  updateNameandPhoneVerification,
   updateNameandPhone
 };
