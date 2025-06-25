@@ -25,7 +25,7 @@ export const addAddress = async (req, res) => {
                 return res.status(200).json({ status: 404, message: "User not found", success: false });
             }
             user.pickupAddress = address._id;
-            
+
             await user.save();
             return res.status(200).json({ Address: address, isDefault, status: 200, success: true, user });
 
@@ -47,22 +47,50 @@ export const getAllAddresses = async (req, res) => {
     }
 };
 
-export const addressUpdate = async(req, res) => {
-    try {
-        const {isDefault, addressId} = req.body;
-        const userId = req.params.userid || req.headers['userid'];
+export const addressUpdate = async (req, res) => {
+  try {
+    const { isDefault, addressId } = req.body;
+    const userId = req.params.userid || req.headers['userid'];
 
-        if(isDefault === 1){
-            const user = await UserModel.findOne({ _id: userId });
-            if (!user) {
-                return res.status(200).json({ status: 404, message: "User not found", success: false });
-            }
-            user.pickupAddress = addressId;
-            await user.save();
-            return res.status(200).json({ user, status: 200, success: true, user });
-        }
-
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
+    if (!userId || !addressId) {
+      return res.status(200).json({ success: false, message: "userId and addressId are required",status: 400 });
     }
-}
+
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(200).json({ success: false, message: "User not found", status: 404 });
+    }
+
+    if (isDefault === 1 || isDefault === true) {
+      await addressSchema.updateMany(
+        { _id: { $ne: addressId } }, 
+        { $set: { isDefault: false } }
+      );
+
+      // Step 2: Set selected address to isDefault: true
+      const updatedAddress = await addressSchema.findByIdAndUpdate(
+        addressId,
+        { isDefault: true },
+        { new: true }
+      );
+
+      // Step 3: Update user's pickupAddress field
+      user.pickupAddress = addressId;
+      await user.save();
+
+      return res.status(200).json({
+        success: true,
+        status: 200,
+        message: "Default address updated",
+        user,
+        defaultAddress: updatedAddress
+      });
+    } else {
+      return res.status(200).json({ status: 400 ,success: false, message: "isDefault must be true/1" });
+    }
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
