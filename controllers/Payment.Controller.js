@@ -17,7 +17,8 @@ export const addPaymentCard = async (req, res) => {
 
         // Check for required fields
         if (!userId || !cardNumber || !cardHolderName || !expirationDate || !cvv) {
-            return res.status(400).json({
+            return res.status(200).json({
+                status: 400,
                 success: false,
                 message: "All fields are required"
             });
@@ -43,6 +44,7 @@ export const addPaymentCard = async (req, res) => {
 
         return res.status(200).json({
             success: true,
+            status: 200,
             message: "Card added successfully",
             card: newCard
         });
@@ -64,11 +66,13 @@ export const getUserCards = async (req, res) => {
 
     return res.status(200).json({
       success: true,
+      status: 200,
       message: "Cards retrieved successfully",
       cards
     });
   } catch (error) {
     return res.status(500).json({
+        status: 500,
       success: false,
       message: error.message
     });
@@ -104,9 +108,9 @@ export const editCard = async (req, res) => {
     }
 
     await card.save();
-    return res.status(200).json({ success: true, message: "Card updated successfully", card });
+    return res.status(200).json({status: 200, success: true, message: "Card updated successfully", card });
 
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({status: 500, success: false, message: error.message });
   }
 };
