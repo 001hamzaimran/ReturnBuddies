@@ -88,7 +88,7 @@ export const editCard = async (req, res) => {
 
     const card = await CardModel.findById(cardId);
     if (!card) {
-      return res.status(404).json({ success: false, message: "Card not found" });
+      return res.status(200).json({status: 404, success: false, message: "Card not found" });
     }
 
     // Update fields
