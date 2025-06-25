@@ -7,9 +7,10 @@ import DbCon from './utils/db.js'
 
 import './middlewares/passport/googleStrategy.js'
 
-import router from './routes/index.js' 
+import router from './routes/index.js'
 import bundleRouter from './routes/BundleRoute.js'
 import ProductItemRoutes from './routes/productItem.js'
+import { addressRouter } from './routes/Address.routes.js'
 
 
 dotenv.config()
@@ -17,8 +18,8 @@ dotenv.config()
 // db connection 
 
 
-const PORT=process.env.PORT
-const app=express()
+const PORT = process.env.PORT
+const app = express()
 app.use(express.json())
 app.use('/public', express.static('public'));
 
@@ -26,20 +27,21 @@ app.use(cors())
 
 // google login setup
 app.use(session({
-    secret:"some-secret",
-    resave: false,
-    saveUninitialized: true,
-    
+  secret: "some-secret",
+  resave: false,
+  saveUninitialized: true,
+
 }))
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.use('/api',router) 
-app.use('/api',bundleRouter)
-app.use('/api',ProductItemRoutes)
+app.use('/api', router)
+app.use('/api', bundleRouter)
+app.use('/api', ProductItemRoutes)
+app.use('/api', addressRouter)
 
-app.get('/',(req,res)=>{
-    res.send("Hello World")
+app.get('/', (req, res) => {
+  res.send("Hello World")
 })
 
 //time delay api

@@ -24,7 +24,8 @@ const returnBundleSchema = new mongoose.Schema({
     },
 
     pickupAddress: {
-        type: String
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Address'
     },
 
     payment: {

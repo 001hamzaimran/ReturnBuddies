@@ -11,42 +11,54 @@ import sendSms from "../middlewares/sendsms.js";
 
 const Register = async (req, res) => {
   const { name, email, password } = req.body;
+
   try {
-    const user = await UserModel.findOne({ email });
-    if (user) {
-      return res.status(200).json({
+    // Check if user already exists
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
         success: false,
         status: 400,
         message: "User already exists",
       });
     }
 
-    const hasepassword = await bcrypt.hashSync(password, 10);
-    const verificationToken = crypto.randomInt(10000, 99999).toString();
-    const emailResponse = await sendVerficationEmail(email, verificationToken);
+    // Hash password
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    // Generate OTP token
+    const otp = crypto.randomInt(10000, 99999).toString();
+
+    // Send email
+    const emailResponse = await sendVerficationEmail(email, otp);
     if (!emailResponse.success) {
-      return res
-        .status(200)
-        .json({
-          success: false,
-          message: emailResponse.message || "Failed to send email",
-        });
+      return res.status(500).json({
+        success: false,
+        status: 500,
+        message: emailResponse.message || "Failed to send verification email",
+      });
     }
+
+    // Create and save new user
     const newUser = new UserModel({
       name,
       email,
-      password: hasepassword,
-      otp: verificationToken,
+      password: hashedPassword,
+      otp,
     });
     await newUser.save();
+
+    // Sanitize response (omit password and otp)
+    const { password: _, otp: __, ...safeUser } = newUser.toObject();
+
     return res.status(200).json({
       success: true,
       status: 200,
-      message: `Email hase been send to ${email} Please Verify your Email`,
-      user: newUser,
+      message: `Email has been sent to ${email}. Please verify your email.`,
+      user: safeUser,
     });
   } catch (error) {
-    console.log("error", error);
+    console.error("Register error:", error);
     return res.status(500).json({
       success: false,
       status: 500,
@@ -54,6 +66,7 @@ const Register = async (req, res) => {
     });
   }
 };
+
 
 const VerifyEmail = async (req, res) => {
   const { email, otp } = req.body;
