@@ -8,7 +8,7 @@ const addressSchema = new mongoose.Schema({
   state: { type: String, required: true, trim: true },
   postalCode: { type: String, required: true, trim: true },
   suite: { type: String, required: true, trim: true },
-  isDefault: { type: Boolean, default: false }
+  isDefault: { type: Number, default: false }
 });
 
 // Export as a Mongoose model

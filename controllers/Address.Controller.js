@@ -15,7 +15,8 @@ export const addAddress = async (req, res) => {
             city,
             state,
             postalCode,
-            suite
+            suite,
+            isDefault
         });
 
         if (isDefault === 1) {
@@ -24,6 +25,7 @@ export const addAddress = async (req, res) => {
                 return res.status(200).json({ status: 404, message: "User not found", success: false });
             }
             user.pickupAddress = address._id;
+            
             await user.save();
             return res.status(200).json({ Address: address, isDefault, status: 200, success: true, user });
 
@@ -44,3 +46,23 @@ export const getAllAddresses = async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 };
+
+export const addressUpdate = async(req, res) => {
+    try {
+        const {isDefault, addressId} = req.body;
+        const userId = req.params.userid || req.headers['userid'];
+
+        if(isDefault === 1){
+            const user = await UserModel.findOne({ _id: userId });
+            if (!user) {
+                return res.status(200).json({ status: 404, message: "User not found", success: false });
+            }
+            user.pickupAddress = addressId;
+            await user.save();
+            return res.status(200).json({ user, status: 200, success: true, user });
+        }
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
