@@ -6,7 +6,7 @@ export const addAddress = async (req, res) => {
         const { street, city, state, postalCode, suite, isDefault } = req.body;
         const userId = req.params.userid || req.headers['userid'];
         if (!street || !city || !state || !postalCode || !suite) {
-            return res.status(200).json({ status: 400, error: "All fields are required", success: false });
+            return res.status(200).json({ status: 400, message: "All fields are required", success: false });
         }
 
         const address = await addressSchema.create({
@@ -21,7 +21,7 @@ export const addAddress = async (req, res) => {
         if (isDefault === 1) {
             const user = await UserModel.findOne({ _id: userId });
             if (!user) {
-                return res.status(200).json({ status: 404, error: "User not found", success: false });
+                return res.status(200).json({ status: 404, message: "User not found", success: false });
             }
             user.pickupAddress = address._id;
             await user.save();
@@ -30,7 +30,7 @@ export const addAddress = async (req, res) => {
         }
         return res.status(200).json({ Address: address, isDefault, status: 200, success: true });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };
 
