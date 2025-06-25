@@ -24,7 +24,7 @@ export const addAddress = async (req, res) => {
         }
 
         if (isDefault === 1 || isDefault === true) {
-            await Address.updateMany(
+            await addressSchema.updateMany(
                 { userId },
                 { $set: { isDefault: false } }
             );
@@ -107,6 +107,7 @@ export const editAddress = async (req, res) => {
   try {
     const addressId = req.params.addressId;
     const { street, city, state, postalCode, suite, isDefault } = req.body;
+    const userId = req.params.userid || req.headers['userid'];
 
     // Step 1: Find address
     const address = await addressSchema.findById(addressId);
