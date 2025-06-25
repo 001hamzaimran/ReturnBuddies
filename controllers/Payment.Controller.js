@@ -55,3 +55,58 @@ export const addPaymentCard = async (req, res) => {
         });
     }
 };
+
+export const getUserCards = async (req, res) => {
+  try {
+    const userId = req.params.userid || req.headers['userid'];
+
+    const cards = await CardModel.find({ userId });
+
+    return res.status(200).json({
+      success: true,
+      message: "Cards retrieved successfully",
+      cards
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+export const editCard = async (req, res) => {
+  try {
+    const cardId = req.params.cardId;
+    const {
+      cardNumber,
+      cardHolderName,
+      expirationDate,
+      cvv,
+      isDefault
+    } = req.body;
+
+    const card = await CardModel.findById(cardId);
+    if (!card) {
+      return res.status(404).json({ success: false, message: "Card not found" });
+    }
+
+    // Update fields
+    card.cardNumber = cardNumber || card.cardNumber;
+    card.cardHolderName = cardHolderName || card.cardHolderName;
+    card.expirationDate = expirationDate || card.expirationDate;
+    card.cvv = cvv || card.cvv;
+
+    // If setting this card as default, unset others
+    if (isDefault === 1 || isDefault === true) {
+      await CardModel.updateMany({ userId: card.userId, _id: { $ne: cardId } }, { isDefault: 0 });
+      card.isDefault = 1;
+    }
+
+    await card.save();
+    return res.status(200).json({ success: true, message: "Card updated successfully", card });
+
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
