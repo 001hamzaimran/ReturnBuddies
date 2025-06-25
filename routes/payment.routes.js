@@ -4,4 +4,4 @@ import { isLogin } from "../middlewares/authMiddleware.js";
 
 export const PaymentRouter = express.Router();
 
-PaymentRouter.post("/add_Payment_card",isLogin,addPaymentCard)
+PaymentRouter.post("/add-Payment-card",isLogin,addPaymentCard)
