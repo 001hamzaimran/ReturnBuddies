@@ -107,7 +107,7 @@ const Login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await UserModel.findOne({ email });
+    const user = await UserModel.findOne({ email }).populate("pickupAddress").populate("payment");;
     if (!user) {
       return res
         .status(200)

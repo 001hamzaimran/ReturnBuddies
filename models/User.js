@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema({
     },
     payment: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Payment'
+        ref: 'Card'
     },
     password: {
         type: String,
