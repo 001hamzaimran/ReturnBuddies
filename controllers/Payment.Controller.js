@@ -139,3 +139,36 @@ export const editCard = async (req, res) => {
         return res.status(500).json({ status: 500, success: false, message: error.message });
     }
 };
+
+
+export const deleteCard = async (req, res) => {
+    try {
+        const { Id } = req.params
+
+        if (!Id) {
+            return res.status(200).json({ status: 400, message: "Card Id is required" });
+        }
+
+        const deleteCard = await CardModel.findByIdAndDelete(Id);
+        if (!deleteCard) {
+            return res.status(200).json({ status: 404, message: "Card not found" });
+        }
+
+        const user = await UserModel.findById(deleteCard.userId);
+
+        if (user && user.payment?.toString() === Id) {
+            user.payment = null;
+            await user.save();
+        }
+
+        return res.status(200).json({
+            status: 200,
+            message: "Card deleted successfully",
+            deleteAddress
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+
+    }
+}
