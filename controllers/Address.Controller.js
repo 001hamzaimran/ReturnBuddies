@@ -147,3 +147,33 @@ export const editAddress = async (req, res) => {
     });
   }
 };
+export const deleteAddress = async (req, res) => {
+  try {
+    const { Id } = req.params;
+
+    if (!Id) {
+      return res.status(200).json({ status: 400, message: "Address Id is required" });
+    }
+
+    const deleteAddress = await addressSchema.findByIdAndDelete(Id);
+
+    if (!deleteAddress) {
+      return res.status(200).json({ status: 404, message: "Address not found" });
+    }
+
+    const user = await UserModel.findById(deleteAddress.userId);
+
+    if (user && user.pickupAddress?.toString() === Id) {
+      user.pickupAddress = null;
+      await user.save();
+    }
+
+    return res.status(200).json({
+      status: 200,
+      message: "Address deleted successfully",
+      deleteAddress
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
