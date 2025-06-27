@@ -123,7 +123,7 @@ const Login = async (req, res) => {
       const verificationToken = crypto.randomInt(10000, 99999).toString();
 
       await sendVerficationEmail(email, verificationToken);
-      await UserModel.findOneAndUpdate({ email }, { Otp: verificationToken });
+      await UserModel.findOneAndUpdate({ email }, { otp: verificationToken });
       return res
         .status(200)
         .json({
