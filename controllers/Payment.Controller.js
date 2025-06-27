@@ -164,7 +164,7 @@ export const deleteCard = async (req, res) => {
         return res.status(200).json({
             status: 200,
             message: "Card deleted successfully",
-            deleteAddress
+            deleteCard
         });
 
     } catch (error) {

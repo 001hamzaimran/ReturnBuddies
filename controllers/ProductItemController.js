@@ -204,3 +204,9 @@ export const uploadLabel = async (req, res) => {
         });
     }
 };
+
+
+
+export const editLabel = async (req,res)=>{
+    
+}
