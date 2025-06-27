@@ -151,7 +151,7 @@ export const deleteAddress = async (req, res) => {
   try {
     const { userid } = req.params;
 
-    if (!Id) {
+    if (!userid) {
       return res.status(200).json({ status: 400, message: "Address Id is required" });
     }
 
