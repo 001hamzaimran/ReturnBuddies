@@ -134,7 +134,7 @@ const Login = async (req, res) => {
     const token = await jsonwebtoken.sign(
       { id: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "7d" }
     );
     return res
       .status(200)
