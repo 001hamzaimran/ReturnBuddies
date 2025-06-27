@@ -149,13 +149,13 @@ export const editAddress = async (req, res) => {
 };
 export const deleteAddress = async (req, res) => {
   try {
-    const { Id } = req.params;
+    const { userid } = req.params;
 
     if (!Id) {
       return res.status(200).json({ status: 400, message: "Address Id is required" });
     }
 
-    const deleteAddress = await addressSchema.findByIdAndDelete(Id);
+    const deleteAddress = await addressSchema.findByIdAndDelete(userid);
 
     if (!deleteAddress) {
       return res.status(200).json({ status: 404, message: "Address not found" });
@@ -163,7 +163,7 @@ export const deleteAddress = async (req, res) => {
 
     const user = await UserModel.findById(deleteAddress.userId);
 
-    if (user && user.pickupAddress?.toString() === Id) {
+    if (user && user.pickupAddress?.toString() === userid) {
       user.pickupAddress = null;
       await user.save();
     }

@@ -113,7 +113,7 @@ const Login = async (req, res) => {
         .status(200)
         .json({ message: "User Not Found", status: 400 });
     }
-    const isMatch = await bcrypt.compareSync(password, user.password);
+    const isMatch = bcrypt.compareSync(password, user.password);
     if (!isMatch) {
       return res
         .status(200)
@@ -131,7 +131,7 @@ const Login = async (req, res) => {
           status: 201,
         });
     }
-    const token = await jsonwebtoken.sign(
+    const token = jsonwebtoken.sign(
       { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
@@ -325,7 +325,7 @@ const UpdateProfile = async (req, res) => {
 
     // Handle password update with old password verification
     if (oldPassword && newPassword) {
-      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      const isMatch = bcrypt.compare(oldPassword, user.password);
       if (!isMatch) {
         return res.status(400).json({
           success: false,
@@ -503,7 +503,7 @@ const changePassword = async (req, res) => {
     }
 
     // Verify current password
-    const isMatch = await bcrypt.compare(currentPassword, currentUser.password);
+    const isMatch = bcrypt.compare(currentPassword, currentUser.password);
     if (!isMatch) {
       return res.status(200).json({
         success: false,
