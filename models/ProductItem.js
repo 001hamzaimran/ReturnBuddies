@@ -13,10 +13,10 @@ const productItemSchema = new mongoose.Schema({
     },
 
     thumbnail: {
-        data: Buffer,
-        contentType: String,
+        type: String,
+        required: true,
+        trim: true
     },
-
 
     labelReceipt: {
         type: String,

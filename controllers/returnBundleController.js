@@ -52,11 +52,7 @@ export const createProductItemsAndReturnBundle = async (req, res) => {
                 userId,
                 productName: detail,
                 oversized: oversized || false,
-                thumbnail: {
-                    data: file.buffer,         // save buffer directly
-                    contentType: file.mimetype // required for proper display
-                },
-
+                thumbnail: file.path,
                 labelReceipt: 'pending'
             });
 
@@ -99,12 +95,12 @@ export const createProductItemsAndReturnBundle = async (req, res) => {
 export const getReturnBundle = async (req, res) => {
     try {
         const userId = req.params.userid || req.headers['userid'];
-
-
+ 
+        
         if (!userId) {
             return res.status(200).json({ error: "User ID is required", status: 400, success: false });
         }
-
+        
         // Support both single and multiple bundleId from query or params
         let bundleIds = req.params.bundleId || req.query.bundleId;
 
@@ -132,29 +128,15 @@ export const getReturnBundle = async (req, res) => {
         }
 
         // Fetch all matching bundles
-        const bundles = await ReturnBundle.find({ _id: { $in: bundleIds } })
-            .populate('products');
+        const bundles = await ReturnBundle.find({ _id: { $in: bundleIds } }).populate('products');
 
-        const processedBundles = bundles.map(bundle => {
-            const processedProducts = bundle.products.map(product => {
-                const productObj = product.toObject(); // Convert Mongoose document to plain object
-
-                // Add image as Base64 URL if it exists
-                if (product.thumbnail?.data && product.thumbnail?.contentType) {
-                    const base64Image = product.thumbnail.data.toString('base64');
-                    productObj.thumbnailUrl = `data:${product.thumbnail.contentType};base64,${base64Image}`;
-                } else {
-                    productObj.thumbnailUrl = null;
-                }
-
-                return productObj;
+        if (!bundles || bundles.length === 0) {
+            return res.status(404).json({
+                error: 'No return bundles found',
+                success: false,
+                status: 404
             });
-
-            const bundleObj = bundle.toObject();
-            bundleObj.products = processedProducts;
-
-            return bundleObj;
-        });
+        }
 
         return res.status(200).json({
             data: bundles,
@@ -177,49 +159,19 @@ export const getAllReturnBundles = async (req, res) => {
         const userId = req.params.userid || req.headers['userid'];
 
         if (!userId) {
-            return res.status(200).json({
-                error: "User ID is required",
-                status: 400,
-                success: false,
-            });
+            return res.status(200).json({ error: "User ID is required", status: 400, success: false });
         }
 
-        const bundles = await ReturnBundle.find({ userId }).populate('products');
+        const bundles = await ReturnBundle.find({ userId: userId }).populate('products');
 
-        // Convert image Buffers to base64 data URLs
-        const processedBundles = bundles.map(bundle => {
-            const processedProducts = bundle.products.map(product => {
-                const productObj = product.toObject();
-
-                if (product.thumbnail?.data && product.thumbnail?.contentType) {
-                    const base64 = product.thumbnail.data.toString('base64');
-                    productObj.thumbnailUrl = `data:${product.thumbnail.contentType};base64,${base64}`;
-                } else {
-                    productObj.thumbnailUrl = null;
-                }
-
-                return productObj;
-            });
-
-            const bundleObj = bundle.toObject();
-            bundleObj.products = processedProducts;
-
-            return bundleObj;
-        });
-
-        res.status(200).json({
-            data: processedBundles,
-            status: 200,
-            success: true,
-        });
+        res.status(200).json({ data: bundles, status: 200, success: true });
     } catch (error) {
         console.error("Error fetching user return bundles:", error);
         res.status(500).json({ error: "Internal server error", success: false });
     }
 };
 
-
-export const DeleteBundle = async (req, res) => {
+export const DeleteBundle = async (req,res)=>{
     try {
         const userId = req.params.userid || req.headers['userid'];
         const bundleId = req.query.bundleId
@@ -241,6 +193,6 @@ export const DeleteBundle = async (req, res) => {
     } catch (error) {
         console.error("Error deleting bundle:", error);
         res.status(500).json({ error: "Internal server error", success: false });
-
+        
     }
 }

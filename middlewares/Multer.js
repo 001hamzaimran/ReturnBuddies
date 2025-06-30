@@ -7,7 +7,7 @@ const dir = 'public/images';
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Check if the directory   exists
+    // Check if the directory exists
     if (!fs.existsSync(dir)) {
       // Create the directory recursively if it doesn't exist
       fs.mkdirSync(dir, { recursive: true });
@@ -19,7 +19,4 @@ const storage = multer.diskStorage({
   },
 });
 
-export const upload = multer({
-  storage: multer.memoryStorage(), // Store files in memory as Buffer
-});
-
+export const upload = multer({ storage });
