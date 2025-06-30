@@ -177,17 +177,47 @@ export const getAllReturnBundles = async (req, res) => {
         const userId = req.params.userid || req.headers['userid'];
 
         if (!userId) {
-            return res.status(200).json({ error: "User ID is required", status: 400, success: false });
+            return res.status(200).json({
+                error: "User ID is required",
+                status: 400,
+                success: false,
+            });
         }
 
-        const bundles = await ReturnBundle.find({ userId: userId }).populate('products');
+        const bundles = await ReturnBundle.find({ userId }).populate('products');
 
-        res.status(200).json({ data: bundles, status: 200, success: true });
+        // Convert image Buffers to base64 data URLs
+        const processedBundles = bundles.map(bundle => {
+            const processedProducts = bundle.products.map(product => {
+                const productObj = product.toObject();
+
+                if (product.thumbnail?.data && product.thumbnail?.contentType) {
+                    const base64 = product.thumbnail.data.toString('base64');
+                    productObj.thumbnailUrl = `data:${product.thumbnail.contentType};base64,${base64}`;
+                } else {
+                    productObj.thumbnailUrl = null;
+                }
+
+                return productObj;
+            });
+
+            const bundleObj = bundle.toObject();
+            bundleObj.products = processedProducts;
+
+            return bundleObj;
+        });
+
+        res.status(200).json({
+            data: processedBundles,
+            status: 200,
+            success: true,
+        });
     } catch (error) {
         console.error("Error fetching user return bundles:", error);
         res.status(500).json({ error: "Internal server error", success: false });
     }
 };
+
 
 export const DeleteBundle = async (req, res) => {
     try {
