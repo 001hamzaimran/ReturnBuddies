@@ -94,6 +94,7 @@ const VerifyEmail = async (req, res) => {
         success: true,
         status: 200,
         message: "Email verified successfully",
+        user: user,
       });
   } catch (error) {
     console.log("error", error);
