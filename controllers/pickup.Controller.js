@@ -81,7 +81,7 @@ export const getAllPickups = async (req, res) => {
             });
         }
 
-        const pickups = await pickupModel.find({ userId }).populate('bundleId');
+        const pickups = await pickupModel.find({ userId }).populate('bundleId').populate('userId').populate('Payment');
 
         res.status(200).json({
             success: true,
