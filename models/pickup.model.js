@@ -1,17 +1,16 @@
 import mongoose from "mongoose";
 
-
 const pickupSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    bundleId: {
+    bundleId: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ReturnBundle',
         required: true
-    },
+    }],
     status: {
         type: String,
         enum: ['awaiting pickup', 'picked up', 'inspected', 'completed', 'canceled', 'in transit', 'delivered'],
@@ -21,7 +20,7 @@ const pickupSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Address'
     },
-    notes: {
+    note: {
         type: String,
         trim: true
     },
@@ -33,27 +32,29 @@ const pickupSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    deliveryType: {
+    pickupType: {
         type: String,
         required: true
     },
     deliveryDate: {
-        type: Date,
-        required: true
-    },
-    deliveryTime: {
-        type: String,
-        required: true
+        type: Date
     },
     Payment: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Payment'
     },
-    Oversized: {
+    isOversize: {
         type: Boolean,
         default: false
+    },
+    totalPrice: {
+        type: Number,
+        required: true
+    },
+    phone: {
+        type: String,
+        required: true
     }
-
 }, {
     timestamps: true
 });
