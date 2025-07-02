@@ -5,7 +5,7 @@ export const addAddress = async (req, res) => {
     const { street, city, state, postalCode, suite, isDefault } = req.body;
     const userId = req.params.userid || req.headers['userid'];
 
-    if (!street || !city || !state || !postalCode || !suite) {
+    if (!street || !city || !state || !postalCode ) {
       return res.status(200).json({ status: 400, message: "All fields are required", success: false });
     }
 

@@ -12,6 +12,7 @@ import bundleRouter from './routes/BundleRoute.js'
 import ProductItemRoutes from './routes/productItem.js'
 import { addressRouter } from './routes/Address.routes.js'
 import { PaymentRouter } from './routes/payment.routes.js'
+import basepriceRouter from './routes/baseprice.routes.js'
 
 
 dotenv.config()
@@ -36,11 +37,18 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.use('/api', router)
-app.use('/api', bundleRouter)
-app.use('/api', ProductItemRoutes)
-app.use('/api', addressRouter)
-app.use('/api', PaymentRouter)
+const routes = [router, bundleRouter, ProductItemRoutes, addressRouter, PaymentRouter, basepriceRouter]
+
+
+routes.map(route => {
+  app.use('/api', route)
+})
+// app.use('/api', router)
+// app.use('/api', bundleRouter)
+// app.use('/api', ProductItemRoutes)
+// app.use('/api', addressRouter)
+// app.use('/api', PaymentRouter)
+// app.use('/api', PaymentRouter)
 
 app.get('/', (req, res) => {
   res.send("Hello World")
