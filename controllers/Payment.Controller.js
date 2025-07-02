@@ -9,7 +9,8 @@ export const addPaymentCard = async (req, res) => {
             cardHolderName,
             expirationDate,
             cvv,
-            isDefault
+            isDefault,
+            cardType
         } = req.body;
 
         const userId = req.params.userid || req.headers['userid'];
@@ -47,6 +48,7 @@ export const addPaymentCard = async (req, res) => {
             cardHolderName,
             expirationDate,
             cvv,
+            cardType,
             isDefault: isDefault === 1 || isDefault === true ? 1 : 0
         });
 
@@ -106,7 +108,8 @@ export const editCard = async (req, res) => {
             cardHolderName,
             expirationDate,
             cvv,
-            isDefault
+            isDefault,
+            cardType
         } = req.body;
 
         const card = await CardModel.findById(cardId);
@@ -118,6 +121,7 @@ export const editCard = async (req, res) => {
         card.cardNumber = cardNumber || card.cardNumber;
         card.cardHolderName = cardHolderName || card.cardHolderName;
         card.expirationDate = expirationDate || card.expirationDate;
+        card.cardType = cardType || card.cardType;
         card.cvv = cvv || card.cvv;
 
         // If setting this card as default, unset others

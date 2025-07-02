@@ -18,6 +18,10 @@ const CardSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    cardType: {
+        type: String,
+        required: true
+    },
     cvv: {
         type: String,
         required: true
