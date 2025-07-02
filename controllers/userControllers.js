@@ -6,9 +6,9 @@ import sendVerficationEmail from "../middlewares/Email/Email.js";
 import jsonwebtoken from "jsonwebtoken";
 import ForgotModal from "../models/ForgotPassword.js";
 import DeleteOtpModal from "../models/DeleteOtp.js";
-import { stat } from "fs";
 import sendSms from "../middlewares/sendsms.js";
 
+// Register
 const Register = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -67,7 +67,7 @@ const Register = async (req, res) => {
   }
 };
 
-
+// Verify email
 const VerifyEmail = async (req, res) => {
   const { email, otp } = req.body;
 
@@ -104,6 +104,7 @@ const VerifyEmail = async (req, res) => {
   }
 };
 
+// Login
 const Login = async (req, res) => {
   const { email, password } = req.body;
 
