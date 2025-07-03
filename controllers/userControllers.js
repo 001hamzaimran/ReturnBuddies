@@ -198,12 +198,15 @@ const verifyPhone = async (req, res) => {
     user.phoneOtp = null;
     user.phoneVerified = true;
     await user.save();
-    return res.status(200).json({ message: "Phone number verified successfully", status: 200 ,user});
+    return res.status(200).json({ message: "Phone number verified successfully", status: 200, user });
   } catch (error) {
     console.log("error", error);
     return res.status(500).json({ message: "Internal server error", status: 500 });
   }
 }
+
+
+
 
 // Forgot password
 const ForgotPassword = async (req, res) => {
@@ -704,6 +707,44 @@ const updateNameandPhoneVerification = async (req, res) => {
   }
 }
 
+const editProfile = async (req, res) => {
+  try {
+    const user = req.headers['userid'];
+    const { phone, name } = req.body
+    if (!user) {
+      return res.status(200).json({
+        success: false,
+        status: 404,
+        message: "User not found",
+      });
+    }
+    const currentUser = await UserModel.findByIdAndUpdate(
+      user,
+      { name, phone },
+      { new: true, runValidators: true }
+    )
+    if (!currentUser) {
+      return res.status(200).json({
+        success: false,
+        status: 404,
+        message: "User not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      message: "User Updated Successfully",
+      user: currentUser
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Internal server error",
+    })
+  }
+}
+
 export {
   Register,
   VerifyEmail,
@@ -717,5 +758,6 @@ export {
   updateNameandPhoneVerification,
   updateNameandPhone,
   phoneVerfication,
-  verifyPhone
+  verifyPhone,
+  editProfile
 };
