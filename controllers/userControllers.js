@@ -5,7 +5,6 @@ import sendVerficationEmail from "../middlewares/Email/Email.js";
 
 import jsonwebtoken from "jsonwebtoken";
 import ForgotModal from "../models/ForgotPassword.js";
-import DeleteOtpModal from "../models/DeleteOtp.js";
 import sendSms from "../middlewares/sendsms.js";
 
 // Register
@@ -424,102 +423,37 @@ const UpdateProfile = async (req, res) => {
 };
 
 const DeleteAccount = async (req, res) => {
-  const { password } = req.body;
-  const user = req.user;
-
   try {
+    const user = req.headers['userid'];
+
     if (!user) {
       return res.status(200).json({
         success: false,
-        status: 400,
-        message: "User not found",
-      });
-    }
-    // Check if password matches
-    const comparePassword = await bcrypt.compare(password, user.password);
-    if (!comparePassword) {
-      return res.status(200).json({
-        success: false,
-        status: 400,
-        message: "Invalid password",
-      });
-    }
-
-    const otp = crypto.randomInt(1000, 9999).toString();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 60 * 1000); // 5 hours
-
-    // Send OTP
-    await sendVerficationEmail(user.email, otp);
-
-    // Save OTP for verification
-    await DeleteOtpModal.findOneAndUpdate(
-      { email: user.email },
-      { otp, expiresAt, verified: false },
-      { upsert: true, new: true }
-    );
-
-    return res.status(200).json({
-      success: true,
-      status: 200,
-      message: `OTP sent to ${user.email} for account deletion confirmation.`,
-    });
-  } catch (error) {
-    console.error("DeleteAccount error:", error);
-    return res.status(500).json({
-      success: false,
-      status: 500,
-      message: "Internal server error",
-    });
-  }
-};
-
-const DeleteVerifyAccount = async (req, res) => {
-  const { email, otp } = req.body;
-
-  try {
-    const user = await DeleteOtpModal.findOne({ email });
-
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        status: 400,
+        status: 404,
         message: "User not found",
       });
     }
 
-    // Check if OTP is expired
-    if (user.expiresAt < new Date()) {
-      return res.status(400).json({
+    const deletedUser = await UserModel.findByIdAndDelete(user);
+    if (deletedUser) {
+      return res.status(200).json({
+        success: true,
+        status: 200,
+        message: "Account deleted successfully",
+      });
+    } else {
+      return res.status(200).json({
         success: false,
-        status: 400,
-        message: "OTP has expired",
+        status: 404,
+        message: "User not found",
       });
     }
-
-    // Check if OTP is correct
-    if (otp !== user.otp) {
-      return res.status(400).json({
-        success: false,
-        status: 400,
-        message: "Invalid OTP",
-      });
-    }
-
-    // OTP is correct and not expired — mark as verified
-    await UserModel.deleteOne({ email });
-    await DeleteOtpModal.deleteOne({ email });
-    return res.status(200).json({
-      success: true,
-      status: 200,
-      message: "Account Deleted Successfully",
-    });
   } catch (error) {
-    console.error("OTP verification error:", error);
     return res.status(500).json({
       success: false,
       status: 500,
       message: "Internal server error",
-    });
+    })
   }
 };
 
@@ -601,7 +535,7 @@ const changePassword = async (req, res) => {
 
 const updateNameandPhone = async (req, res) => {
   try {
-    const { phone, name } = req.body
+    const { phone } = req.body
     const user = req.user;
 
     if (!user) {
@@ -612,11 +546,11 @@ const updateNameandPhone = async (req, res) => {
       });
     }
 
-    if (!name || !phone) {
+    if ( !phone) {
       return res.status(200).json({
         success: false,
         status: 400,
-        message: "Name and phone are required",
+        message: "Phone number is required",
       });
     }
 
@@ -753,7 +687,6 @@ export {
   ForgotVerification,
   UpdateProfile,
   DeleteAccount,
-  DeleteVerifyAccount,
   changePassword,
   updateNameandPhoneVerification,
   updateNameandPhone,

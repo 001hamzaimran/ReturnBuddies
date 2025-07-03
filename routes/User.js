@@ -1,5 +1,5 @@
 import express from 'express'
-import { changePassword, DeleteAccount, DeleteVerifyAccount, editProfile, ForgotPassword, ForgotVerification, Login, phoneVerfication, Register, updateNameandPhone, updateNameandPhoneVerification, UpdateProfile, VerifyEmail, verifyPhone } from '../controllers/userControllers.js'
+import { changePassword, DeleteAccount,  editProfile, ForgotPassword, ForgotVerification, Login, phoneVerfication, Register, updateNameandPhone, updateNameandPhoneVerification, UpdateProfile, VerifyEmail, verifyPhone } from '../controllers/userControllers.js'
 import validate from '../validations/validate.js'
 import { authSchema, EmailSchema_validation, loginSchema } from '../validations/auth.schema.js'
 import passport from 'passport'
@@ -20,9 +20,8 @@ AuthRoutes.post('/forgot-verfication', upload.none(), validate(EmailSchema_valid
 // AuthRoutes.post('/Update-Password',upload.none(),validate(loginSchema),UpdatePassword)
 AuthRoutes.post('/update-profile', upload.none(), isLogin, UpdateProfile)
 AuthRoutes.post('/delete-account', upload.none(), isLogin, DeleteAccount)
-AuthRoutes.post('/verify-&-delete-account', upload.none(), DeleteVerifyAccount)
 AuthRoutes.post('/change-password', upload.none(), isLogin, changePassword)
-AuthRoutes.post('/updateNameandPhone', upload.none(), isLogin, updateNameandPhone)
+AuthRoutes.post('/updatePhone', upload.none(), isLogin, updateNameandPhone)
 AuthRoutes.post('/updateNameandPhoneVerification', upload.none(), isLogin, updateNameandPhoneVerification);
 AuthRoutes.post('/phoneVerfication', upload.none(), isLogin, phoneVerfication);
 AuthRoutes.post('/verifyPhone', upload.none(), isLogin, verifyPhone);
