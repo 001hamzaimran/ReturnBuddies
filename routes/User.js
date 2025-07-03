@@ -1,5 +1,5 @@
 import express from 'express'
-import { changePassword, DeleteAccount, DeleteVerifyAccount, ForgotPassword, ForgotVerification, Login, Register, updateNameandPhone, updateNameandPhoneVerification, UpdateProfile, VerifyEmail } from '../controllers/userControllers.js'
+import { changePassword, DeleteAccount, DeleteVerifyAccount, ForgotPassword, ForgotVerification, Login, phoneVerfication, Register, updateNameandPhone, updateNameandPhoneVerification, UpdateProfile, VerifyEmail, verifyPhone } from '../controllers/userControllers.js'
 import validate from '../validations/validate.js'
 import { authSchema, EmailSchema_validation, loginSchema } from '../validations/auth.schema.js'
 import passport from 'passport'
@@ -24,6 +24,8 @@ AuthRoutes.post('/verify-&-delete-account', upload.none(), DeleteVerifyAccount)
 AuthRoutes.post('/change-password', upload.none(), isLogin, changePassword)
 AuthRoutes.post('/updateNameandPhone', upload.none(), isLogin, updateNameandPhone)
 AuthRoutes.post('/updateNameandPhoneVerification', upload.none(), isLogin, updateNameandPhoneVerification);
+AuthRoutes.post('/phoneVerfication', upload.none(), isLogin, phoneVerfication);
+AuthRoutes.post('/verifyPhone', upload.none(), isLogin, verifyPhone);
 
 // AuthRoutes.post("/Login-with-google",async(req,res)=>{
 //     const client = new OAuth2Client('133065484326-6rcc8d8s03p4j8g6dqm6hbrbv19mo61r.apps.googleusercontent.com');

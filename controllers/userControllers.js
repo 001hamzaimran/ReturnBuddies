@@ -155,6 +155,56 @@ const Login = async (req, res) => {
   }
 };
 
+const phoneVerfication = async (req, res) => {
+  const { phone } = req.body;
+  const userId = req.headers["userid"];
+
+  try {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(200).json({ message: "User not found", status: 404 });
+    }
+    // Generate OTP token
+    const otp = crypto.randomInt(10000, 99999).toString();
+
+    // Send OTP to user's phone number
+    user.phoneOtp = otp;
+    user.phone = phone;
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ message: "Phone number updated successfully", status: 200, user, otp });
+  } catch (error) {
+    console.log("error", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", status: 500 });
+  }
+}
+
+const verifyPhone = async (req, res) => {
+  const { otp } = req.body;
+  const userId = req.headers["userid"];
+
+  try {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(200).json({ message: "User not found", status: 404 });
+    }
+    if (otp !== user.phoneOtp) {
+      return res.status(200).json({ message: "Invalid OTP", status: 404 });
+    }
+    user.phoneOtp = null;
+    user.phoneVerified = true;
+    await user.save();
+    return res.status(200).json({ message: "Phone number verified successfully", status: 200 ,user});
+  } catch (error) {
+    console.log("error", error);
+    return res.status(500).json({ message: "Internal server error", status: 500 });
+  }
+}
+
 // Forgot password
 const ForgotPassword = async (req, res) => {
   const { email } = req.body;
@@ -665,5 +715,7 @@ export {
   DeleteVerifyAccount,
   changePassword,
   updateNameandPhoneVerification,
-  updateNameandPhone
+  updateNameandPhone,
+  phoneVerfication,
+  verifyPhone
 };

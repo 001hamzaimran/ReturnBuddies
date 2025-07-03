@@ -40,6 +40,14 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    phoneOtp:{
+        type: Number,
+        default: null
+    },
+    phoneVerified: {
+        type: Boolean,
+        default: false
+    },
     phone: {
         type: String,
         default: null
