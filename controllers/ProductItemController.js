@@ -106,7 +106,7 @@ export const uploadLabel = async (req, res) => {
 
             const updated = await ProductItem.findOneAndUpdate(
                 { _id: item.productId, userId },
-                { labelReceipt: labelPath },
+                { labelReceipt: labelPath, date: new Date(date) },
                 { new: true }
             );
 
@@ -117,7 +117,10 @@ export const uploadLabel = async (req, res) => {
                 updatedProducts.push(updated._id.toString());
                 const bundle = await ReturnBundle.findByIdAndUpdate(
                     bundleId,
-                    { status: 'processed' },
+                    {
+                        status: 'processed',
+                        pickupTime: new Date(date)
+                    },
                     { new: true }
                 )
             } else {
@@ -142,7 +145,8 @@ export const uploadLabel = async (req, res) => {
                 status: 200,
                 message: 'All products in bundle updated with label. No new bundle created.',
                 data: {
-                    bundle: bundleId
+                    bundle: bundleId,
+                    date: new Date(date)
                 }
             });
         }
@@ -159,13 +163,14 @@ export const uploadLabel = async (req, res) => {
         }
 
         const autoBundleName = `Return #${nextNumber}`;
-
+        const pickupDate = new Date(date);
+        console.log("📅 Parsed pickupTime:", pickupDate);
         // Create a new bundle with selected products
         const newBundle = new ReturnBundle({
             userId,
             BundleName: autoBundleName,
             products: updatedProducts,
-            pickupTime: new Date(date),
+            pickupTime: pickupDate,
             pickupAddress: null,
             payment: null,
             status: 'processed'
@@ -191,7 +196,8 @@ export const uploadLabel = async (req, res) => {
             status: 200,
             message: 'Label uploaded and new bundle created successfully.',
             data: {
-                bundle: populatedBundle
+                bundle: populatedBundle,
+                date: date
             }
         });
 

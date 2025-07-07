@@ -31,6 +31,10 @@ const productItemSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    date: {
+        type: Date,
+        default: Date.now
+    },
 },
     {
         _id: true,
