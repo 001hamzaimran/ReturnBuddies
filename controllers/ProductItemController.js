@@ -216,7 +216,7 @@ export const uploadLabel = async (req, res) => {
 export const editLabel = async (req, res) => {
     try {
         const userId = req.params.userid || req.headers['userid'];
-        const { bundleId } = req.body;
+        const { bundleId, date } = req.body;
 
         if (!userId || !bundleId) {
             return res.status(400).json({
@@ -245,12 +245,8 @@ export const editLabel = async (req, res) => {
             });
         }
 
-        // Ensure label file is provided
-        if (!req.files || req.files.length === 0) {
-            return res.status(400).json({ status: 400, message: 'Label image is required.' });
-        }
-
-        const labelPath = req.files?.[0]?.path;
+        // Check if label file is uploaded
+        const labelPath = req.files?.[0]?.path || null;
 
         // Fetch current bundle and check validity
         const currentBundle = await ReturnBundle.findById(bundleId).lean();
@@ -265,10 +261,20 @@ export const editLabel = async (req, res) => {
         const selectedProductIds = productIDs.map(p => p.productId);
 
         const updatedProducts = [];
+
         for (const item of productIDs) {
+            // Build update object conditionally
+            const updateData = {
+                date: new Date(date)
+            };
+
+            if (labelPath) {
+                updateData.labelReceipt = labelPath;
+            }
+
             const updated = await ProductItem.findOneAndUpdate(
                 { _id: item.productId, userId },
-                { labelReceipt: labelPath },
+                updateData,
                 { new: true }
             );
 
@@ -296,7 +302,9 @@ export const editLabel = async (req, res) => {
 
         return res.status(200).json({
             status: 200,
-            message: 'Label(s) updated successfully.',
+            message: labelPath
+                ? 'Label(s) and date updated successfully.'
+                : 'Date updated successfully (label unchanged).',
             data: {
                 bundle: updatedBundle,
                 updatedProducts
