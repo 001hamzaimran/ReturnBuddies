@@ -101,7 +101,6 @@ export const getReturnBundle = async (req, res) => {
         }
 
         let bundleIds = req.params.bundleId || req.query.bundleId;
-
         if (!bundleIds) {
             return res.status(400).json({
                 error: 'Missing bundleId parameter',
@@ -133,29 +132,33 @@ export const getReturnBundle = async (req, res) => {
             });
         }
 
-        const products = await ProductItem.find({ _id: { $in: bundles[0].products } }).populate('userId');
+        const enrichedBundles = [];
 
-        // Extract labelReceipt from the first product (assuming all products have the same labelReceipt)
-        const labelReceipt = products[0]?.labelReceipt || null;
+        for (const bundle of bundles) {
+            const products = await ProductItem.find({ _id: { $in: bundle.products } }).populate('userId');
 
-        // Create a new bundle object with labelReceipt under BundleName
-        const resbundle = {
-            _id: bundles[0]._id,
-            userId: bundles[0].userId,
-            BundleName: bundles[0].BundleName,
-            labelReceipt, // 🔽 Injected here
-            products,
-            history: bundles[0].history,
-            pickupAddress: bundles[0].pickupAddress,
-            payment: bundles[0].payment,
-            pickupTime: bundles[0].pickupTime,
-            status: bundles[0].status,
-            createdAt: bundles[0].createdAt,
-            __v: bundles[0].__v
-        };
+            const labelReceipt = products[0]?.labelReceipt || null;
+            const date = products[0]?.date;
+
+            enrichedBundles.push({
+                _id: bundle._id,
+                userId: bundle.userId,
+                BundleName: bundle.BundleName,
+                labelReceipt,
+                date,
+                products,
+                history: bundle.history,
+                pickupAddress: bundle.pickupAddress,
+                payment: bundle.payment,
+                pickupTime: bundle.pickupTime,
+                status: bundle.status,
+                createdAt: bundle.createdAt,
+                __v: bundle.__v
+            });
+        }
 
         return res.status(200).json({
-            data: [resbundle],
+            data: enrichedBundles,
             success: true,
             status: 200
         });
