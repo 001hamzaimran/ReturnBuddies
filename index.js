@@ -14,6 +14,7 @@ import { addressRouter } from './routes/Address.routes.js'
 import { PaymentRouter } from './routes/payment.routes.js'
 import basepriceRouter from './routes/baseprice.routes.js'
 import pickupRouter from './routes/pickup.routes.js'
+import faqRouter from './routes/FAQ.routes.js'
 
 
 dotenv.config()
@@ -38,7 +39,7 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-const routes = [router, bundleRouter, ProductItemRoutes, addressRouter, PaymentRouter, basepriceRouter, pickupRouter]
+const routes = [router, bundleRouter, ProductItemRoutes, addressRouter, PaymentRouter, basepriceRouter, pickupRouter,faqRouter]
 
 
 routes.map(route => {

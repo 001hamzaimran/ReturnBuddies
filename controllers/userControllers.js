@@ -205,8 +205,6 @@ const verifyPhone = async (req, res) => {
 }
 
 
-
-
 // Forgot password
 const ForgotPassword = async (req, res) => {
   const { email } = req.body;
