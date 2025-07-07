@@ -95,13 +95,11 @@ export const createProductItemsAndReturnBundle = async (req, res) => {
 export const getReturnBundle = async (req, res) => {
     try {
         const userId = req.params.userid || req.headers['userid'];
- 
-        
+
         if (!userId) {
             return res.status(200).json({ error: "User ID is required", status: 400, success: false });
         }
-        
-        // Support both single and multiple bundleId from query or params
+
         let bundleIds = req.params.bundleId || req.query.bundleId;
 
         if (!bundleIds) {
@@ -112,12 +110,10 @@ export const getReturnBundle = async (req, res) => {
             });
         }
 
-        // If comma-separated string, convert to array
         if (typeof bundleIds === 'string') {
             bundleIds = bundleIds.split(',').map(id => id.trim());
         }
 
-        // Validate all IDs
         const invalidIds = bundleIds.filter(id => !mongoose.isValidObjectId(id));
         if (invalidIds.length > 0) {
             return res.status(400).json({
@@ -127,7 +123,6 @@ export const getReturnBundle = async (req, res) => {
             });
         }
 
-        // Fetch all matching bundles
         const bundles = await ReturnBundle.find({ _id: { $in: bundleIds } }).populate('products');
 
         if (!bundles || bundles.length === 0) {
@@ -138,8 +133,29 @@ export const getReturnBundle = async (req, res) => {
             });
         }
 
+        const products = await ProductItem.find({ _id: { $in: bundles[0].products } }).populate('userId');
+
+        // Extract labelReceipt from the first product (assuming all products have the same labelReceipt)
+        const labelReceipt = products[0]?.labelReceipt || null;
+
+        // Create a new bundle object with labelReceipt under BundleName
+        const resbundle = {
+            _id: bundles[0]._id,
+            userId: bundles[0].userId,
+            BundleName: bundles[0].BundleName,
+            labelReceipt, // 🔽 Injected here
+            products,
+            history: bundles[0].history,
+            pickupAddress: bundles[0].pickupAddress,
+            payment: bundles[0].payment,
+            pickupTime: bundles[0].pickupTime,
+            status: bundles[0].status,
+            createdAt: bundles[0].createdAt,
+            __v: bundles[0].__v
+        };
+
         return res.status(200).json({
-            data: bundles,
+            data: [resbundle],
             success: true,
             status: 200
         });
@@ -152,6 +168,7 @@ export const getReturnBundle = async (req, res) => {
         });
     }
 };
+
 
 
 export const getAllReturnBundles = async (req, res) => {
@@ -171,7 +188,7 @@ export const getAllReturnBundles = async (req, res) => {
     }
 };
 
-export const DeleteBundle = async (req,res)=>{
+export const DeleteBundle = async (req, res) => {
     try {
         const userId = req.params.userid || req.headers['userid'];
         const bundleId = req.query.bundleId
@@ -193,6 +210,6 @@ export const DeleteBundle = async (req,res)=>{
     } catch (error) {
         console.error("Error deleting bundle:", error);
         res.status(500).json({ error: "Internal server error", success: false });
-        
+
     }
 }
