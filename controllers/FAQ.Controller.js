@@ -23,6 +23,5 @@ const getAllFAQ = async (req, res) => {
     }
 };
 
+
 export { createFAQ, getAllFAQ };
-
-
