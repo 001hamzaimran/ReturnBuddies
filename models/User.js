@@ -40,7 +40,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: null
     },
-    phoneOtp:{
+    phoneOtp: {
         type: Number,
         default: null
     },
@@ -57,6 +57,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         enum: ["admin", "user"],
         default: "user"
+    },
+    FirstLogin: {
+        type: Boolean,
+        default: true
     },
 
 }, { timestamps: true })

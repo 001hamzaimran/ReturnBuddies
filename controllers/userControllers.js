@@ -44,6 +44,7 @@ const Register = async (req, res) => {
       email,
       password: hashedPassword,
       otp,
+      FirstLogin: true
     });
     await newUser.save();
 
@@ -132,6 +133,16 @@ const Login = async (req, res) => {
           status: 201,
         });
     }
+
+    // Track FirstLogin only after verification
+    let isFirstLogin = false;
+    if (user.FirstLogin === true) {
+      isFirstLogin = true;
+      user.FirstLogin = false;
+      await user.save(); // update in DB
+    }
+
+
     const token = jsonwebtoken.sign(
       { id: user._id },
       process.env.JWT_SECRET,
@@ -144,6 +155,7 @@ const Login = async (req, res) => {
         status: 200,
         success: true,
         user,
+        firstLogin: isFirstLogin,
         token,
       });
   } catch (error) {
