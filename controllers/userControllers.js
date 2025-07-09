@@ -310,6 +310,41 @@ const ForgotVerification = async (req, res) => {
   }
 };
 
+const ResetPassword = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      return res.status(200).json({
+        success: false,
+        status: 400,
+        message: "User not found",
+      });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Update user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.error("Password reset error:", error);
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      message: "Internal server error",
+    });
+  }
+}
 // const UpdatePassword = async (req, res) => {
 //   const { email, password } = req.body;
 
@@ -544,7 +579,7 @@ const updateNameandPhone = async (req, res) => {
       });
     }
 
-    if ( !phone) {
+    if (!phone) {
       return res.status(200).json({
         success: false,
         status: 400,
@@ -690,5 +725,6 @@ export {
   updateNameandPhone,
   phoneVerfication,
   verifyPhone,
-  editProfile
+  editProfile,
+  ResetPassword
 };
