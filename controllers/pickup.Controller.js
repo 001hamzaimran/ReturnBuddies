@@ -123,9 +123,38 @@ export const PickupbyStatus = async (req, res) => {
         });
     } catch (error) {
         console.error("❌ Error fetching pickups:", error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Server error while fetching pickups"
+        });
+    }
+};
+
+export const pickupById = async (req, res) => {
+    try {
+        const userId = req.params.userid || req.headers['userid'];
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                status: 400,
+                message: "User ID is required in params or headers"
+            });
+        }
+
+        const { id } = req.params;
+        const pickup = await pickupModel.findById(id).populate('bundleId').populate('userId');
+        return res.status(200).json({
+            success: true,
+            message: "Pickup fetched successfully",
+            data: pickup,
+            status: 200
+        });
+    } catch (error) {
+        console.error("❌ Error fetching pickup by ID:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while fetching pickup by ID"
         });
     }
 };
