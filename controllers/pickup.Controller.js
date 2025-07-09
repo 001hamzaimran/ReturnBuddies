@@ -97,3 +97,35 @@ export const getAllPickups = async (req, res) => {
         });
     }
 };
+
+export const PickupbyStatus = async (req, res) => {
+    try {
+        const userId = req.params.userid || req.headers['userid'];
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                status: 400,
+                message: "User ID is required in params or headers"
+            });
+        }
+        // pickups whose status are not "canceled","completed","delivered"
+        const recentPickups = await pickupModel.find({ userId, status: { $nin: ["canceled", "completed", "delivered"] } }).populate('bundleId').populate('userId');
+
+        // pickups whose status are  "canceled","completed","delivered"
+        const pastPickups = await pickupModel.find({ userId, status: { $in: ["canceled", "completed", "delivered"] } }).populate('bundleId').populate('userId');
+
+        return res.status(200).json({
+            success: true,
+            message: "Pickups fetched successfully",
+            data: { active: recentPickups, post: pastPickups },
+            status: 200
+        });
+    } catch (error) {
+        console.error("❌ Error fetching pickups:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error while fetching pickups"
+        });
+    }
+};
