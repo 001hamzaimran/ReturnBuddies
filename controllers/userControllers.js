@@ -5,7 +5,7 @@ import sendVerficationEmail from "../middlewares/Email/Email.js";
 
 import jsonwebtoken from "jsonwebtoken";
 import ForgotModal from "../models/ForgotPassword.js";
-import sendSms from "../middlewares/sendsms.js";
+import { sendSms } from "../middlewares/Phone/Phone.js";
 
 // Register
 const Register = async (req, res) => {
@@ -165,6 +165,8 @@ const phoneVerfication = async (req, res) => {
     }
     // Generate OTP token
     const otp = crypto.randomInt(10000, 99999).toString();
+
+    sendSms(phone, otp);
 
     // Send OTP to user's phone number
     user.phoneOtp = otp;
