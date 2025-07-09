@@ -130,7 +130,7 @@ export const PickupbyStatus = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Pickups fetched successfully",
-            data: { active: recentPickups, post: pastPickups },
+            data: { active: recentPickups, past: pastPickups },
             status: 200
         });
     } catch (error) {

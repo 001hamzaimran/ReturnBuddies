@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import ProductItem from "../models/ProductItem.js";
 import ReturnBundle from "../models/ReturnBundle.js";
 import { stat } from "fs";
+import pickupModel from "../models/pickup.model.js";
 
 export const createProductItemsAndReturnBundle = async (req, res) => {
     try {
@@ -175,21 +176,34 @@ export const getReturnBundle = async (req, res) => {
 
 
 export const getAllReturnBundles = async (req, res) => {
-    try {
-        const userId = req.params.userid || req.headers['userid'];
+  try {
+    const userId = req.params.userid || req.headers['userid'];
 
-        if (!userId) {
-            return res.status(200).json({ error: "User ID is required", status: 400, success: false });
-        }
-
-        const bundles = await ReturnBundle.find({ userId: userId }).populate('products');
-
-        res.status(200).json({ data: bundles, status: 200, success: true });
-    } catch (error) {
-        console.error("Error fetching user return bundles:", error);
-        res.status(500).json({ error: "Internal server error", success: false });
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required", status: 400, success: false });
     }
+
+    // Step 1: Fetch all pickups by this user
+    const pickups = await pickupModel.find({ userId }).select("bundleId");
+
+    // Step 2: Flatten all bundleIds into a single array
+    const excludedBundleIds = pickups.flatMap(pickup =>
+      pickup.bundleId.map(bundle => bundle.toString())
+    );
+
+    // Step 3: Find all return bundles NOT in excluded list
+    const bundles = await ReturnBundle.find({
+      userId,
+      _id: { $nin: excludedBundleIds.map(id => new mongoose.Types.ObjectId(id)) }
+    }).populate("products");
+
+    res.status(200).json({ data: bundles, status: 200, success: true });
+  } catch (error) {
+    console.error("Error fetching user return bundles:", error);
+    res.status(500).json({ error: "Internal server error", success: false });
+  }
 };
+
 
 export const DeleteBundle = async (req, res) => {
     try {
