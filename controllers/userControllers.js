@@ -165,8 +165,9 @@ const phoneVerfication = async (req, res) => {
     }
     // Generate OTP token
     const otp = crypto.randomInt(10000, 99999).toString();
+    const message = `Your OTP is ${otp}`;
 
-    sendSms(phone, otp);
+    sendSms(phone, message);
 
     // Send OTP to user's phone number
     user.phoneOtp = otp;
