@@ -173,32 +173,33 @@ export const pickupById = async (req, res) => {
 };
 
 
-// export const pickupCanceled =  async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         const pickup = await pickupModel.findById(id);
+export const pickupCanceled = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const pickup = await pickupModel.findById(id);
 
-//         if (!pickup) {
-//             return res.status(200).json({
-//                 success: false,
-//                 status: 404,
-//                 message: "Pickup not found"
-//             });
-//         }
+        if (!pickup) {
+            return res.status(200).json({
+                success: false,
+                status: 404,
+                message: "Pickup not found"
+            });
+        }
 
-//         pickup.status = "Pickup Canceled";
-//         await pickup.save();
+        pickup.status = "Pickup Canceled";
+        await pickup.save();
 
-//         return res.status(200).json({
-//             success: true,
-//             message: "Pickup canceled successfully",
-//             data: pickup,
-//             status: 200
-//         });
-//     } catch (error) {
-//         console.error("❌ Error canceling pickup:", error);
-//         return res.status(500).json({
-//             success: false,
-//             message: "Server error while canceling pickup"
-//         });
-//     }
+        return res.status(200).json({
+            success: true,
+            message: "Pickup canceled successfully",
+            data: pickup,
+            status: 200
+        });
+    } catch (error) {
+        console.error("❌ Error canceling pickup:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while canceling pickup"
+        });
+    }
+};
