@@ -110,7 +110,7 @@ export const PickupbyStatus = async (req, res) => {
             });
         }
         // pickups whose status are not "canceled","completed","delivered"
-        const recentPickups = await pickupModel.find({ userId, status: { $nin: ["canceled", "completed", "delivered"] } }).populate({
+        const recentPickups = await pickupModel.find({ userId, status: { $nin: ["Pickup Canceled", "completed", "delivered"] } }).populate({
             path: 'bundleId',
             populate: {
                 path: 'products', // nested field inside bundle
@@ -118,8 +118,8 @@ export const PickupbyStatus = async (req, res) => {
             }
         }).populate('userId');
 
-        // pickups whose status are  "canceled","completed","delivered"
-        const pastPickups = await pickupModel.find({ userId, status: { $in: ["canceled", "completed", "delivered"] } }).populate({
+        // pickups whose status are  "Pickup Canceled","completed","delivered"
+        const pastPickups = await pickupModel.find({ userId, status: { $in: ["Pickup Canceled", "completed", "delivered"] } }).populate({
             path: 'bundleId',
             populate: {
                 path: 'products', // nested field inside bundle
