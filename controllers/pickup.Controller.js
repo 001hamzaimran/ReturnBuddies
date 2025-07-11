@@ -186,7 +186,7 @@ export const pickupCanceled = async (req, res) => {
             });
         }
 
-        if (pickup.status === "canceled") {
+        if (pickup.status === "Pickup Canceled") {
             return res.status(200).json({
                 success: false,
                 status: 400,
