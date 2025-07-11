@@ -186,6 +186,14 @@ export const pickupCanceled = async (req, res) => {
             });
         }
 
+        if (pickup.status === "canceled") {
+            return res.status(200).json({
+                success: false,
+                status: 400,
+                message: "Pickup is already canceled"
+            });
+        }
+
         pickup.status = "Pickup Canceled";
         await pickup.save();
 
