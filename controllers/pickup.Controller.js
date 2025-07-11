@@ -160,6 +160,7 @@ export const pickupById = async (req, res) => {
             success: true,
             message: "Pickup fetched successfully",
             data: pickup,
+            TrackingNumber: "123456789",
             status: 200
         });
     } catch (error) {
