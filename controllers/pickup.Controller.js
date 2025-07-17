@@ -68,7 +68,6 @@ export const createPickup = async (req, res) => {
     }
 };
 
-
 export const getAllPickups = async (req, res) => {
     try {
         const userId = req.params.userid || req.headers['userid'];
@@ -171,7 +170,6 @@ export const pickupById = async (req, res) => {
         });
     }
 };
-
 
 export const pickupCanceled = async (req, res) => {
     try {

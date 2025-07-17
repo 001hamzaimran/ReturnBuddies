@@ -25,13 +25,6 @@ export default function App() {
         <AuthProvider>
           <Toaster />
           <Routes>
-            {/* <Route path='/' element={<UserLayouts/>}>
-
-<Route index element={<Home/>}/>
- <Route path='Additem' element={<AddItem/>}/>
- <Route path='myPickups' element={<MyPickups/>}/>
-
-</Route> */}
             {/* ✅ Redirect root to /admin/dashboard */}
             <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path='/admin/dashboard' element={<AdminLayouts />}>
