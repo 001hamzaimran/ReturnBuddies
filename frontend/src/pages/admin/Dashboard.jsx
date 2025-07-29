@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react";
-import { FaTruck, FaClipboardCheck, FaMoneyBillWave } from "react-icons/fa";
+import { FaTruck, FaClipboardCheck, FaMoneyBillWave, FaTruckLoading } from "react-icons/fa";
 
 export default function Dashboard() {
   const [recentUsers, setRecentUsers] = useState([]);
-
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     getUser();
-    const url = `${import.meta.env.VITE_BASE_URL}admin/dashboard`;
-    console.log("Requesting URL:", url);
   }, []);
 
   const getUser = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
 
       const url = `${import.meta.env.VITE_BASE_URL}admin/dashboard`;
-      console.log("Fetching:", url);
-      console.log("Token being sent:", token);
-      console.log(`Authorization: Bearer ${token}`);
+      // console.log("Fetching:", url);
+      // console.log("Token being sent:", token);
+      // console.log(`Authorization: Bearer ${token}`);
 
       const response = await fetch(url, {
         method: "GET",
@@ -36,11 +35,14 @@ export default function Dashboard() {
         name: user.name,
         email: user.email,
         image: user.profile,
+        phone: user.phone,
       }));
 
       setRecentUsers(formattedUsers); // ⬅️ This triggers re-render
     } catch (error) {
       console.error("Fetch error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,38 +73,42 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Users Table */}
-      <div className="bg-white rounded-xl shadow-md p-5">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800">Recent Users</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto">
-            <thead>
-              <tr className="text-left text-sm font-medium text-gray-600 border-b">
-                <th className="p-3">User</th>
-                <th className="p-3">Email</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentUsers.map((user) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-gray-100 cursor-pointer transition"
-                  onClick={() => alert(`Clicked on ${user.name}`)}
-                >
-                  <td className="p-3 flex items-center gap-3">
-                    <img
-                      src={user.image}
-                      alt={user.name}
-                      className="w-10 h-10 rounded-full"
-                    />
-                    <span className="font-medium text-gray-800">{user.name}</span>
-                  </td>
-                  <td className="p-3 text-gray-700">{user.email}</td>
+      {loading ? <div className="text-blue-500 text-3xl animate-spin" /> :
+        <div className="bg-white rounded-xl shadow-md p-5">
+          <h2 className="text-lg font-semibold mb-4 text-gray-800">Recent Users</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto">
+              <thead>
+                <tr className="text-left text-sm font-medium text-gray-600 border-b">
+                  <th className="p-3">User</th>
+                  <th className="p-3">Email</th>
+                  <th className="p-3">Phone</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {recentUsers.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="hover:bg-gray-100 cursor-pointer transition"
+                  >
+                    <td className="p-3 flex items-center gap-3">
+                      <img
+                        src={user.image}
+                        alt={user.name}
+                        className="w-10 h-10 rounded-full"
+                      />
+                      <span className="font-medium text-gray-800">{user.name}</span>
+                    </td>
+                    <td className="p-3 text-gray-700">{user.email}</td>
+                    <td className="p-3 text-gray-700">{user.phone}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      }
+
     </div>
   );
 }

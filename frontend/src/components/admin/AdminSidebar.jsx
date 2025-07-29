@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaTruck, FaUsers, FaMoneyBillWave, FaWarehouse, FaTimes } from 'react-icons/fa';
+import { FaTruck, FaUsers, FaMoneyBillWave, FaWarehouse, FaTimes, FaDollarSign } from 'react-icons/fa';
 import Logo from '../../assets/Images/logo.png';
 
 export default function AdminSidebar({ onClose }) {
@@ -30,6 +30,10 @@ export default function AdminSidebar({ onClose }) {
           <Link to="/admin/dashboard/users" className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-md space-x-2">
             <FaUsers />
             <span>Users</span>
+          </Link>
+          <Link to="/admin/dashboard/Promo-code" className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-md space-x-2">
+            <FaDollarSign />
+            <span>Promo Code</span>
           </Link>
           <Link to="/admin/dashboard/Pickup-Management" className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-md space-x-2">
             <FaTruck />

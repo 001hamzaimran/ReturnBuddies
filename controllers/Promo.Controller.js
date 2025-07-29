@@ -4,7 +4,7 @@ import UserModel from "../models/User.js";
 
 const addPromo = async (req, res) => {
     try {
-        const userid = req.headers['userid'];
+        const userid = req.user.id;
 
         if (!userid) return res.status(200).json({ message: "User ID is required in headers", success: false, status: 400 });
 
@@ -60,4 +60,27 @@ const getPromo = async (req, res) => {
     }
 };
 
-export { addPromo, getPromo }
+const getAllPromo = async (req, res) => {
+    try {
+        const promos = await PromoCodeModal.find();
+        console.log(promos);
+        return res.status(200).json({ data: promos, success: true });
+    } catch (error) {
+        return res.status(500).json({ error: "Internal server error", success: false });
+    }
+}
+
+const deletePromos = async (req, res) => {
+    try {
+        const Id = req.params.Id;
+        const deletePromo = await PromoCodeModal.findByIdAndDelete(Id);
+        if (!deletePromo) {
+            return res.status(200).json({ message: "Promo code not found", success: false, status: 404 });
+        }
+        return res.status(200).json({ message: "Promo code deleted successfully", success: true, status: 200 });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal Server Error", success: false, status: 500, error: error.message });
+    }
+}
+
+export { addPromo, getPromo, getAllPromo, deletePromos }

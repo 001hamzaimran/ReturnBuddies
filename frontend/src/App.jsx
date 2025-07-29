@@ -16,6 +16,7 @@ import ErrorPage from './pages/ErrorPage'
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext'
 import ForgotPassword from './pages/users/ForgotPassword'
+import PromoCode from './pages/admin/PromoCode'
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
               <Route path='Pickup-Management' element={<PickupManagement />} />
               <Route path='Warehouse-Management' element={<WarehouseManagement />} />
               <Route path='Payment-Management' element={<PaymentManagement />} />
+              <Route path='Promo-code' element={<PromoCode />} />
             </Route>
 
             <Route path='/admin/dashboard/login' element={<Login />} />
@@ -41,7 +43,6 @@ export default function App() {
 
             <Route path='*' element={<ErrorPage />} />
           </Routes>
-
         </AuthProvider>
       </BrowserRouter>
 
