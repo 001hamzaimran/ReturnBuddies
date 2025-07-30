@@ -29,11 +29,103 @@ const addNotification = async (req, res) => {
             existingNotifications.DraftReminder = DraftReminder;
             existingNotifications.PickupConfirmation = PickupConfirmation;
             await existingNotifications.save();
-            return res.status(200).json({ message: "Notifications updated successfully", success: true, status: 200, existingNotifications });
+
+            const text = [
+                {
+                    _id: "pickup_updates",
+                    title: "Pickup Updates",
+                    detail:
+                        "Messages confirming your scheduled pickup, item pickup, and dropoff.",
+                    value: existingNotifications.PickupUpdates,
+                },
+                {
+                    _id: "pickup_reminder",
+                    title: "Pickup Reminder",
+                    detail:
+                        "A morning message letting you know a pickup is scheduled for today.",
+                    value: existingNotifications.PickupReminder,
+                },
+                {
+                    _id: "label_issues",
+                    title: "Label Issues",
+                    detail:
+                        "Messages if your return label is missing, inval_id, or can’t be processed.",
+                    value: existingNotifications.LabelIssues,
+                },
+            ]
+            const email = [
+                {
+                    _id: "account_security",
+                    title: "Account & Security",
+                    detail: "Important account, support and security related messages.",
+                    value: existingNotifications.AccountSecurity,
+                },
+                {
+                    _id: "draft_reminders",
+                    title: "Draft Reminders",
+                    detail: "Reminder to finish scheduling items saved in drafts.",
+                    value: existingNotifications.DraftReminder,
+                },
+                {
+                    _id: "pickup_confirmations",
+                    title: "Pickup Confirmations",
+                    detail:
+                        "Details of when your pickup is scheduled, upcoming, completed, or rescheduled.",
+                    value: existingNotifications.PickupConfirmation,
+                },
+            ]
+            const Notifications = { text, email }
+            return res.status(200).json({ message: "Notifications updated successfully", success: true, status: 200, Notifications });
         } else {
             const newNotification = new NotificationModel({ userId, PickupUpdates, PickupReminder, LabelIssues, AccountSecurity, DraftReminder, PickupConfirmation });
             await newNotification.save();
-            return res.status(200).json({ message: "Notifications added successfully", success: true, status: 200, newNotification });
+
+            const text = [
+                {
+                    _id: "pickup_updates",
+                    title: "Pickup Updates",
+                    detail:
+                        "Messages confirming your scheduled pickup, item pickup, and dropoff.",
+                    value: newNotifications.PickupUpdates,
+                },
+                {
+                    _id: "pickup_reminder",
+                    title: "Pickup Reminder",
+                    detail:
+                        "A morning message letting you know a pickup is scheduled for today.",
+                    value: newNotifications.PickupReminder,
+                },
+                {
+                    _id: "label_issues",
+                    title: "Label Issues",
+                    detail:
+                        "Messages if your return label is missing, inval_id, or can’t be processed.",
+                    value: newNotifications.LabelIssues,
+                },
+            ]
+            const email = [
+                {
+                    _id: "account_security",
+                    title: "Account & Security",
+                    detail: "Important account, support and security related messages.",
+                    value: newNotifications.AccountSecurity,
+                },
+                {
+                    _id: "draft_reminders",
+                    title: "Draft Reminders",
+                    detail: "Reminder to finish scheduling items saved in drafts.",
+                    value: newNotifications.DraftReminder,
+                },
+                {
+                    _id: "pickup_confirmations",
+                    title: "Pickup Confirmations",
+                    detail:
+                        "Details of when your pickup is scheduled, upcoming, completed, or rescheduled.",
+                    value: newNotifications.PickupConfirmation,
+                },
+            ]
+            const Notifications = { text, email }
+            return res.status(200).json({ message: "Notifications added successfully", success: true, status: 200, Notifications });
         }
     } catch (error) {
         return res.status(500).json({ message: "Internal Server Error", success: false, status: 500, error: error.message });
