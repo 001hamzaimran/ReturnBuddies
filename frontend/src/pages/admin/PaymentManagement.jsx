@@ -1,7 +1,10 @@
 import React from 'react';
+import { useEffect } from 'react';
 import { FaMoneyCheckAlt, FaEdit } from 'react-icons/fa';
 
 export default function PaymentManagement() {
+  const userId = JSON.parse(localStorage.getItem("user")).user._id;
+
   const transactions = [
     {
       id: 'TXN001',
@@ -18,6 +21,11 @@ export default function PaymentManagement() {
       status: 'Pending',
     },
   ];
+
+  useEffect(() => {
+    console.log('User ID:', userId);
+
+  }, []);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -50,9 +58,8 @@ export default function PaymentManagement() {
                   <td className="p-2">{txn.amount}</td>
                   <td className="p-2">
                     <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        txn.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                      }`}
+                      className={`px-2 py-1 rounded text-xs ${txn.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                        }`}
                     >
                       {txn.status}
                     </span>

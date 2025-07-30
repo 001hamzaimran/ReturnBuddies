@@ -48,11 +48,11 @@ const getNotification = async (req, res) => {
         if (!userId) return res.status(200).json({ message: "User ID is required", success: false, status: 400 });
 
         const user = await UserModel.findOne({ _id: userId });
-        if (!user) return res.status(200).json({ message: "User not found", success: false, status: 404 });
+        if (!user) return res.status(200).json({ message: "User not found", success: false, status: 2 });
 
         const notifications = await NotificationModel.findOne({ userId });
 
-        if (!notifications) return res.status(200).json({ message: "Notifications not found", success: false, status: 404 });
+        if (!notifications) return res.status(200).json({ message: "Notifications not found", success: false, status: 200 });
 
         return res.status(200).json({ message: "Notifications found successfully", success: true, status: 200, notifications });
     } catch (error) {

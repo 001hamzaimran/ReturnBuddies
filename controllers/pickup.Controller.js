@@ -221,3 +221,33 @@ export const pickupCanceled = async (req, res) => {
         });
     }
 };
+
+
+export const getAllPickupsAdmin = async (req, res) => {
+    try {
+        const userId = req.params.userid || req.headers['userid'];
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                status: 400,
+                message: "User ID is required in params or headers"
+            });
+        }
+
+        const pickups = await pickupModel.find()    .populate('userId')
+
+        res.status(200).json({
+            success: true,
+            message: "Pickups fetched successfully",
+            data: pickups,
+            status: 200
+        });
+    } catch (error) {
+        console.error("❌ Error fetching pickups:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error while fetching pickups"
+        });
+    }
+};

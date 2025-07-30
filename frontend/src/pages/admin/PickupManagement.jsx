@@ -1,8 +1,34 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AiOutlinePlus, AiOutlineEdit } from 'react-icons/ai';
 import { FaTruck, FaWarehouse, FaShippingFast } from 'react-icons/fa';
 
 export default function PickupManagement() {
+  const BASE_URL = import.meta.env.VITE_BASE_URL
+  const token = localStorage.getItem("token");
+  const userId = JSON.parse(localStorage.getItem("user")).user._id;
+
+  const getAllPickups = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}get-all-pickup`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json', 
+          'userid': userId,
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error('Error fetching pickups:', error);
+    }
+  }
+
   const [pickups] = useState([
     {
       id: 'RB-1234',
@@ -32,6 +58,10 @@ export default function PickupManagement() {
     'At Warehouse': 'bg-yellow-100 text-yellow-700',
     'At Carrier': 'bg-blue-100 text-blue-700',
   };
+
+  useEffect(() => {
+    getAllPickups();
+  }, []);
 
   return (
     <div className="p-6 space-y-6">
