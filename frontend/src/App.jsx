@@ -17,6 +17,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext'
 import ForgotPassword from './pages/users/ForgotPassword'
 import PromoCode from './pages/admin/PromoCode'
+import Profile from './pages/admin/Profile'
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
               <Route path='Warehouse-Management' element={<WarehouseManagement />} />
               <Route path='Payment-Management' element={<PaymentManagement />} />
               <Route path='Promo-code' element={<PromoCode />} />
+              <Route path='profile' element={<Profile />} />
             </Route>
 
             <Route path='/admin/dashboard/login' element={<Login />} />

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FiMenu, FiSettings } from 'react-icons/fi';
 import { HiBell } from "react-icons/hi";
 import { CiSearch } from "react-icons/ci";
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import useAuth from '../../hook/useAuth';
 
 export default function AdminNav({sidebarOpen,setSidebarOpen}) {
@@ -76,7 +76,7 @@ export default function AdminNav({sidebarOpen,setSidebarOpen}) {
 
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border z-50">
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your profile</a>
+              <Link to={"/admin/dashboard/profile"} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your profile</Link>
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={handleLogout}>Sign out</a>
             </div>
           )}

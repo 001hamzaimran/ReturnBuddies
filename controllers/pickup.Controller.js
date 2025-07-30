@@ -235,7 +235,7 @@ export const getAllPickupsAdmin = async (req, res) => {
             });
         }
 
-        const pickups = await pickupModel.find()    .populate('userId')
+        const pickups = await pickupModel.find().populate('userId').populate('pickupAddress')
 
         res.status(200).json({
             success: true,
