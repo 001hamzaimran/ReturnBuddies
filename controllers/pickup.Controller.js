@@ -18,7 +18,7 @@ export const createPickup = async (req, res) => {
 
         // Extract userId from middleware-authenticated headers
         const userId = req.user?._id || req.headers['x-user-id'];
-        const pickupName = `Pickup-${Date.now()} by ${userId}`;
+        const PickupName = `Pickup-${pickupType}-${pickupAddress?.city || pickupAddress?.street || 'Unknown'}-${userId}`;
 
         // === Basic Validation ===
         if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
@@ -40,7 +40,7 @@ export const createPickup = async (req, res) => {
         const pickup = new pickupModel({
             userId,
             pickupAddress,
-            pickupName,
+            PickupName,
             pickupType,
             pickupDate: new Date(pickupDate),
             pickupTime,
