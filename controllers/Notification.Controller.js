@@ -32,21 +32,21 @@ const addNotification = async (req, res) => {
 
             const text = [
                 {
-                    _id: "pickup_updates",
+                    _id: "PickupUpdates",
                     title: "Pickup Updates",
                     detail:
                         "Messages confirming your scheduled pickup, item pickup, and dropoff.",
                     value: existingNotifications.PickupUpdates,
                 },
                 {
-                    _id: "pickup_reminder",
+                    _id: "PickupReminder",
                     title: "Pickup Reminder",
                     detail:
                         "A morning message letting you know a pickup is scheduled for today.",
                     value: existingNotifications.PickupReminder,
                 },
                 {
-                    _id: "label_issues",
+                    _id: "LabelIssues",
                     title: "Label Issues",
                     detail:
                         "Messages if your return label is missing, inval_id, or can’t be processed.",
@@ -55,19 +55,19 @@ const addNotification = async (req, res) => {
             ]
             const email = [
                 {
-                    _id: "account_security",
+                    _id: "AccountSecurity",
                     title: "Account & Security",
                     detail: "Important account, support and security related messages.",
                     value: existingNotifications.AccountSecurity,
                 },
                 {
-                    _id: "draft_reminders",
+                    _id: "DraftReminder",
                     title: "Draft Reminders",
                     detail: "Reminder to finish scheduling items saved in drafts.",
                     value: existingNotifications.DraftReminder,
                 },
                 {
-                    _id: "pickup_confirmations",
+                    _id: "PickupConfirmation",
                     title: "Pickup Confirmations",
                     detail:
                         "Details of when your pickup is scheduled, upcoming, completed, or rescheduled.",
@@ -82,46 +82,46 @@ const addNotification = async (req, res) => {
 
             const text = [
                 {
-                    _id: "pickup_updates",
+                    _id: "PickupUpdates",
                     title: "Pickup Updates",
                     detail:
                         "Messages confirming your scheduled pickup, item pickup, and dropoff.",
-                    value: newNotifications.PickupUpdates,
+                    value: newNotification.PickupUpdates,
                 },
                 {
-                    _id: "pickup_reminder",
+                    _id: "PickupReminder",
                     title: "Pickup Reminder",
                     detail:
                         "A morning message letting you know a pickup is scheduled for today.",
-                    value: newNotifications.PickupReminder,
+                    value: newNotification.PickupReminder,
                 },
                 {
-                    _id: "label_issues",
+                    _id: "LabelIssues",
                     title: "Label Issues",
                     detail:
                         "Messages if your return label is missing, inval_id, or can’t be processed.",
-                    value: newNotifications.LabelIssues,
+                    value: newNotification.LabelIssues,
                 },
             ]
             const email = [
                 {
-                    _id: "account_security",
+                    _id: "AccountSecurity",
                     title: "Account & Security",
                     detail: "Important account, support and security related messages.",
-                    value: newNotifications.AccountSecurity,
+                    value: newNotification.AccountSecurity,
                 },
                 {
-                    _id: "draft_reminders",
+                    _id: "DraftReminder",
                     title: "Draft Reminders",
                     detail: "Reminder to finish scheduling items saved in drafts.",
-                    value: newNotifications.DraftReminder,
+                    value: newNotification.DraftReminder,
                 },
                 {
-                    _id: "pickup_confirmations",
+                    _id: "PickupConfirmation",
                     title: "Pickup Confirmations",
                     detail:
                         "Details of when your pickup is scheduled, upcoming, completed, or rescheduled.",
-                    value: newNotifications.PickupConfirmation,
+                    value: newNotification.PickupConfirmation,
                 },
             ]
             const Notifications = { text, email }
@@ -147,21 +147,21 @@ const getNotification = async (req, res) => {
         if (!notifications) return res.status(200).json({ message: "Notifications not found", success: false, status: 200 });
         const text = [
             {
-                _id: "pickup_updates",
+                _id: "PickupUpdates",
                 title: "Pickup Updates",
                 detail:
                     "Messages confirming your scheduled pickup, item pickup, and dropoff.",
                 value: notifications.PickupUpdates,
             },
             {
-                _id: "pickup_reminder",
+                _id: "PickupReminder",
                 title: "Pickup Reminder",
                 detail:
                     "A morning message letting you know a pickup is scheduled for today.",
                 value: notifications.PickupReminder,
             },
             {
-                _id: "label_issues",
+                _id: "LabelIssues",
                 title: "Label Issues",
                 detail:
                     "Messages if your return label is missing, inval_id, or can’t be processed.",
@@ -170,19 +170,19 @@ const getNotification = async (req, res) => {
         ]
         const email = [
             {
-                _id: "account_security",
+                _id: "AccountSecurity",
                 title: "Account & Security",
                 detail: "Important account, support and security related messages.",
                 value: notifications.AccountSecurity,
             },
             {
-                _id: "draft_reminders",
+                _id: "DraftReminder",
                 title: "Draft Reminders",
                 detail: "Reminder to finish scheduling items saved in drafts.",
                 value: notifications.DraftReminder,
             },
             {
-                _id: "pickup_confirmations",
+                _id: "PickupConfirmation",
                 title: "Pickup Confirmations",
                 detail:
                     "Details of when your pickup is scheduled, upcoming, completed, or rescheduled.",
