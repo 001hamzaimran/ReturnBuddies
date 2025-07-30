@@ -6,6 +6,10 @@ const pickupSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    PickupName: {
+        type: String,
+        required: true
+    },
     bundleId: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ReturnBundle',
@@ -20,6 +24,7 @@ const pickupSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Address'
     },
+    
     note: {
         type: String,
         trim: true
