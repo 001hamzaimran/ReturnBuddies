@@ -28,40 +28,39 @@ AuthRoutes.post('/phoneVerfication', upload.none(), isLogin, phoneVerfication);
 AuthRoutes.post('/verifyPhone', upload.none(), isLogin, verifyPhone);
 AuthRoutes.post('/editProfile', upload.none(), isLogin, editProfile);
 
-// AuthRoutes.post("/Login-with-google",async(req,res)=>{
-//     const client = new OAuth2Client('133065484326-6rcc8d8s03p4j8g6dqm6hbrbv19mo61r.apps.googleusercontent.com');
-//     const { idToken } = req.body;
-//    try {
+AuthRoutes.post("/Login-with-google",async(req,res)=>{
+    const client = new OAuth2Client('133065484326-6rcc8d8s03p4j8g6dqm6hbrbv19mo61r.apps.googleusercontent.com');
+    const { idToken } = req.body;
+   try {
 
-//       const ticket = await client.verifyIdToken({
-//       idToken,
-//       audience: '133065484326-6rcc8d8s03p4j8g6dqm6hbrbv19mo61r.apps.googleusercontent.com', // same for both app and web
-//     });
-//        const payload = ticket.getPayload();
-//        console.log('payload',payload)
-//     const { email, name, picture, sub } = payload;
-//         // const user=await UserModel.findOne({email})
+      const ticket = await client.verifyIdToken({
+      idToken,
+      audience: '133065484326-6rcc8d8s03p4j8g6dqm6hbrbv19mo61r.apps.googleusercontent.com', // same for both app and web
+    });
+       const payload = ticket.getPayload();
+       console.log('payload',payload)
+    const { email, name, picture, sub } = payload;
+        // const user=await UserModel.findOne({email})
 
-//         // if(!user){
-//         //     const newUser=new UserModel({
-//         //         name,
-//         //         email,
-//         //         profile:picture,
-//         //         googleId:sub
-//         //     })
-//         //     await newUser.save()
-//         //     const token=await jsonwebtoken.sign({id:newUser._id}, process.env.JWT_SECRET, {expiresIn:"1d"})
-//         //     return res.status(200).json({message:"User Login successfully", status:200, success:true, user, token})
-//         // }else{
-//         //     const token=await jsonwebtoken.sign({id:user._id}, process.env.JWT_SECRET, {expiresIn:"1d"})
-//         //     return res.status(200).json({message:"User Login successfully", status:200, success:true, user, token})
-//         // }
-//    } catch (error) {
+        // if(!user){
+        //     const newUser=new UserModel({
+        //         name,
+        //         email,
+        //         profile:picture,
+        //         googleId:sub
+        //     })
+        //     await newUser.save()
+        //     const token=await jsonwebtoken.sign({id:newUser._id}, process.env.JWT_SECRET, {expiresIn:"1d"})
+        //     return res.status(200).json({message:"User Login successfully", status:200, success:true, user, token})
+        // }else{
+        //     const token=await jsonwebtoken.sign({id:user._id}, process.env.JWT_SECRET, {expiresIn:"1d"})
+        //     return res.status(200).json({message:"User Login successfully", status:200, success:true, user, token})
+        // }
+   } catch (error) {
 
-//    }
-// })
+   }
+})
 
-// google logign 
 
 AuthRoutes.get('/google', passport.authenticate('google', {
     scope: ['profile', 'email']
