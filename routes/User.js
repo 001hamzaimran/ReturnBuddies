@@ -7,6 +7,7 @@ import { OAuth2Client } from 'google-auth-library'
 import jwt from 'jsonwebtoken'
 import { isLogin } from '../middlewares/authMiddleware.js'
 import { upload } from '../middlewares/Multer.js'
+import UserModel from '../models/User.js'
 
 
 
@@ -40,22 +41,22 @@ AuthRoutes.post("/Login-with-google",async(req,res)=>{
        const payload = ticket.getPayload();
        console.log('payload',payload)
     const { email, name, picture, sub } = payload;
-        // const user=await UserModel.findOne({email})
+        const user=await UserModel.findOne({email})
 
-        // if(!user){
-        //     const newUser=new UserModel({
-        //         name,
-        //         email,
-        //         profile:picture,
-        //         googleId:sub
-        //     })
-        //     await newUser.save()
-        //     const token=await jsonwebtoken.sign({id:newUser._id}, process.env.JWT_SECRET, {expiresIn:"1d"})
-        //     return res.status(200).json({message:"User Login successfully", status:200, success:true, user, token})
-        // }else{
-        //     const token=await jsonwebtoken.sign({id:user._id}, process.env.JWT_SECRET, {expiresIn:"1d"})
-        //     return res.status(200).json({message:"User Login successfully", status:200, success:true, user, token})
-        // }
+        if(!user){
+            const newUser=new UserModel({
+                name,
+                email,
+                profile:picture,
+                googleId:sub
+            })
+            await newUser.save()
+            const token=await jsonwebtoken.sign({id:newUser._id}, process.env.JWT_SECRET, {expiresIn:"1d"})
+            return res.status(200).json({message:"User Login successfully", status:200, success:true, user, token})
+        }else{
+            const token=await jsonwebtoken.sign({id:user._id}, process.env.JWT_SECRET, {expiresIn:"1d"})
+            return res.status(200).json({message:"User Login successfully", status:200, success:true, user, token})
+        }
    } catch (error) {
 
    }
