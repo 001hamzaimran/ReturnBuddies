@@ -219,7 +219,6 @@ const verifyPhone = async (req, res) => {
   }
 }
 
-
 // Forgot password
 const ForgotPassword = async (req, res) => {
   const { email } = req.body;
@@ -360,44 +359,6 @@ const ResetPassword = async (req, res) => {
     });
   }
 }
-// const UpdatePassword = async (req, res) => {
-//   const { email, password } = req.body;
-
-//   try {
-//     // Check if a forgot password request exists and is verified
-//     const forgotRecord = await ForgotModal.findOne({ email });
-
-//     if (!forgotRecord || !forgotRecord.verified) {
-//       return res.status(400).json({
-//         success: false,
-//         status: 400,
-//         message: "OTP verification required before password reset",
-//       });
-//     }
-
-//     // Hash the new password
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     // Update user's password
-//     await UserModel.findOneAndUpdate({ email }, { password: hashedPassword });
-
-//     // Optionally, delete the forgot record to prevent reuse
-//     await ForgotModal.deleteOne({ email });
-
-//     return res.status(200).json({
-//       success: true,
-//       status: 200,
-//       message: "Password updated successfully",
-//     });
-//   } catch (error) {
-//     console.log("error:", error);
-//     return res.status(500).json({
-//       success: false,
-//       status: 500,
-//       message: "Internal server error",
-//     });
-//   }
-// };
 
 const UpdateProfile = async (req, res) => {
   try {

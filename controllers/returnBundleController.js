@@ -1,99 +1,9 @@
 import mongoose from "mongoose";
 import ProductItem from "../models/ProductItem.js";
 import ReturnBundle from "../models/ReturnBundle.js";
-import { stat } from "fs";
 import pickupModel from "../models/pickup.model.js";
 import cloudinary from "../utils/cloundinary.js";
-
-// export const createProductItemsAndReturnBundle = async (req, res) => {
-//     try {
-//         const userId = req.params.userid || req.headers['userid'];
-//         const rawItems = req.body.items;
-//         const files = req.files;
-
-//         if (!userId) {
-//             return res.status(200).json({ message: 'Missing userId in params or headers.', status: 400 });
-//         }
-
-//         if (!rawItems) {
-//             return res.status(200).json({ message: 'Missing items in request body.', status: 400 });
-//         }
-
-//         let items;
-//         try {
-//             // If rawItems is already an object, don't parse
-//             items = typeof rawItems === 'string' ? JSON.parse(rawItems) : rawItems;
-//         } catch (err) {
-//             return res.status(200).json({ message: 'Invalid JSON in items.', status: 400 });
-//         }
-
-//         if (!Array.isArray(items) || items.length !== files.length) {
-//             return res.status(200).json({ message: 'Mismatch between items and files.', status: 400 });
-//         }
-
-//         // Generate BundleName
-//         const latestBundle = await ReturnBundle.findOne().sort({ createdAt: -1 }).select('BundleName');
-//         let nextNumber = 1;
-
-//         if (latestBundle && latestBundle.BundleName?.startsWith("Return #")) {
-//             const match = latestBundle.BundleName.match(/Return #(\d+)/);
-//             if (match) {
-//                 nextNumber = parseInt(match[1]) + 1;
-//             }
-//         }
-
-//         const autoBundleName = `Return #${nextNumber}`;
-
-//         const savedItems = [];
-
-//         for (let i = 0; i < items.length; i++) {
-//             const { detail, oversized } = items[i];
-//             const file = files[i];
-
-//             const newProductItem = new ProductItem({
-//                 userId,
-//                 productName: detail,
-//                 oversized: oversized || false,
-//                 thumbnail: file.path,
-//                 labelReceipt: 'pending'
-//             });
-
-//             const saved = await newProductItem.save();
-//             savedItems.push(saved);
-//         }
-
-//         const productIds = savedItems.map(item => item._id);
-
-//         const newReturnBundle = new ReturnBundle({
-//             userId,
-//             BundleName: autoBundleName,
-//             products: productIds,
-//             payment: null,
-//             pickupAddress: null,
-//             pickupTime: null
-//         });
-
-//         const savedBundle = await newReturnBundle.save();
-
-//         const populatedBundle = await ReturnBundle.findById(savedBundle._id).populate('products');
-
-//         return res.status(200).json({
-//             data: {
-//                 bundle: populatedBundle,
-//                 products: savedItems
-//             },
-//             status: 200,
-//             message: "Bundle created successfully",
-
-//         });
-
-//     } catch (error) {
-//         console.error("Error creating product items and return bundle:", error);
-//         res.status(500).json({ error: "Internal server error", success: false });
-//     }
-// };
-
-
+ 
 export const createProductItemsAndReturnBundle = async (req, res) => {
     try {
         const userId = req.params.userid || req.headers['userid'];
@@ -181,7 +91,6 @@ export const createProductItemsAndReturnBundle = async (req, res) => {
     }
 };
 
-
 export const getReturnBundle = async (req, res) => {
     try {
         const userId = req.params.userid || req.headers['userid'];
@@ -262,8 +171,6 @@ export const getReturnBundle = async (req, res) => {
     }
 };
 
-
-
 export const getAllReturnBundles = async (req, res) => {
     try {
         const userId = req.params.userid || req.headers['userid'];
@@ -292,7 +199,6 @@ export const getAllReturnBundles = async (req, res) => {
         res.status(500).json({ error: "Internal server error", success: false });
     }
 };
-
 
 export const DeleteBundle = async (req, res) => {
     try {

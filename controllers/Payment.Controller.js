@@ -144,7 +144,6 @@ export const editCard = async (req, res) => {
     }
 };
 
-
 export const deleteCard = async (req, res) => {
     try {
         const { Id } = req.params

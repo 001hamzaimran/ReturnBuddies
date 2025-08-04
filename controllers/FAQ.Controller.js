@@ -12,7 +12,6 @@ const createFAQ = async (req, res) => {
     }
 }
 
-
 const getAllFAQ = async (req, res) => {
     try {
         const faqs = await FAQ.find();

@@ -222,7 +222,6 @@ export const pickupcancelled = async (req, res) => {
     }
 };
 
-
 export const getAllPickupsAdmin = async (req, res) => {
     try {
         const userId = req.params.userid || req.headers['userid'];
@@ -251,7 +250,6 @@ export const getAllPickupsAdmin = async (req, res) => {
         });
     }
 };
-
 
 // get All completed pickups count
 export const getAllCompletedPickupsCount = async (req, res) => {

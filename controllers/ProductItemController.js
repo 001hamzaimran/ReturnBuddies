@@ -34,7 +34,6 @@ export const createProductItems = async (req, res) => {
     }
 };
 
-
 export const getProductItems = async (req, res) => {
     try {
         const { userid } = req.params;
@@ -45,7 +44,6 @@ export const getProductItems = async (req, res) => {
         res.status(500).json({ error: "Internal server error", success: false });
     }
 };
-
 
 export const uploadLabel = async (req, res) => {
     let populatedBundle
@@ -210,8 +208,6 @@ export const uploadLabel = async (req, res) => {
         });
     }
 };
-
-
 
 export const editLabel = async (req, res) => {
     try {

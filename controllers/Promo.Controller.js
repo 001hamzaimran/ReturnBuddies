@@ -1,7 +1,6 @@
 import PromoCodeModal from "../models/promoCode.Model.js";
 import UserModel from "../models/User.js";
 
-
 const addPromo = async (req, res) => {
     try {
         const userid = req.user.id;
