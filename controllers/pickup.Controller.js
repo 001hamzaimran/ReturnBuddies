@@ -2,14 +2,7 @@ import pickupModel from '../models/pickup.model.js';
 import mongoose from 'mongoose';
 
 // Generates a random 4-letter word
-function generateFourLetterWord() {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-    let word = '';
-    for (let i = 0; i < 4; i++) {
-        word += letters.charAt(Math.floor(Math.random() * letters.length));
-    }
-    return word;
-}
+
 
 export const createPickup = async (req, res) => {
     try {
@@ -28,7 +21,8 @@ export const createPickup = async (req, res) => {
 
         // Extract userId from middleware-authenticated headers
         const userId = req.user?._id || req.headers['x-user-id'];
-        const PickupName = generateFourLetterWord();
+        const PickupName = "RB-" + Math.floor(100 + Math.random() * 900);
+
 
         // === Basic Validation ===
         if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
