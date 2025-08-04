@@ -109,11 +109,20 @@ const Login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await UserModel.findOne({ email }).populate("pickupAddress").populate("payment");;
+    const user = await UserModel.findOne({ email }).populate("pickupAddress").populate("payment");
+
     if (!user) {
       return res
         .status(200)
         .json({ message: "User Not Found", status: 400 });
+    }
+
+    if (user.googleId) {
+      return res.status(200).json({
+        success: false,
+        status: 400,
+        message: "Login with google",
+      });
     }
     const isMatch = bcrypt.compareSync(password, user.password);
     if (!isMatch) {
