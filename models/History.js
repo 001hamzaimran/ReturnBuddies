@@ -13,7 +13,7 @@ const historySchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['awaiting pickup', 'picked up', 'inspected', 'completed', 'canceled', 'in transit', 'delivered'],
+        enum: ['awaiting pickup', 'picked up', 'inspected', 'completed', 'cancelled', 'in transit', 'delivered'],
         required: true
     },
     location:{

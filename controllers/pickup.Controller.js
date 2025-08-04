@@ -120,8 +120,8 @@ export const PickupbyStatus = async (req, res) => {
                 message: "User ID is required in params or headers"
             });
         }
-        // pickups whose status are not "canceled","completed","delivered"
-        const recentPickups = await pickupModel.find({ userId, status: { $nin: ["Pickup Canceled", "completed", "delivered"] } }).populate({
+        // pickups whose status are not "cancelled","completed","delivered"
+        const recentPickups = await pickupModel.find({ userId, status: { $nin: ["Pickup cancelled", "completed", "delivered"] } }).populate({
             path: 'bundleId',
             populate: {
                 path: 'products', // nested field inside bundle
@@ -129,8 +129,8 @@ export const PickupbyStatus = async (req, res) => {
             }
         }).populate('userId');
 
-        // pickups whose status are  "Pickup Canceled","completed","delivered"
-        const pastPickups = await pickupModel.find({ userId, status: { $in: ["Pickup Canceled", "completed", "delivered"] } }).populate({
+        // pickups whose status are  "Pickup cancelled","completed","delivered"
+        const pastPickups = await pickupModel.find({ userId, status: { $in: ["Pickup cancelled", "completed", "delivered"] } }).populate({
             path: 'bundleId',
             populate: {
                 path: 'products', // nested field inside bundle
@@ -183,7 +183,7 @@ export const pickupById = async (req, res) => {
     }
 };
 
-export const pickupCanceled = async (req, res) => {
+export const pickupcancelled = async (req, res) => {
     try {
         const { id } = req.params;
         const pickup = await pickupModel.findById(id);
@@ -196,20 +196,20 @@ export const pickupCanceled = async (req, res) => {
             });
         }
 
-        if (pickup.status === "Pickup Canceled") {
+        if (pickup.status === "Pickup cancelled") {
             return res.status(200).json({
                 success: false,
                 status: 400,
-                message: "Pickup is already canceled"
+                message: "Pickup is already cancelled"
             });
         }
 
-        pickup.status = "Pickup Canceled";
+        pickup.status = "Pickup cancelled";
         await pickup.save();
 
         return res.status(200).json({
             success: true,
-            message: "Pickup canceled successfully",
+            message: "Pickup cancelled successfully",
             data: pickup,
             status: 200
         });
@@ -248,6 +248,27 @@ export const getAllPickupsAdmin = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Server error while fetching pickups"
+        });
+    }
+};
+
+
+// get All completed pickups count
+export const getAllCompletedPickupsCount = async (req, res) => {
+    try {
+        const completedPickups = await pickupModel.countDocuments({ status: "completed" });
+        const notCompletedPickups = await pickupModel.countDocuments({ status: { $ne: "completed" } });
+        return res.status(200).json({
+            success: true,
+            message: "Completed pickups count fetched successfully",
+            data: {completedPickups, notCompletedPickups},
+            status: 200
+        });
+    } catch (error) {
+        console.error("❌ Error fetching completed pickups count:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while fetching completed pickups count"
         });
     }
 };

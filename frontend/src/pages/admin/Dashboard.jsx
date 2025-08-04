@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaTruck, FaClipboardCheck, FaMoneyBillWave, FaTruckLoading } from "react-icons/fa";
 
 export default function Dashboard() {
   const [recentUsers, setRecentUsers] = useState([]);
+  const [completedPickupsCount, setCompletedPickupsCount] = useState(0);
+  const [ActivePickupsCount, setActivePickupsCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const intervalRef = useRef(null);
   useEffect(() => {
     getUser();
   }, []);
@@ -38,6 +41,7 @@ export default function Dashboard() {
         phone: user.phone,
       }));
 
+
       setRecentUsers(formattedUsers); // ⬅️ This triggers re-render
     } catch (error) {
       console.error("Fetch error:", error);
@@ -45,6 +49,34 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
+
+  const getCompletedPickupsCount = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const url = `${import.meta.env.VITE_BASE_URL}get-pickup-completed`;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      console.log(data.data);
+      setCompletedPickupsCount(data.data.completedPickups);
+      setActivePickupsCount(data.data.notCompletedPickups);
+    } catch (error) {
+      console.error("Fetch error:", error);
+      return 0;
+    }
+  };
+
+  useEffect(() => {
+ 
+      getCompletedPickupsCount(); // initial fetch
+  
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -54,13 +86,13 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
         <DashboardCard
           title="Total Pickups Completed"
-          value="1,284"
+          value={completedPickupsCount}
           icon={<FaClipboardCheck className="text-green-500 text-3xl" />}
           bg="bg-green-100"
         />
         <DashboardCard
           title="Active Pickups"
-          value="74"
+          value={ActivePickupsCount}
           icon={<FaTruck className="text-blue-500 text-3xl" />}
           bg="bg-blue-100"
         />

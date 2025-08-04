@@ -63,7 +63,7 @@ export default function PickupManagement() {
     'picked up': 'bg-green-100 text-green-700',
     'inspected': 'bg-yellow-100 text-yellow-700',
     'completed': 'bg-green-200 text-green-800',
-    'pickup canceled': 'bg-red-100 text-red-700',
+    'pickup cancelled': 'bg-red-100 text-red-700',
     'in transit': 'bg-blue-100 text-blue-700',
     'delivered': 'bg-teal-100 text-teal-700',
   };

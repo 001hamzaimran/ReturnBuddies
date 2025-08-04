@@ -17,7 +17,7 @@ const pickupSchema = new mongoose.Schema({
     }],
     status: {
         type: String,
-        enum: ['Pickup Requested', 'picked up', 'inspected', 'completed', 'Pickup Canceled', 'in transit', 'delivered'],
+        enum: ['Pickup Requested', 'picked up', 'inspected', 'completed', 'Pickup cancelled', 'in transit', 'delivered'],
         default: 'Pickup Requested',
     },
     pickupAddress: {

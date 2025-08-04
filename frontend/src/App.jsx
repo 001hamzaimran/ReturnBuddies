@@ -18,6 +18,7 @@ import { AuthProvider } from './context/AuthContext'
 import ForgotPassword from './pages/users/ForgotPassword'
 import PromoCode from './pages/admin/PromoCode'
 import Profile from './pages/admin/Profile'
+import FAQ from './pages/admin/FAQ'
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
               <Route path='Payment-Management' element={<PaymentManagement />} />
               <Route path='Promo-code' element={<PromoCode />} />
               <Route path='profile' element={<Profile />} />
+              <Route path='FAQ' element={<FAQ />} />
             </Route>
 
             <Route path='/admin/dashboard/login' element={<Login />} />
