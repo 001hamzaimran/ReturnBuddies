@@ -1,6 +1,11 @@
 import ProductItem from "../models/ProductItem.js";
 import ReturnBundle from "../models/ReturnBundle.js";
 
+function parseCustomDate(input) {
+  const [day, month, year] = input.split('/');
+  return new Date(`${year}-${month}-${day}`);
+}
+
 export const createProductItems = async (req, res) => {
     try {
         const items = JSON.parse(req.body.items);
@@ -104,7 +109,8 @@ export const uploadLabel = async (req, res) => {
 
             const updated = await ProductItem.findOneAndUpdate(
                 { _id: item.productId, userId },
-                { labelReceipt: labelPath, date: new Date(date) },
+                { labelReceipt: labelPath, date: parseCustomDate(date)
+ },
                 { new: true }
             );
 
@@ -144,7 +150,8 @@ export const uploadLabel = async (req, res) => {
                 message: 'All products in bundle updated with label. No new bundle created.',
                 data: {
                     bundle: bundleId,
-                    date: new Date(date)
+                   date: parseCustomDate(date)
+
                 }
             });
         }
@@ -161,7 +168,8 @@ export const uploadLabel = async (req, res) => {
         }
 
         const autoBundleName = `Return #${nextNumber}`;
-        const pickupDate = new Date(date);
+        const pickupDate = parseCustomDate(date);
+
         console.log("📅 Parsed pickupTime:", pickupDate);
         // Create a new bundle with selected products
         const newBundle = new ReturnBundle({
@@ -195,7 +203,8 @@ export const uploadLabel = async (req, res) => {
             message: 'Label uploaded and new bundle created successfully.',
             data: {
                 bundle: populatedBundle,
-                date: date
+                date: parseCustomDate(date)
+
             }
         });
 
