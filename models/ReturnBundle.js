@@ -34,7 +34,7 @@ const returnBundleSchema = new mongoose.Schema({
     },
 
     pickupTime: {
-        type: Date
+        type: String
     },
 
     status: {
