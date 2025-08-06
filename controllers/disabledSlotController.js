@@ -65,10 +65,47 @@ export const getDisabledSlots = async (req, res) => {
             }
         });
 
-        return res.status(200).json({ data: Object.values(groupedSlots) });
+        return res.status(200).json({ data: Object.values(groupedSlots), status: 200, success: true });
     } catch (error) {
         console.error("Error fetching disabled slots:", error);
-        return res.status(500).json({ error: "Internal server error." });
+        return res.status(500).json({ error: "Internal server error.", success: false, status: 500 });
     }
 };
 
+export const updateDisabledSlot = async (req, res) => {
+    try {
+        const { date, timeSlot, value } = req.body;
+
+        if (!date || timeSlot === undefined) {
+            return res.status(400).json({ error: "Date and timeSlot are required." });
+        }
+
+        const isoDate = new Date(date).toISOString();
+        const slotQuery = { date: isoDate, timeSlot: timeSlot || null };
+
+        if (value === true) {
+            // Enable: remove from disabled collection if it exists
+            await DisabledSlot.deleteOne(slotQuery);
+            return res.status(200).json({ message: "Slot enabled successfully." });
+        } else {
+            // Disable: ensure it exists
+            const existing = await DisabledSlot.findOne(slotQuery);
+
+            if (!existing) {
+                const newSlot = new DisabledSlot({
+                    date: isoDate,
+                    timeSlot: timeSlot || null,
+                    disabled: true,
+                });
+
+                await newSlot.save();
+                return res.status(201).json({ message: "Slot disabled successfully.", data: newSlot });
+            }
+
+            return res.status(200).json({ message: "Slot already disabled." });
+        }
+    } catch (error) {
+        console.error("Error updating disabled slot:", error);
+        return res.status(500).json({ error: "Internal server error." });
+    }
+};

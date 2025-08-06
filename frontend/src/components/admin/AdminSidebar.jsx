@@ -1,9 +1,24 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { FaTruck, FaUsers, FaMoneyBillWave, FaWarehouse, FaTimes, FaDollarSign, FaQuestionCircle, FaCogs } from 'react-icons/fa';
+import { NavLink } from 'react-router-dom';
+import {
+  FaTruck,
+  FaUsers,
+  FaMoneyBillWave,
+  FaWarehouse,
+  FaTimes,
+  FaDollarSign,
+  FaQuestionCircle,
+  FaCogs,
+  FaMountain
+} from 'react-icons/fa';
 import Logo from '../../assets/Images/logo.png';
 
 export default function AdminSidebar({ onClose }) {
+  const navLinkClass = ({ isActive }) =>
+    `flex items-center px-4 py-2 rounded-md space-x-2 ${isActive ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 text-gray-300'
+    }`;
+
+
   return (
     <aside className="h-full bg-gray-900 text-white flex flex-col justify-between w-64">
       <div>
@@ -21,44 +36,49 @@ export default function AdminSidebar({ onClose }) {
 
         {/* Nav Items */}
         <nav className="mt-6 space-y-1 px-2">
-          <Link to="/admin/dashboard" className="flex items-center px-4 py-2 bg-gray-800 rounded-md">
-            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Dashboard
-          </Link>
-          <Link to="/admin/dashboard/users" className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-md space-x-2">
+          <NavLink to="/admin/dashboard" end className={navLinkClass}>
+            <FaMountain />
+            <span>Dashboard</span>
+          </NavLink>
+
+          <NavLink to="/admin/dashboard/users" className={navLinkClass}>
             <FaUsers />
             <span>Users</span>
-          </Link>
-          <Link to="/admin/dashboard/Promo-code" className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-md space-x-2">
+          </NavLink>
+
+          <NavLink to="/admin/dashboard/Promo-code" className={navLinkClass}>
             <FaDollarSign />
             <span>Promo Code</span>
-          </Link>
-          <Link to="/admin/dashboard/Pickup-Management" className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-md space-x-2">
+          </NavLink>
+
+          <NavLink to="/admin/dashboard/Pickup-Management" className={navLinkClass}>
             <FaTruck />
             <span>Pickup Management</span>
-          </Link>
-          <Link to="/admin/dashboard/Warehouse-Management" className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-md space-x-2">
+          </NavLink>
+
+          <NavLink to="/admin/dashboard/Warehouse-Management" className={navLinkClass}>
             <FaWarehouse />
             <span>Warehouse Management</span>
-          </Link>
-          <Link to="/admin/dashboard/Payment-Management" className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-md space-x-2">
+          </NavLink>
+
+          <NavLink to="/admin/dashboard/Payment-Management" className={navLinkClass}>
             <FaMoneyBillWave />
             <span>Payment Management</span>
-          </Link>
-          <Link to="/admin/dashboard/FAQ" className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-md space-x-2">
+          </NavLink>
+
+          <NavLink to="/admin/dashboard/FAQ" className={navLinkClass}>
             <FaQuestionCircle />
             <span>FAQ</span>
-          </Link>
-          <Link to="/admin/dashboard/Settings" className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-md space-x-2">
+          </NavLink>
+
+          <NavLink to="/admin/dashboard/Settings" className={navLinkClass}>
             <FaCogs />
             <span>Settings</span>
-          </Link>
+          </NavLink>
         </nav>
       </div>
 
-      {/* Settings (bottom) */}
+      {/* Bottom Settings Link */}
       <div className="p-4">
         <a href="#" className="flex items-center text-sm text-gray-400 hover:text-white">
           ⚙️ <span className="ml-2">Settings</span>
