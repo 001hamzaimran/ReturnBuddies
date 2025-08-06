@@ -19,6 +19,7 @@ import ForgotPassword from './pages/users/ForgotPassword'
 import PromoCode from './pages/admin/PromoCode'
 import Profile from './pages/admin/Profile'
 import FAQ from './pages/admin/FAQ'
+import Settings from './pages/admin/Settings'
 
 export default function App() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
               <Route path='Promo-code' element={<PromoCode />} />
               <Route path='profile' element={<Profile />} />
               <Route path='FAQ' element={<FAQ />} />
+              <Route path='Settings' element={<Settings />} />
             </Route>
 
             <Route path='/admin/dashboard/login' element={<Login />} />

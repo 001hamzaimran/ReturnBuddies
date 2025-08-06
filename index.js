@@ -17,6 +17,7 @@ import pickupRouter from './routes/pickup.routes.js'
 import faqRouter from './routes/FAQ.routes.js'
 import { PromoRouter } from './routes/Promo.routes.js'
 import NotificationRouter from './routes/Notification.routes.js'
+import { disabledSlotRouter } from './routes/DisabledSlot.routes.js'
 
 
 dotenv.config()
@@ -41,7 +42,7 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-const routes = [router, bundleRouter, ProductItemRoutes, addressRouter, PaymentRouter, basepriceRouter, pickupRouter,faqRouter,PromoRouter,NotificationRouter]
+const routes = [router, bundleRouter, ProductItemRoutes, addressRouter, PaymentRouter, basepriceRouter, pickupRouter,faqRouter,PromoRouter,NotificationRouter,disabledSlotRouter]
 
 
 routes.map(route => {

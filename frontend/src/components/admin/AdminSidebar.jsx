@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaTruck, FaUsers, FaMoneyBillWave, FaWarehouse, FaTimes, FaDollarSign, FaQuestionCircle } from 'react-icons/fa';
+import { FaTruck, FaUsers, FaMoneyBillWave, FaWarehouse, FaTimes, FaDollarSign, FaQuestionCircle, FaCogs } from 'react-icons/fa';
 import Logo from '../../assets/Images/logo.png';
 
 export default function AdminSidebar({ onClose }) {
@@ -50,6 +50,10 @@ export default function AdminSidebar({ onClose }) {
           <Link to="/admin/dashboard/FAQ" className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-md space-x-2">
             <FaQuestionCircle />
             <span>FAQ</span>
+          </Link>
+          <Link to="/admin/dashboard/Settings" className="flex items-center px-4 py-2 hover:bg-gray-800 rounded-md space-x-2">
+            <FaCogs />
+            <span>Settings</span>
           </Link>
         </nav>
       </div>
