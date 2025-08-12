@@ -194,7 +194,7 @@ export const getReturnBundle = async (req, res) => {
 
         const invalidIds = bundleIds.filter(id => !mongoose.isValidObjectId(id));
         if (invalidIds.length > 0) {
-            return res.status(400).json({
+            return res.status(200).json({
                 error: `Invalid bundleId(s): ${invalidIds.join(', ')}`,
                 success: false,
                 status: 400
@@ -204,7 +204,7 @@ export const getReturnBundle = async (req, res) => {
         const bundles = await ReturnBundle.find({ _id: { $in: bundleIds } }).populate('products');
 
         if (!bundles || bundles.length === 0) {
-            return res.status(404).json({
+            return res.status(200).json({
                 error: 'No return bundles found',
                 success: false,
                 status: 404
