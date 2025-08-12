@@ -3,7 +3,7 @@ import ProductItem from "../models/ProductItem.js";
 import ReturnBundle from "../models/ReturnBundle.js";
 import pickupModel from "../models/pickup.model.js";
 import cloudinary from "../utils/cloundinary.js";
- 
+
 export const createProductItemsAndReturnBundle = async (req, res) => {
     try {
         const userId = req.params.userid || req.headers['userid'];
@@ -91,6 +91,86 @@ export const createProductItemsAndReturnBundle = async (req, res) => {
     }
 };
 
+// export const getReturnBundle = async (req, res) => {
+//     try {
+//         const userId = req.params.userid || req.headers['userid'];
+
+//         if (!userId) {
+//             return res.status(200).json({ error: "User ID is required", status: 400, success: false });
+//         }
+
+//         let bundleIds = req.params.bundleId || req.query.bundleId;
+//         if (!bundleIds) {
+//             return res.status(400).json({
+//                 error: 'Missing bundleId parameter',
+//                 success: false,
+//                 status: 400
+//             });
+//         }
+
+//         if (typeof bundleIds === 'string') {
+//             bundleIds = bundleIds.split(',').map(id => id.trim());
+//         }
+
+//         const invalidIds = bundleIds.filter(id => !mongoose.isValidObjectId(id));
+//         if (invalidIds.length > 0) {
+//             return res.status(400).json({
+//                 error: `Invalid bundleId(s): ${invalidIds.join(', ')}`,
+//                 success: false,
+//                 status: 400
+//             });
+//         }
+
+//         const bundles = await ReturnBundle.find({ _id: { $in: bundleIds } }).populate('products');
+
+//         if (!bundles || bundles.length === 0) {
+//             return res.status(404).json({
+//                 error: 'No return bundles found',
+//                 success: false,
+//                 status: 404
+//             });
+//         }
+
+//         const enrichedBundles = [];
+
+//         for (const bundle of bundles) {
+//             const products = await ProductItem.find({ _id: { $in: bundle.products } }).populate('userId');
+
+//             const labelReceipt = products[0]?.labelReceipt || null;
+//             const date = products[0]?.date;
+
+//             enrichedBundles.push({
+//                 _id: bundle._id,
+//                 userId: bundle.userId,
+//                 BundleName: bundle.BundleName,
+//                 labelReceipt,
+//                 date,
+//                 products,
+//                 history: bundle.history,
+//                 pickupAddress: bundle.pickupAddress,
+//                 payment: bundle.payment,
+//                 pickupTime: bundle.pickupTime,
+//                 status: bundle.status,
+//                 createdAt: bundle.createdAt,
+//                 __v: bundle.__v
+//             });
+//         }
+
+//         return res.status(200).json({
+//             data: enrichedBundles,
+//             success: true,
+//             status: 200
+//         });
+
+//     } catch (error) {
+//         console.error("Error fetching return bundle(s):", error);
+//         return res.status(500).json({
+//             error: "Internal server error",
+//             success: false
+//         });
+//     }
+// };
+
 export const getReturnBundle = async (req, res) => {
     try {
         const userId = req.params.userid || req.headers['userid'];
@@ -139,6 +219,15 @@ export const getReturnBundle = async (req, res) => {
             const labelReceipt = products[0]?.labelReceipt || null;
             const date = products[0]?.date;
 
+            // Format pickupTime to MM/DD/YYYY
+            let formattedDate = null;
+            if (bundle.pickupTime instanceof Date && !isNaN(bundle.pickupTime)) {
+                const month = String(bundle.pickupTime.getMonth() + 1).padStart(2, '0');
+                const day = String(bundle.pickupTime.getDate()).padStart(2, '0');
+                const year = bundle.pickupTime.getFullYear();
+                formattedDate = `${month}/${day}/${year}`;
+            }
+
             enrichedBundles.push({
                 _id: bundle._id,
                 userId: bundle.userId,
@@ -149,7 +238,8 @@ export const getReturnBundle = async (req, res) => {
                 history: bundle.history,
                 pickupAddress: bundle.pickupAddress,
                 payment: bundle.payment,
-                pickupTime: bundle.pickupTime,
+                pickupTime: bundle.pickupTime, // original Date
+                formattedDate,                 // new field in MM/DD/YYYY format
                 status: bundle.status,
                 createdAt: bundle.createdAt,
                 __v: bundle.__v
@@ -170,6 +260,7 @@ export const getReturnBundle = async (req, res) => {
         });
     }
 };
+
 
 export const getAllReturnBundles = async (req, res) => {
     try {
