@@ -2,47 +2,47 @@ import ProductItem from "../models/ProductItem.js";
 import ReturnBundle from "../models/ReturnBundle.js";
 
 export const createProductItems = async (req, res) => {
-    try {
-        const items = JSON.parse(req.body.items);
-        const files = req.files;
+  try {
+    const items = JSON.parse(req.body.items);
+    const files = req.files;
 
-        if (!Array.isArray(items) || items.length !== files.length) {
-            return res.status(400).json({ error: 'Mismatch between items and images.' });
-        }
-
-        const savedItems = [];
-
-        for (let i = 0; i < items.length; i++) {
-            const { detail, oversized } = items[i];
-            const file = files[i];
-
-            const newProductItem = new ProductItem({
-                productName: detail,
-                oversized: oversized || false,
-                thumbnail: file.path, // multer stores file path
-                labelReceipt: 'pending'
-            });
-
-            const saved = await newProductItem.save();
-            savedItems.push(saved);
-        }
-
-        return res.status(201).json({ data: savedItems, success: true });
-    } catch (error) {
-        console.error("Error creating product items:", error);
-        res.status(500).json({ error: "Internal server error", success: false });
+    if (!Array.isArray(items) || items.length !== files.length) {
+      return res.status(400).json({ error: 'Mismatch between items and images.' });
     }
+
+    const savedItems = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const { detail, oversized } = items[i];
+      const file = files[i];
+
+      const newProductItem = new ProductItem({
+        productName: detail,
+        oversized: oversized || false,
+        thumbnail: file.path, // multer stores file path
+        labelReceipt: 'pending'
+      });
+
+      const saved = await newProductItem.save();
+      savedItems.push(saved);
+    }
+
+    return res.status(201).json({ data: savedItems, success: true });
+  } catch (error) {
+    console.error("Error creating product items:", error);
+    res.status(500).json({ error: "Internal server error", success: false });
+  }
 };
 
 export const getProductItems = async (req, res) => {
-    try {
-        const { userid } = req.params;
-        const items = await ProductItem.find({ userId: userid });
-        res.status(200).json({ data: items, success: true });
-    } catch (error) {
-        console.error("Error fetching product items:", error);
-        res.status(500).json({ error: "Internal server error", success: false });
-    }
+  try {
+    const { userid } = req.params;
+    const items = await ProductItem.find({ userId: userid });
+    res.status(200).json({ data: items, success: true });
+  } catch (error) {
+    console.error("Error fetching product items:", error);
+    res.status(500).json({ error: "Internal server error", success: false });
+  }
 };
 
 // export const uploadLabel = async (req, res) => {
@@ -214,111 +214,111 @@ export const getProductItems = async (req, res) => {
 // };
 
 export const editLabel = async (req, res) => {
-    try {
-        const userId = req.params.userid || req.headers['userid'];
-        const { bundleId, date } = req.body;
+  try {
+    const userId = req.params.userid || req.headers['userid'];
+    const { bundleId, date } = req.body;
 
-        if (!userId || !bundleId) {
-            return res.status(400).json({
-                status: 400,
-                message: 'Missing userId or bundleId.'
-            });
-        }
-
-        // Parse productIDs
-        let productIDs;
-        try {
-            productIDs = typeof req.body.productIDs === 'string'
-                ? JSON.parse(req.body.productIDs)
-                : req.body.productIDs;
-        } catch (err) {
-            return res.status(400).json({
-                status: 400,
-                message: 'Invalid format for productIDs.'
-            });
-        }
-
-        if (!Array.isArray(productIDs) || productIDs.length === 0) {
-            return res.status(400).json({
-                status: 400,
-                message: 'productIDs must be a non-empty array.'
-            });
-        }
-
-        // Check if label file is uploaded
-        const labelPath = req.files?.[0]?.path || null;
-
-        // Fetch current bundle and check validity
-        const currentBundle = await ReturnBundle.findById(bundleId).lean();
-        if (!currentBundle) {
-            return res.status(404).json({
-                status: 404,
-                message: 'Bundle not found.'
-            });
-        }
-
-        const currentProductIds = currentBundle.products.map(id => id.toString());
-        const selectedProductIds = productIDs.map(p => p.productId);
-
-        const updatedProducts = [];
-
-        for (const item of productIDs) {
-            // Build update object conditionally
-            const updateData = {
-                date: new Date(date)
-            };
-
-            if (labelPath) {
-                updateData.labelReceipt = labelPath;
-            }
-
-            const updated = await ProductItem.findOneAndUpdate(
-                { _id: item.productId, userId },
-                updateData,
-                { new: true }
-            );
-
-            if (updated) {
-                updatedProducts.push(updated._id.toString());
-            }
-        }
-
-        if (updatedProducts.length === 0) {
-            return res.status(400).json({
-                status: 400,
-                message: 'No products were updated.'
-            });
-        }
-
-        // Optional: Mark bundle as processed if all products are updated
-        const allSelected = currentProductIds.length === updatedProducts.length &&
-            currentProductIds.every(id => updatedProducts.includes(id));
-
-        if (allSelected) {
-            await ReturnBundle.findByIdAndUpdate(bundleId, { status: 'processed' });
-        }
-
-        const updatedBundle = await ReturnBundle.findById(bundleId).populate('products');
-
-        return res.status(200).json({
-            status: 200,
-            message: labelPath
-                ? 'Label(s) and date updated successfully.'
-                : 'Date updated successfully (label unchanged).',
-            data: {
-                bundle: updatedBundle,
-                updatedProducts
-            }
-        });
-
-    } catch (error) {
-        console.error('Error in editLabel:', error);
-        return res.status(500).json({
-            status: 500,
-            message: 'Internal server error',
-            error: error.message
-        });
+    if (!userId || !bundleId) {
+      return res.status(400).json({
+        status: 400,
+        message: 'Missing userId or bundleId.'
+      });
     }
+
+    // Parse productIDs
+    let productIDs;
+    try {
+      productIDs = typeof req.body.productIDs === 'string'
+        ? JSON.parse(req.body.productIDs)
+        : req.body.productIDs;
+    } catch (err) {
+      return res.status(400).json({
+        status: 400,
+        message: 'Invalid format for productIDs.'
+      });
+    }
+
+    if (!Array.isArray(productIDs) || productIDs.length === 0) {
+      return res.status(400).json({
+        status: 400,
+        message: 'productIDs must be a non-empty array.'
+      });
+    }
+
+    // Check if label file is uploaded
+    const labelPath = req.files?.[0]?.path || null;
+
+    // Fetch current bundle and check validity
+    const currentBundle = await ReturnBundle.findById(bundleId).lean();
+    if (!currentBundle) {
+      return res.status(404).json({
+        status: 404,
+        message: 'Bundle not found.'
+      });
+    }
+
+    const currentProductIds = currentBundle.products.map(id => id.toString());
+    const selectedProductIds = productIDs.map(p => p.productId);
+
+    const updatedProducts = [];
+
+    for (const item of productIDs) {
+      // Build update object conditionally
+      const updateData = {
+        date: new Date(date)
+      };
+
+      if (labelPath) {
+        updateData.labelReceipt = labelPath;
+      }
+
+      const updated = await ProductItem.findOneAndUpdate(
+        { _id: item.productId, userId },
+        updateData,
+        { new: true }
+      );
+
+      if (updated) {
+        updatedProducts.push(updated._id.toString());
+      }
+    }
+
+    if (updatedProducts.length === 0) {
+      return res.status(400).json({
+        status: 400,
+        message: 'No products were updated.'
+      });
+    }
+
+    // Optional: Mark bundle as processed if all products are updated
+    const allSelected = currentProductIds.length === updatedProducts.length &&
+      currentProductIds.every(id => updatedProducts.includes(id));
+
+    if (allSelected) {
+      await ReturnBundle.findByIdAndUpdate(bundleId, { status: 'processed' });
+    }
+
+    const updatedBundle = await ReturnBundle.findById(bundleId).populate('products');
+
+    return res.status(200).json({
+      status: 200,
+      message: labelPath
+        ? 'Label(s) and date updated successfully.'
+        : 'Date updated successfully (label unchanged).',
+      data: {
+        bundle: updatedBundle,
+        updatedProducts
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in editLabel:', error);
+    return res.status(500).json({
+      status: 500,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
 };
 
 
@@ -329,8 +329,8 @@ function parseCustomDate(input) {
   const parts = input.split('/');
   if (parts.length !== 3) return null;
 
-  const [day, month, year] = parts;
-  const formatted = `${year}-${month}-${day}`;
+  const [month, day, year] = parts; // now interpreting first part as month
+  const formatted = `${year}-${month}-${day}`; // YYYY-MM-DD for Date()
   const date = new Date(formatted);
 
   return isNaN(date.getTime()) ? null : date;
@@ -354,7 +354,7 @@ export const uploadLabel = async (req, res) => {
     if (!parsedDate) {
       return res.status(200).json({
         status: 400,
-        message: 'Invalid date format. Please use DD/MM/YYYY.'
+        message: 'Invalid date format. Please use MM/DD/YYYY.'
       });
     }
 
