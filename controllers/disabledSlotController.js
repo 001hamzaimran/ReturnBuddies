@@ -34,7 +34,7 @@ export const disableSlot = async (req, res) => {
 
 export const getDisabledSlots = async (req, res) => {
     try {
-        const disabledSlots = await DisabledSlot.find();
+        const disabledSlots = await DisabledSlot.find().limit(5);
 
         const groupedSlots = {};
 
