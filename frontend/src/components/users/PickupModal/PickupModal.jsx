@@ -41,7 +41,7 @@ export default function PickupModal({ onClose,setRefresh }) {
   // This function would be called to send data to API, for now just closes modal
 const handleSave = async () => {
   try {
-    const res = await axios.post("http://localhost:5000/api/additem", Formdata);
+    const res = await axios.post("https://returnbuddies-production.up.railway.app/api/additem", Formdata);
     const itemdata = res.data;
 
     if (res.status === 200 && itemdata.success) {

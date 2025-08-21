@@ -11,7 +11,7 @@ export default function Settings() {
     const [showModal, setShowModal] = useState(false);
     const [disabledSlots, setDisabledSlots] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
-    const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:5000";
+    const BASE_URL = import.meta.env.VITE_BASE_URL;
     const minDate = addDays(new Date(), 5);
 
     const getDisabledSlots = async () => {

@@ -17,7 +17,7 @@ export default function Users() {
     try {
       const token = localStorage.getItem("token");
       const url = `${import.meta.env.VITE_BASE_URL}admin/dashboard`;
-
+      console.log("Fetching:", url);
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -29,17 +29,18 @@ export default function Users() {
       const data = await response.json();
       console.log("Fetched Users:", data);
 
-      const formattedUsers = data.data.map((user, index) => ({
+      const formattedUsers = data.data.map((user) => ({
         id: user._id,
         name: user.name,
         email: user.email,
-        address: user.pickupAddress.suite || "N/A", // fallback
-        state: user.pickupAddress.state || "N/A", // fallback
-        postalCode: user.pickupAddress.postalCode || "N/A", // fallback
+        address: user.pickupAddress?.suite || "N/A",
+        state: user.pickupAddress?.state || "N/A",
+        postalCode: user.pickupAddress?.postalCode || "N/A",
         image: user.profile,
-        phone: user.phone,
-        history: [], // optionally fill with history later
+        phone: user.phone || "N/A",
+        history: [],
       }));
+
 
       setUsers(formattedUsers);
     } catch (error) {

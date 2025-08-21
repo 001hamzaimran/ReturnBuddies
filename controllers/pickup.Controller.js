@@ -249,11 +249,11 @@ export const getAllPickupsAdmin = async (req, res) => {
 export const getAllCompletedPickupsCount = async (req, res) => {
     try {
         const completedPickups = await pickupModel.countDocuments({ status: "completed" });
-        const notCompletedPickups = await pickupModel.countDocuments({ status: { $ne: "completed" } });
+        const notCompletedPickups = await pickupModel.countDocuments({ status: { $ne: "completed", $ne: "Pickup cancelled" } });
         return res.status(200).json({
             success: true,
             message: "Completed pickups count fetched successfully",
-            data: {completedPickups, notCompletedPickups},
+            data: { completedPickups, notCompletedPickups },
             status: 200
         });
     } catch (error) {
