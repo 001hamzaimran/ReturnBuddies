@@ -316,3 +316,16 @@ export const DeleteBundle = async (req, res) => {
 
     }
 }
+
+export const getAllReturnBundlesAdmin = async (req, res) => {
+    try {
+
+        // Step 1: Fetch all pickups by this user
+        const Bundles = await ReturnBundle.find().populate("userId").populate("products");
+
+        res.status(200).json({ data: Bundles, status: 200, success: true });
+    } catch (error) {
+        console.error("Error fetching user return bundles:", error);
+        res.status(500).json({ error: "Internal server error", success: false });
+    }
+};

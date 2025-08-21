@@ -1,9 +1,6 @@
 import pickupModel from '../models/pickup.model.js';
 import mongoose from 'mongoose';
 
-// Generates a random 4-letter word
-
-
 export const createPickup = async (req, res) => {
     try {
         const {
@@ -244,8 +241,7 @@ export const getAllPickupsAdmin = async (req, res) => {
         });
     }
 };
-
-// get All completed pickups count
+ 
 export const getAllCompletedPickupsCount = async (req, res) => {
     try {
         const completedPickups = await pickupModel.countDocuments({ status: "completed" });
