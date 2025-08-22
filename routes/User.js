@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken'
 import { isLogin } from '../middlewares/authMiddleware.js'
 import { upload } from '../middlewares/Multer.js'
 import UserModel from '../models/User.js'
-import { googleLogin } from '../controllers/GoogleAuth.Controller.js'
+import { appleLogin, googleLogin } from '../controllers/GoogleAuth.Controller.js'
 
 
 
@@ -64,6 +64,7 @@ AuthRoutes.post('/editProfile', upload.none(), isLogin, editProfile);
 // })
 
 AuthRoutes.post('/Login-with-google', googleLogin);
+AuthRoutes.post('/Login-with-apple', appleLogin);
 AuthRoutes.get('/google', passport.authenticate('google', {
     scope: ['profile', 'email']
 }));
