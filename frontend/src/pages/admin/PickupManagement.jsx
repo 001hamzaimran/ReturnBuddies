@@ -1,5 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { FaTruck, FaWarehouse, FaShippingFast } from 'react-icons/fa';
+import React, { useEffect, useState } from "react";
+import { FaTruck, FaWarehouse, FaShippingFast } from "react-icons/fa";
+import { FiSearch } from "react-icons/fi";
+import PickupStatus from "../../components/admin/PickupStatus";
+import PickupPagination from "../../components/admin/PickupPagination";
+import PickupModal from "../../components/admin/PickupModal";
 
 export default function PickupManagement() {
   const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -9,13 +13,35 @@ export default function PickupManagement() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pickups, setPickups] = useState([]);
+  const [selectedPickup, setSelectedPickup] = useState(null);
+
 
   const [pickedUpCount, setPickedUpCount] = useState(0);
   const [warehouseCount, setWarehouseCount] = useState(0);
   const [carrierCount, setCarrierCount] = useState(0);
 
-  const totalPages = Math.ceil(pickups.length / itemsPerPage);
-  const paginatedPickups = pickups.slice(
+  const [searchProductByID, setSearchProductByID] = useState("");
+  const [selectedPickupFilter, setSelectedPickupFilter] = useState("");
+
+  // Combined Filter (Product ID + Dropdown Status)
+  const filteredPickups = pickups.filter((pickup) => {
+    const search = searchProductByID.trim().toLowerCase();
+
+    const matchesProductId = pickup.PickupName
+      ?.toLowerCase()
+      .includes(search);
+
+    const matchesStatus =
+      !selectedPickupFilter ||
+      pickup.status?.toLowerCase() === selectedPickupFilter.toLowerCase();
+
+    return matchesProductId && matchesStatus;
+  });
+
+
+  // Pagination after filtering
+  const totalPages = Math.ceil(filteredPickups.length / itemsPerPage) || 1;
+  const paginatedPickups = filteredPickups.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -23,21 +49,22 @@ export default function PickupManagement() {
   const getAllPickups = async () => {
     try {
       const response = await fetch(`${BASE_URL}get-all-pickup`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'userid': userId,
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          userid: userId,
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!response.ok) throw new Error('Network response was not ok');
+      if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();
       setPickups(data.data);
+      console.log(data.data);
       setCurrentPage(1);
       calculateCounts(data.data);
     } catch (error) {
-      console.error('Error fetching pickups:', error);
+      console.error("Error fetching pickups:", error);
     }
   };
 
@@ -46,11 +73,11 @@ export default function PickupManagement() {
     let warehouse = 0;
     let carrier = 0;
 
-    pickupList.forEach(pickup => {
+    pickupList.forEach((pickup) => {
       const status = pickup.status?.toLowerCase();
-      if (status === 'picked up') picked++;
-      else if (['delivered', 'inspected'].includes(status)) warehouse++;
-      else if (['in transit', 'completed'].includes(status)) carrier++;
+      if (status === "picked up") picked++;
+      else if (["delivered", "inspected"].includes(status)) warehouse++;
+      else if (["in transit", "completed"].includes(status)) carrier++;
     });
 
     setPickedUpCount(picked);
@@ -59,19 +86,23 @@ export default function PickupManagement() {
   };
 
   const statusColor = {
-    'pickup requested': 'bg-purple-100 text-purple-700',
-    'picked up': 'bg-green-100 text-green-700',
-    'inspected': 'bg-yellow-100 text-yellow-700',
-    'completed': 'bg-green-200 text-green-800',
-    'pickup cancelled': 'bg-red-100 text-red-700',
-    'in transit': 'bg-blue-100 text-blue-700',
-    'delivered': 'bg-teal-100 text-teal-700',
+    "pickup requested": "bg-purple-100 text-purple-700",
+    "picked up": "bg-green-100 text-green-700",
+    inspected: "bg-yellow-100 text-yellow-700",
+    completed: "bg-green-200 text-green-800",
+    "pickup cancelled": "bg-red-100 text-red-700",
+    "in transit": "bg-blue-100 text-blue-700",
+    delivered: "bg-teal-100 text-teal-700",
   };
 
   const formatDate = (iso) => {
     const d = new Date(iso);
-    return d.toISOString().split('T')[0];
+    return d.toISOString().split("T")[0];
   };
+
+  useEffect(() => {
+    setCurrentPage(1); // reset pagination on filter/search change
+  }, [searchProductByID, selectedPickupFilter]);
 
   useEffect(() => {
     getAllPickups();
@@ -83,28 +114,39 @@ export default function PickupManagement() {
         <h2 className="text-2xl font-bold">Pickup Management</h2>
       </div>
 
-      {/* Status Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl p-4 shadow flex items-center space-x-4">
-          <FaTruck className="text-green-600 text-2xl" />
-          <div>
-            <p className="text-sm text-gray-500">Picked Up</p>
-            <p className="text-xl font-semibold">{pickedUpCount}</p>
-          </div>
+      <PickupStatus pickedUpCount={pickedUpCount} warehouseCount={warehouseCount} carrierCount={carrierCount} />
+
+      <div className="flex flex-row">
+        <div className="mb-6 relative md:w-1/2 mr-2">
+          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
+          <input
+            type="text"
+            placeholder="Search by Product ID"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            value={searchProductByID}
+            onChange={(e) => setSearchProductByID(e.target.value)}
+          />
         </div>
-        <div className="bg-white rounded-xl p-4 shadow flex items-center space-x-4">
-          <FaWarehouse className="text-yellow-600 text-2xl" />
-          <div>
-            <p className="text-sm text-gray-500">At Warehouse</p>
-            <p className="text-xl font-semibold">{warehouseCount}</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow flex items-center space-x-4">
-          <FaShippingFast className="text-blue-600 text-2xl" />
-          <div>
-            <p className="text-sm text-gray-500">At Carrier</p>
-            <p className="text-xl font-semibold">{carrierCount}</p>
-          </div>
+
+        <div className="mb-6 relative md:w-1/2">
+          <select
+            value={selectedPickupFilter}
+            onChange={(e) => setSelectedPickupFilter(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-purple-500"
+          >
+            <option value="">ALL</option>
+            {[
+              { value: "Pickup Requested", key: "Pickup Requested" },
+              { value: "Picked up", key: "picked up" },
+              { value: "In Warehouse", key: "inspected" },
+              { value: "Dropped Off", key: "in transit" },
+              { value: "Complete", key: "completed" },
+            ].map((slot) => (
+              <option key={slot.key} value={slot.value}>
+                {slot.value}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -116,6 +158,7 @@ export default function PickupManagement() {
               <th className="px-4 py-3">Pickup ID</th>
               <th className="px-4 py-3">Customer</th>
               <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3">Time</th>
               <th className="px-4 py-3">Address</th>
               <th className="px-4 py-3">Status</th>
             </tr>
@@ -123,16 +166,25 @@ export default function PickupManagement() {
           <tbody>
             {paginatedPickups.map((pickup) => {
               const addressObj = pickup.pickupAddress || {};
-              const fullAddress = `${addressObj.street || ''}, ${addressObj.suite || ''}, ${addressObj.city || ''}, ${addressObj.state || ''}, ${addressObj.postalCode || ''}`;
+              const fullAddress = `${addressObj.street || ""}, ${addressObj.suite || ""
+                }, ${addressObj.city || ""}, ${addressObj.state || ""}, ${addressObj.postalCode || ""
+                }`;
 
               return (
                 <tr key={pickup._id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-5 font-medium">{pickup._id.slice(0, 8)}</td>
+                  <td className="px-4 py-5 font-medium" onClick={() => setSelectedPickup(pickup)}>
+                    {pickup.PickupName}
+                  </td>
                   <td className="px-4 py-5">{pickup.userId?.name || "N/A"}</td>
                   <td className="px-4 py-5">{formatDate(pickup.pickupDate)}</td>
+                  <td className="px-4 py-5">{pickup.pickupTime}</td>
                   <td className="px-4 py-5">{fullAddress}</td>
                   <td className="px-4 py-5">
-                    <span className={`text-xs px-2 py-1 rounded-full ${statusColor[pickup.status?.toLowerCase()] || 'bg-gray-100 text-gray-700'}`}>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${statusColor[pickup.status?.toLowerCase()] ||
+                        "bg-gray-100 text-gray-700"
+                        }`}
+                    >
                       {pickup.status}
                     </span>
                   </td>
@@ -141,34 +193,23 @@ export default function PickupManagement() {
             })}
             {pickups.length === 0 && (
               <tr>
-                <td colSpan="6" className="text-center text-gray-400 py-6">No pickup requests found.</td>
+                <td colSpan="6" className="text-center text-gray-400 py-6">
+                  No pickup requests found.
+                </td>
               </tr>
             )}
           </tbody>
         </table>
+        {selectedPickup && (
+          <PickupModal
+            pickup={selectedPickup}
+            onClose={() => setSelectedPickup(null)}
+            formatDate={formatDate}
+          />
+        )}
 
         {/* Pagination */}
-        <div className="flex justify-between items-center px-4 py-3 bg-white border-t">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-
-          <div className="text-sm text-gray-700">
-            Page {currentPage} of {totalPages}
-          </div>
-
-          <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+        <PickupPagination currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} />
       </div>
     </div>
   );

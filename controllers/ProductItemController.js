@@ -1,7 +1,7 @@
 import ProductItem from "../models/ProductItem.js";
 import ReturnBundle from "../models/ReturnBundle.js";
 import cloudinary from "../utils/cloundinary.js";
-
+import path from "path";
 
 export const createProductItems = async (req, res) => {
   try {
@@ -389,11 +389,19 @@ export const uploadLabel = async (req, res) => {
       return res.status(200).json({ status: 400, message: 'Label image is required.' });
     }
 
+    // Detect file type (image vs pdf vs doc)
+    const fileExt = path.extname(req.files[0].originalname).toLowerCase();
+    let resourceType = "image";
+    if ([".pdf", ".docx", ".doc", ".zip"].includes(fileExt)) {
+      resourceType = "raw";
+    }
+
     // Upload to Cloudinary
     const uploadResult = await cloudinary.uploader.upload(req.files[0].path, {
       folder: 'return-bundles',
       use_filename: true,
-      unique_filename: false
+      unique_filename: false,
+      resource_type: resourceType
     });
     const labelUrl = uploadResult.secure_url;
 
@@ -543,14 +551,20 @@ export const editLabel = async (req, res) => {
         message: 'productIDs must be a non-empty array.'
       });
     }
-
+    const fileExt = path.extname(req.files[0].originalname).toLowerCase();
+    let resourceType = "image";
+    if ([".pdf", ".docx", ".doc", ".zip"].includes(fileExt)) {
+      resourceType = "raw";
+    }
     // Upload to Cloudinary if file is provided
     let labelUrl = null;
     if (req.files && req.files.length > 0) {
       const uploadResult = await cloudinary.uploader.upload(req.files[0].path, {
+        resource_type: resourceType,
         folder: 'return-bundles',
         use_filename: true,
-        unique_filename: false
+        unique_filename: false,
+        access_mode: "public"
       });
       labelUrl = uploadResult.secure_url;
     }

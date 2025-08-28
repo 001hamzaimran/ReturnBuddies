@@ -162,7 +162,8 @@ export const pickupById = async (req, res) => {
             success: true,
             message: "Pickup fetched successfully",
             data: pickup,
-            trackingNumber: "123456789",
+            trackingNumber: pickup?.TrackingNumber || "123456789",
+            Carrier: pickup?.Carrier || "Not Available",
             status: 200
         });
     } catch (error) {
@@ -215,33 +216,44 @@ export const pickupcancelled = async (req, res) => {
 
 export const getAllPickupsAdmin = async (req, res) => {
     try {
-        const userId = req.params.userid || req.headers['userid'];
+        const userId = req.params.userid || req.headers["userid"];
 
         if (!userId) {
             return res.status(200).json({
                 success: false,
                 status: 400,
-                message: "User ID is required in params or headers"
+                message: "User ID is required in params or headers",
             });
         }
 
-        const pickups = await pickupModel.find().populate('userId').populate('pickupAddress')
+        const pickups = await pickupModel
+            .find()
+            .populate("userId")
+            .populate("pickupAddress")
+            .populate({
+                path: "bundleId",          // populate bundles
+                populate: {
+                    path: "products",        // inside each bundle, populate products
+                    model: "ProductItem",        // must match your Product model name
+                },
+            });
 
         res.status(200).json({
             success: true,
             message: "Pickups fetched successfully",
             data: pickups,
-            status: 200
+            status: 200,
         });
     } catch (error) {
         console.error("❌ Error fetching pickups:", error);
         res.status(500).json({
             success: false,
-            message: "Server error while fetching pickups"
+            message: "Server error while fetching pickups",
         });
     }
 };
- 
+
+
 export const getAllCompletedPickupsCount = async (req, res) => {
     try {
         const completedPickups = await pickupModel.countDocuments({ status: "completed" });
@@ -260,3 +272,54 @@ export const getAllCompletedPickupsCount = async (req, res) => {
         });
     }
 };
+
+
+export const updatePickupStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        const Statuses = ['Pickup Requested', 'picked up', 'inspected', 'completed', 'Pickup cancelled', 'in transit', 'delivered']
+
+        if (!status || !Statuses.includes(status)) {
+            return res.status(200).json({
+                success: false,
+                status: 400,
+                message: "Invalid or missing status"
+            });
+        }
+
+        const pickup = await pickupModel.findById(id);
+        if (!pickup) {
+            return res.status(200).json({
+                success: false,
+                status: 404,
+                message: "Pickup not found"
+            });
+        }
+
+        if (pickup.status === "Pickup cancelled") {
+            return res.status(200).json({
+                success: false,
+                status: 400,
+                message: "Cannot update status of a cancelled pickup"
+            });
+        }
+
+        pickup.status = status;
+
+        await pickup.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Pickup status updated successfully",
+            data: pickup,
+            status: 200
+        });
+    } catch (error) {
+        console.error("❌ Error updating pickup status:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while updating pickup status"
+        });
+    }
+}

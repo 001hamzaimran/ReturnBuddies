@@ -15,6 +15,12 @@ const pickupSchema = new mongoose.Schema({
         ref: 'ReturnBundle',
         required: true
     }],
+    Carrier: {
+        type: String,
+    },
+    TrackingNumber: {
+        type: String,
+    },
     status: {
         type: String,
         enum: ['Pickup Requested', 'picked up', 'inspected', 'completed', 'Pickup cancelled', 'in transit', 'delivered'],
@@ -24,7 +30,7 @@ const pickupSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Address'
     },
-    
+
     note: {
         type: String,
         trim: true

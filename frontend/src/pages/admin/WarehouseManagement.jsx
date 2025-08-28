@@ -24,7 +24,14 @@ export default function WarehouseManagement() {
             };
           }
 
-          acc[userId].products.push(...bundle.products);
+          // attach BundleName to each product
+          const productsWithBundle = bundle.products.map(p => ({
+            ...p,
+            BundleName: bundle.BundleName,
+            status: bundle.status,
+          }));
+
+          acc[userId].products.push(...productsWithBundle);
           return acc;
         }, {});
 
@@ -34,6 +41,7 @@ export default function WarehouseManagement() {
       console.error('Error fetching bundles:', error);
     }
   };
+
 
   useEffect(() => {
     GetBundles();
@@ -68,29 +76,42 @@ export default function WarehouseManagement() {
   };
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(`
-      <html>
-        <head>
-          <title>Print Product</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            img { max-width: 100%; height: auto; margin-bottom: 20px; }
-            h2 { margin-bottom: 10px; }
-            p { margin: 6px 0; }
-          </style>
-        </head>
-        <body>
-          <h2>Product Details</h2>
-          <img src="${selectedProduct.thumbnail}" alt="${selectedProduct.productName}" />
-          <p><strong>Product:</strong> ${selectedProduct.productName}</p>
-          <p><strong>Date:</strong> ${new Date(selectedProduct.date).toLocaleString()}</p>
-        </body>
-      </html>
-    `);
+    <html>
+      <head>
+        <title>Print Product</title>
+        <style>
+          body { font-family: Arial, sans-serif;  }
+          img { max-width: 100%; height: auto; margin-bottom: 20px; }
+          h2 { margin-bottom: 10px; }
+          p { margin: 6px 0; }
+        </style>
+      </head>
+      <body>
+        <h2>Product Details</h2>
+        <img id="print-image" src="${selectedProduct.labelReceipt}" alt="${selectedProduct.productName}" />
+        <p><strong>Product:</strong> ${selectedProduct.productName}</p>
+        <p><strong>Date:</strong> ${new Date(selectedProduct.date).toLocaleString()}</p>
+      </body>
+    </html>
+  `);
+
     printWindow.document.close();
-    printWindow.print();
+
+    // ✅ wait until image fully loads
+    printWindow.onload = () => {
+      const img = printWindow.document.getElementById("print-image");
+      if (img.complete) {
+        printWindow.print();
+      } else {
+        img.onload = () => {
+          printWindow.print();
+        };
+      }
+    };
   };
+
 
   return (
     <div className="p-4 md:p-6">
@@ -116,20 +137,31 @@ export default function WarehouseManagement() {
             <table className="w-full text-sm text-left">
               <thead className="bg-gray-100 text-gray-700 uppercase">
                 <tr>
+                  <th className="px-3 py-2 md:px-4 md:py-2">Bundle</th>
                   <th className="px-3 py-2 md:px-4 md:py-2">Product</th>
                   <th className="px-3 py-2 md:px-4 md:py-2">Thumbnail</th>
+                  <th className="px-3 py-2 md:px-4 md:py-2">Status</th>
                   <th className="px-3 py-2 md:px-4 md:py-2">Date</th>
                   <th className="px-3 py-2 md:px-4 md:py-2">Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {group.products.map((product) => (
                   <tr key={product._id} className="border-b hover:bg-gray-50 transition">
+                    <td className="px-3 py-2 md:px-4 md:py-2 font-medium">{product.BundleName}</td>
                     <td className="px-3 py-2 md:px-4 md:py-2 font-medium">{product.productName}</td>
                     <td className="px-3 py-2 md:px-4 md:py-2">
-                      <img src={product.thumbnail} alt={product.productName} className="w-10 h-10 md:w-12 md:h-12 rounded" />
+                      <img
+                        src={product.thumbnail}
+                        alt={product.productName}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded"
+                      />
                     </td>
-                    <td className="px-3 py-2 md:px-4 md:py-2">{new Date(product.date).toLocaleDateString()}</td>
+                    <td className="px-3 py-2 md:px-4 md:py-2 font-medium">{product.status}</td>
+                    <td className="px-3 py-2 md:px-4 md:py-2">
+                      {new Date(product.date).toLocaleDateString()}
+                    </td>
                     <td className="px-3 py-2 md:px-4 md:py-2">
                       <button
                         onClick={() => handleView(product, group.products)}
@@ -142,6 +174,7 @@ export default function WarehouseManagement() {
                   </tr>
                 ))}
               </tbody>
+
             </table>
           </div>
 
