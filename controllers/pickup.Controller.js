@@ -61,7 +61,13 @@ export const createPickup = async (req, res) => {
             },
             confirm: true, // immediately confirm the payment
             description: `Pickup Payment for ${PickupName}`,
-            metadata: { userId, pickupType, pickupDate, pickupTime }
+            metadata: {
+                userId: String(userId),
+                pickupType: String(pickupType),
+                pickupDate: new Date(pickupDate).toISOString(), // or String(pickupDate)
+                pickupTime: String(pickupTime)
+            }
+
         });
 
         if (paymentIntent.status !== "succeeded") {
