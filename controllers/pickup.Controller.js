@@ -192,7 +192,7 @@ export const pickupById = async (req, res) => {
             message: "Pickup fetched successfully",
             data: pickup,
             trackingNumber: pickup?.TrackingNumber || "123456789",
-            Carrier: pickup?.Carrier || "Not Available",
+            Carrier: pickup?.Carrier || "UPS",
             status: 200
         });
     } catch (error) {
