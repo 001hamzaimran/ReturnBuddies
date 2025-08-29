@@ -41,8 +41,8 @@ export const createPickup = async (req, res) => {
             return res.status(200).json({ status: 400, success: false, message: "Invalid phone number format" });
         }
 
-        const findCard = await CardModel.findById(Payment);
-        if (!findCard) {
+        const card = await CardModel.findById(Payment);
+        if (!card) {
             return res.status(200).json({ status: 400, success: false, message: "Invalid Payment method" });
         }
 
