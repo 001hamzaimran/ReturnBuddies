@@ -2,6 +2,11 @@
 import CardModel from "../models/Card.Model.js";
 import UserModel from "../models/User.js";
 
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+
 export const addPaymentCard = async (req, res) => {
     try {
         const {
@@ -175,3 +180,58 @@ export const deleteCard = async (req, res) => {
 
     }
 }
+
+
+export const getAllPayments = async (req, res) => {
+    try {
+        let hasMore = true;
+        let lastId = null;
+        let allPayments = [];
+
+        while (hasMore) {
+            const response = await stripe.paymentIntents.list({
+                limit: 100,
+                starting_after: lastId || undefined,
+            });
+
+            // Normalize payments
+            for (const pi of response.data) {
+                const userId = pi.metadata?.userId;
+
+                let user = null;
+                if (userId) {
+                    user = await UserModel.findById(userId).select("name email"); // choose fields you want
+                }
+
+                allPayments.push({
+                    id: pi.id,
+                    amount: pi.amount / 100, // convert cents → dollars
+                    currency: pi.currency,
+                    status: pi.status,
+                    description: pi.description,
+                    created: new Date(pi.created * 1000), // convert unix timestamp
+                    metadata: pi.metadata,
+                    user: user ? user.toObject() : null, // attach user details if found
+                });
+            }
+
+            hasMore = response.has_more;
+            if (hasMore) {
+                lastId = response.data[response.data.length - 1].id;
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            totalPayments: allPayments.length,
+            payments: allPayments,
+        });
+    } catch (error) {
+        console.error("❌ Error fetching payments:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error while fetching payments",
+            error: error.message,
+        });
+    }
+};

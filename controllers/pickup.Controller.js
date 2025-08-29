@@ -307,7 +307,8 @@ export const updatePickupStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
-        const Statuses = ['Pickup Requested', 'picked up', 'inspected', 'completed', 'Pickup cancelled', 'in transit', 'delivered']
+
+        const Statuses = ['Pickup Requested', 'Picked Up', 'Inspected', 'Completed', 'Pickup Cancelled', 'In Transit', 'Delivered']
 
         if (!status || !Statuses.includes(status)) {
             return res.status(200).json({
@@ -326,7 +327,7 @@ export const updatePickupStatus = async (req, res) => {
             });
         }
 
-        if (pickup.status === "Pickup cancelled") {
+        if (pickup.status === "Pickup Cancelled") {
             return res.status(200).json({
                 success: false,
                 status: 400,
@@ -349,6 +350,65 @@ export const updatePickupStatus = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Server error while updating pickup status"
+        });
+    }
+}
+
+export const addCarrierAndTracking = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { Carrier, TrackingNumber } = req.body;
+
+        if (!Carrier || !TrackingNumber) {
+            return res.status(200).json({
+                success: false,
+                status: 400,
+                message: "Carrier and TrackingNumber are required"
+            });
+        }
+
+        const pickup = await pickupModel.findById(id);
+
+        if (!pickup) {
+            return res.status(200).json({
+                success: false,
+                status: 404,
+                message: "Pickup not found"
+            });
+        }
+
+        if (pickup.status === "Pickup Cancelled") {
+            return res.status(200).json({
+                success: false,
+                status: 400,
+                message: "Cannot add Carrier and TrackingNumber to a cancelled pickup"
+            });
+        }
+
+        if (pickup.status === "Pickup Requested") {
+            return res.status(200).json({
+                success: false,
+                status: 400,
+                message: "First update status to 'Picked Up' before adding Carrier and TrackingNumber"
+            });
+        }
+
+        pickup.Carrier = Carrier;
+        pickup.TrackingNumber = TrackingNumber;
+
+        await pickup.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Carrier and TrackingNumber added successfully",
+            data: pickup,
+            status: 200
+        });
+    } catch (error) {
+        console.error("❌ Error adding Carrier and TrackingNumber:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while adding Carrier and TrackingNumber"
         });
     }
 }

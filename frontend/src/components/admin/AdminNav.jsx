@@ -5,15 +5,17 @@ import { CiSearch } from "react-icons/ci";
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import useAuth from '../../hook/useAuth';
 
-export default function AdminNav({sidebarOpen,setSidebarOpen}) {
-    const navigate=useNavigate()
-    const {logout}=useAuth()
-    
+export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
+  const navigate = useNavigate()
+  const { logout } = useAuth()
+  const user = JSON.parse(localStorage.getItem("user"))
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
+    console.log("User:", user.user);
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
@@ -25,7 +27,7 @@ export default function AdminNav({sidebarOpen,setSidebarOpen}) {
     };
   }, []);
 
-  const handleLogout=()=>{
+  const handleLogout = () => {
     logout()
     navigate("/admin/dashboard/login")
 
@@ -36,47 +38,47 @@ export default function AdminNav({sidebarOpen,setSidebarOpen}) {
       <div className="flex-1 flex justify-left items-center space-x-2">
         {/* <CiSearch size={24} color='#000000'/> */}
         <div className="w-full max-w-md">
-           <button onClick={setSidebarOpen} className="md:hidden lg:hidden xl:hidden text-2xl text-gray-700">
-                      <FiMenu />
-                    </button>
+          <button onClick={setSidebarOpen} className="md:hidden lg:hidden xl:hidden text-2xl text-gray-700">
+            <FiMenu />
+          </button>
         </div>
       </div>
 
       <div className="flex items-center space-x-4">
-        <button className="relative text-gray-500 hover:text-gray-700">
-          <HiBell size={23} color='#000000'/>
-        </button>
+        {/* <button className="relative text-gray-500 hover:text-gray-700">
+          <HiBell size={23} color='#000000' />
+        </button> */}
 
         <div className="relative" ref={dropdownRef}>
-          <button 
-            onClick={() => setDropdownOpen(prev => !prev)} 
+          <button
+            onClick={() => setDropdownOpen(prev => !prev)}
             className="flex items-center space-x-2 focus:outline-none"
           >
-            <img 
-              className="h-8 w-8 rounded-full" 
-              src="https://i.pravatar.cc/100?img=5" 
-              alt="User" 
+            <img
+              className="h-8 w-8 rounded-full"
+              src={user.user.profile}
+              alt="User"
             />
-            <span className="text-sm font-medium text-gray-700">Tom Cook</span>
-            <svg 
-              className="w-4 h-4 text-gray-500" 
-              fill="none" 
-              stroke="currentColor" 
+            <span className="text-sm font-medium text-gray-700">{user.user.name}</span>
+            <svg
+              className="w-4 h-4 text-gray-500"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path 
-                d="M19 9l-7 7-7-7" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
+              <path
+                d="M19 9l-7 7-7-7"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </button>
 
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border z-50">
-              <Link to={"/admin/dashboard/profile"} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your profile</Link>
+              {/* <Link to={"/admin/dashboard/profile"} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your profile</Link> */}
               <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={handleLogout}>Sign out</a>
             </div>
           )}

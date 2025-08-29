@@ -46,6 +46,27 @@ export default function PickupManagement() {
     currentPage * itemsPerPage
   );
 
+  const updateStatus = async (pickupId, newStatus) => {
+    try {
+      const response = await fetch(`${BASE_URL}update-pickup/${pickupId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          userid: userId,
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!response.ok) throw new Error("Network response was not ok");
+      const data = await response.json();
+      onClose();
+      getAllPickups(); // Refresh the list after updating
+      console.log(data);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
+
   const getAllPickups = async () => {
     try {
       const response = await fetch(`${BASE_URL}get-all-pickup`, {
@@ -98,6 +119,27 @@ export default function PickupManagement() {
   const formatDate = (iso) => {
     const d = new Date(iso);
     return d.toISOString().split("T")[0];
+  };
+
+  const addTrackingCarrier = async (pickupId, carrier, trackingNumber) => {
+    try {
+      const response = await fetch(`${BASE_URL}add-tracking-carrier/${pickupId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          userid: userId,
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ Carrier: carrier, TrackingNumber: trackingNumber }),
+      });
+      if (!response.ok) throw new Error("Network response was not ok");
+      const data = await response.json();
+      onClose();
+      getAllPickups(); // Refresh the list after updating
+      console.log(data);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
   };
 
   useEffect(() => {
@@ -205,6 +247,8 @@ export default function PickupManagement() {
             pickup={selectedPickup}
             onClose={() => setSelectedPickup(null)}
             formatDate={formatDate}
+            onUpdateStatus={updateStatus}
+            onUpdateCarrier={addTrackingCarrier}
           />
         )}
 

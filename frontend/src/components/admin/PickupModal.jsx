@@ -182,7 +182,7 @@ export default function PickupModal({ pickup, onClose, formatDate, onUpdateStatu
                                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 />
                                 <button
-                                    onClick={() => onUpdateCarrier(pickup._id, { carrier, tracking })}
+                                    onClick={() =>  onUpdateCarrier(pickup._id, carrier, tracking)}
                                     className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                                 >
                                     Save Carrier Info

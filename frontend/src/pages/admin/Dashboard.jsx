@@ -6,10 +6,21 @@ export default function Dashboard() {
   const [completedPickupsCount, setCompletedPickupsCount] = useState(0);
   const [ActivePickupsCount, setActivePickupsCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [transactions, setTransactions] = useState([]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
   const intervalRef = useRef(null);
-  useEffect(() => {
-    getUser();
-  }, []);
+
+
+  const GetPayment = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}get-All-Payment`);
+      const data = await response.json();
+      setTransactions(data.payments || []);
+      console.log("Payments:", data.payments);
+    } catch (error) {
+      console.error("Error fetching payment data:", error);
+    }
+  };
 
   const getUser = async () => {
     setLoading(true);
@@ -72,10 +83,16 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
- 
-      getCompletedPickupsCount(); // initial fetch
-  
+    GetPayment();
+    getUser();
+    getCompletedPickupsCount(); // initial fetch
+
   }, []);
+
+  useEffect(() => {
+    setTotalRevenue(transactions.reduce((sum, t) => sum + t.amount, 0));
+    console.log("Total Revenue:", totalRevenue);
+  }, [transactions]);
 
 
   return (
@@ -97,8 +114,8 @@ export default function Dashboard() {
           bg="bg-blue-100"
         />
         <DashboardCard
-          title="Pending Payments"
-          value="$2,190"
+          title="Revenue Generated"
+          value={`$${totalRevenue}`}
           icon={<FaMoneyBillWave className="text-yellow-500 text-3xl" />}
           bg="bg-yellow-100"
         />
