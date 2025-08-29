@@ -50,6 +50,7 @@ export const createPickup = async (req, res) => {
         const paymentIntent = await stripe.paymentIntents.create({
             amount: Math.round(total * 100),
             currency: "usd",
+            payment_method_types: ["card"],
             payment_method: "pm_card_visa", // Stripe test card token
             confirm: true,
             description: `Pickup Payment for ${PickupName}`,
