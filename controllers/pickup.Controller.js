@@ -1,5 +1,8 @@
 import pickupModel from '../models/pickup.model.js';
 import mongoose from 'mongoose';
+import Stripe from 'stripe';
+import CardModel from '../models/Card.Model.js';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const createPickup = async (req, res) => {
     try {
@@ -36,6 +39,33 @@ export const createPickup = async (req, res) => {
 
         if (typeof phone !== 'string' || !/^[0-9]{10,15}$/.test(phone)) {
             return res.status(200).json({ status: 400, success: false, message: "Invalid phone number format" });
+        }
+
+        const findCard = await CardModel.findById(Payment);
+        if (!findCard) {
+            return res.status(200).json({ status: 400, success: false, message: "Invalid Payment method" });
+        }
+
+        // === Process Payment with Stripe ===
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(total * 100), // amount in cents
+            currency: "usd",
+            payment_method_data: {
+                type: "card",
+                card: {
+                    number: card.cardNumber.replace(/\s/g, ""), // remove spaces
+                    exp_month: parseInt(card.expirationDate.split("/")[0]),
+                    exp_year: parseInt("20" + card.expirationDate.split("/")[1]),
+                    cvc: card.cvv,
+                },
+            },
+            confirm: true, // immediately confirm the payment
+            description: `Pickup Payment for ${PickupName}`,
+            metadata: { userId, pickupType, pickupDate, pickupTime }
+        });
+
+        if (paymentIntent.status !== "succeeded") {
+            return res.status(200).json({ success: false, message: "Payment failed", paymentIntent });
         }
 
         const pickup = new pickupModel({
