@@ -48,27 +48,19 @@ export const createPickup = async (req, res) => {
 
         // === Process Payment with Stripe ===
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(total * 100), // amount in cents
+            amount: Math.round(total * 100),
             currency: "usd",
-            payment_method_data: {
-                type: "card",
-                card: {
-                    number: card.cardNumber.replace(/\s/g, ""), // remove spaces
-                    exp_month: parseInt(card.expirationDate.split("/")[0]),
-                    exp_year: parseInt("20" + card.expirationDate.split("/")[1]),
-                    cvc: card.cvv,
-                },
-            },
-            confirm: true, // immediately confirm the payment
+            payment_method: "pm_card_visa", // Stripe test card token
+            confirm: true,
             description: `Pickup Payment for ${PickupName}`,
             metadata: {
                 userId: String(userId),
                 pickupType: String(pickupType),
-                pickupDate: new Date(pickupDate).toISOString(), // or String(pickupDate)
-                pickupTime: String(pickupTime)
+                pickupDate: new Date(pickupDate).toISOString(),
+                pickupTime: String(pickupTime),
             }
-
         });
+
 
         if (paymentIntent.status !== "succeeded") {
             return res.status(200).json({ success: false, message: "Payment failed", paymentIntent });
