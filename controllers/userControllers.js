@@ -117,11 +117,11 @@ const Login = async (req, res) => {
         .json({ message: "User Not Found", status: 400 });
     }
 
-    if (user.googleId) {
+    if (user.googleId || user.appleId) {
       return res.status(200).json({
         success: false,
         status: 400,
-        message: "Login with google",
+        message: "Login with google or apple account",
       });
     }
     const isMatch = bcrypt.compareSync(password, user.password);

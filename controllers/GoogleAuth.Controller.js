@@ -20,7 +20,7 @@ export const googleLogin = async (req, res) => {
     const payload = ticket.getPayload();
 
     const { email, name, picture, sub } = payload;
-    let user = await UserModel.findOne({ email });
+    let user = await UserModel.findOne({ email }).populate("pickupAddress").populate("payment");
 
     if (!user) {
       user = new UserModel({
@@ -65,7 +65,7 @@ export const appleLogin = async (req, res) => {
     let name = req.body.name || ""; // Apple only gives name on first login, so pass it from frontend if available
 
     // Find user by email or Apple sub
-    let user = await UserModel.findOne({ email });
+    let user = await UserModel.findOne({ email }).populate("pickupAddress").populate("payment");
 
     if (!user) {
       user = new UserModel({
