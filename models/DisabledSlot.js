@@ -13,6 +13,10 @@ const DisabledSlotSchema = new mongoose.Schema(
             type: Boolean,
             default: true,
         },
+        capacity: {
+            type: Number,
+            default: 5,
+        },
     },
     { timestamps: true }
 );

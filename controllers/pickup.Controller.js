@@ -79,7 +79,8 @@ export const createPickup = async (req, res) => {
             Payment,
             phone,
             totalPrice: total,
-            isOversize: !!isOversize // cast to Boolean
+            isOversize: !!isOversize,
+            statusHistory: [{ status: "Pickup Requested", updatedAt: new Date() }]
         });
 
         await pickup.save();
@@ -308,51 +309,42 @@ export const updatePickupStatus = async (req, res) => {
         const { id } = req.params;
         const { status } = req.body;
 
-        const Statuses = ['Pickup Requested', 'Picked Up', 'Inspected', 'Completed', 'Pickup Cancelled', 'In Transit', 'Delivered']
+        const Statuses = ['Pickup Requested', 'Picked Up', 'Inspected', 'Completed', 'Pickup Cancelled', 'In Transit', 'Delivered'];
 
         if (!status || !Statuses.includes(status)) {
-            return res.status(200).json({
-                success: false,
-                status: 400,
-                message: "Invalid or missing status"
-            });
+            return res.status(400).json({ success: false, message: "Invalid or missing status" });
         }
 
         const pickup = await pickupModel.findById(id);
         if (!pickup) {
-            return res.status(200).json({
-                success: false,
-                status: 404,
-                message: "Pickup not found"
-            });
+            return res.status(404).json({ success: false, message: "Pickup not found" });
         }
 
         if (pickup.status === "Pickup Cancelled") {
-            return res.status(200).json({
-                success: false,
-                status: 400,
-                message: "Cannot update status of a cancelled pickup"
-            });
+            return res.status(400).json({ success: false, message: "Cannot update status of a cancelled pickup" });
         }
 
+        // update current status
         pickup.status = status;
+
+        // push into history
+        pickup.statusHistory.push({
+            status,
+            updatedAt: new Date()
+        });
 
         await pickup.save();
 
         return res.status(200).json({
             success: true,
             message: "Pickup status updated successfully",
-            data: pickup,
-            status: 200
+            data: pickup
         });
     } catch (error) {
         console.error("❌ Error updating pickup status:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Server error while updating pickup status"
-        });
+        return res.status(500).json({ success: false, message: "Server error while updating pickup status" });
     }
-}
+};
 
 export const addCarrierAndTracking = async (req, res) => {
     try {

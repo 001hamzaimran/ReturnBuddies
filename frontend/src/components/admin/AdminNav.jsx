@@ -14,8 +14,7 @@ export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
-  useEffect(() => {
-    console.log("User:", user.user);
+  useEffect(() => { 
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
@@ -56,10 +55,10 @@ export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
           >
             <img
               className="h-8 w-8 rounded-full"
-              src={user.user.profile}
+              src={user?.user?.profile}
               alt="User"
             />
-            <span className="text-sm font-medium text-gray-700">{user.user.name}</span>
+            <span className="text-sm font-medium text-gray-700">{user?.user?.name}</span>
             <svg
               className="w-4 h-4 text-gray-500"
               fill="none"

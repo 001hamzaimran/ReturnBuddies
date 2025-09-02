@@ -30,6 +30,19 @@ const pickupSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Address'
     },
+    // 🟢 New field to track status changes
+    statusHistory: [
+        {
+            status: {
+                type: String,
+                enum: ['Pickup Requested', 'Picked Up', 'Inspected', 'Completed', 'Pickup Cancelled', 'In Transit', 'Delivered']
+            },
+            updatedAt: {
+                type: Date,
+                default: Date.now
+            }
+        }
+    ],
 
     note: {
         type: String,

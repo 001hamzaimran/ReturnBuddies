@@ -109,3 +109,21 @@ export const updateDisabledSlot = async (req, res) => {
         return res.status(500).json({ error: "Internal server error." });
     }
 };
+
+export const getSlotData = async (req, res) => {
+    try {
+        const { date } = req.query;
+
+        if (!date) {
+            return res.status(400).json({ error: "Date is required." });
+        }
+        const isoDate = new Date(date).toISOString();
+
+        const slots = await DisabledSlot.find({ date: isoDate });
+
+        return res.status(200).json({ data: slots, status: 200, success: true });
+    } catch (error) {
+        console.error("Error fetching slot data:", error);
+        return res.status(500).json({ error: "Internal server error.", success: false, status: 500 });
+    }
+};
