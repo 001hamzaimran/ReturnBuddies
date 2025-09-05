@@ -404,3 +404,75 @@ export const addCarrierAndTracking = async (req, res) => {
         });
     }
 }
+
+export const addExtraCharges = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { extraCharges } = req.body;
+
+        if (!extraCharges) {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "extraCharges is required"
+            });
+        }
+
+        const pickup = await pickupModel.findById(id);
+
+        if (!pickup) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Pickup not found"
+            });
+        }
+
+        if (pickup.status === "Pickup Cancelled") {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "Cannot add extra charges to a cancelled pickup"
+            });
+        }
+
+        if (pickup.status !== "Inspected") {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "First status must be 'Inspected' before adding extra charges"
+            });
+        }
+
+        pickup.extraCharge = extraCharges;
+
+        await pickup.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "extraCharges added successfully",
+            data: pickup,
+            status: 200
+        });
+    } catch (error) {
+        console.error("❌ Error adding extraCharges:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while adding extraCharges"
+        });
+    }
+}
+
+export const getPickupByDateandTime = async (req, res) => {
+    try {
+        const { date, timeSlot } = req.query;
+        if (!date || !timeSlot) {
+            return res.status(400).json({ error: "Date and timeSlot are required." });
+        }
+        const pickup = await pickupModel.findOne({ pickupDate: date, pickupTime: timeSlot });
+        return res.json({ pickup });
+    } catch (err) {
+        console.error("Error fetching pickups:", err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};

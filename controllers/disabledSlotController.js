@@ -1,4 +1,14 @@
 import DisabledSlot from "../models/DisabledSlot.js";
+import pickupModel from "../models/pickup.model.js";
+
+
+// Add this helper function to the backend
+function getSlotStatus(slot) {
+    if (slot.disabled) return "disabled";
+    if (slot.capacity > 0 && slot.pickupsBooked >= slot.capacity) return "full";
+    if (slot.capacity > 0 && slot.pickupsBooked >= Math.floor(0.8 * slot.capacity)) return "almost-full";
+    return "available";
+}
 
 export const disableSlot = async (req, res) => {
     try {
@@ -31,46 +41,26 @@ export const disableSlot = async (req, res) => {
         res.status(500).json({ error: "Internal server error." });
     }
 }
-
 export const getDisabledSlots = async (req, res) => {
     try {
-        const disabledSlots = await DisabledSlot.find().limit(5);
+        const slots = await DisabledSlot.find();
 
-        const groupedSlots = {};
+        const data = slots.map(slot => ({
+            date: slot.date,
+            timeSlot: slot.timeSlot,
+            capacity: slot.capacity,
+            pickupsBooked: slot.pickupsBooked,
+            disabled: slot.disabled,
+            status: getSlotStatus(slot),
+        }));
 
-        disabledSlots.forEach(slot => {
-            const date = slot.date;
-            if (!groupedSlots[date]) {
-                groupedSlots[date] = {
-                    date: date,
-                    timeSlots: [
-                        { time: "9:00 AM to 6:00 PM", value: false },
-                        { time: "9:00 AM to 1:00 PM", value: false },
-                        { time: "11:00 AM to 3:00 PM", value: false },
-                        { time: "2:00 PM to 6:00 PM", value: false }
-                    ],
-                    disabled: false
-                };
-            }
-
-            if (!slot.timeSlot) {
-                // full-day disabled
-                groupedSlots[date].disabled = true;
-            } else {
-                // mark the specific timeSlot as true
-                const slotEntry = groupedSlots[date].timeSlots.find(t => t.time === slot.timeSlot);
-                if (slotEntry) {
-                    slotEntry.value = true;
-                }
-            }
-        });
-
-        return res.status(200).json({ data: Object.values(groupedSlots), status: 200, success: true });
+        return res.status(200).json({ data, success: true });
     } catch (error) {
-        console.error("Error fetching disabled slots:", error);
-        return res.status(500).json({ error: "Internal server error.", success: false, status: 500 });
+        console.error("Error fetching slots:", error);
+        res.status(500).json({ error: "Internal server error." });
     }
 };
+
 
 export const updateDisabledSlot = async (req, res) => {
     try {
@@ -117,13 +107,170 @@ export const getSlotData = async (req, res) => {
         if (!date) {
             return res.status(400).json({ error: "Date is required." });
         }
-        const isoDate = new Date(date).toISOString();
 
-        const slots = await DisabledSlot.find({ date: isoDate });
+        // Use the date as is (YYYY-MM-DD format)
+        const formattedDate = new Date(date);
+        formattedDate.setHours(0, 0, 0, 0);
 
-        return res.status(200).json({ data: slots, status: 200, success: true });
+        // Get disabled slots for this date
+        const disabledSlots = await DisabledSlot.find({
+            date: {
+                $gte: formattedDate,
+                $lt: new Date(formattedDate.getTime() + 24 * 60 * 60 * 1000)
+            }
+        });
+
+        // Get all pickups for this date
+        const pickups = await pickupModel.find({
+            pickupDate: {
+                $gte: formattedDate,
+                $lt: new Date(formattedDate.getTime() + 24 * 60 * 60 * 1000)
+            }
+        });
+
+        // Count pickups per time slot
+        const pickupCounts = {};
+        pickups.forEach(p => {
+            if (p.pickupTime) {
+                pickupCounts[p.pickupTime] = (pickupCounts[p.pickupTime] || 0) + 1;
+            }
+        });
+
+        // Define default time slots
+        const defaultTimeSlots = [
+            "9:00 AM to 6:00 PM",
+            "9:00 AM to 1:00 PM",
+            "11:00 AM to 3:00 PM",
+            "2:00 PM to 6:00 PM"
+        ];
+
+        // Check if day is disabled
+        const dayDisabled = disabledSlots.some(s => s.timeSlot === null && s.disabled);
+
+        // Calculate day capacity and booked count
+        let dayCapacity = null;
+        let dayBooked = 0;
+        const dayCapacityRecord = disabledSlots.find(s => s.timeSlot === null);
+        if (dayCapacityRecord) {
+            dayCapacity = dayCapacityRecord.capacity;
+        }
+
+        // Prepare slots data
+        const slots = defaultTimeSlots.map(timeSlot => {
+            const slotRecord = disabledSlots.find(s => s.timeSlot === timeSlot);
+            const pickupsBooked = pickupCounts[timeSlot] || 0;
+            dayBooked += pickupsBooked;
+
+            return {
+                timeSlot,
+                disabled: dayDisabled ? true : (slotRecord ? slotRecord.disabled : false),
+                capacity: slotRecord ? slotRecord.capacity :
+                    timeSlot === "9:00 AM to 6:00 PM" ? 10 :
+                        timeSlot === "9:00 AM to 1:00 PM" ? 8 :
+                            timeSlot === "11:00 AM to 3:00 PM" ? 5 :
+                                timeSlot === "2:00 PM to 6:00 PM" ? 4 : 5,
+                pickupsBooked
+            };
+        });
+
+        return res.status(200).json({
+            date,
+            dayCapacity,
+            dayBooked,
+            dayDisabled,
+            slots,
+            success: true
+        });
     } catch (error) {
         console.error("Error fetching slot data:", error);
-        return res.status(500).json({ error: "Internal server error.", success: false, status: 500 });
+        return res.status(500).json({ error: "Internal server error.", success: false });
+    }
+};
+
+export const getPickupsForSlot = async (req, res) => {
+    try {
+        const { date, timeSlot } = req.query;
+        if (!date || !timeSlot) {
+            return res.status(400).json({ error: "Date and timeSlot are required." });
+        }
+
+        // Use the date as is (YYYY-MM-DD format)
+        const formattedDate = new Date(date);
+        formattedDate.setHours(0, 0, 0, 0);
+
+        // Return more fields than just _id
+        const pickups = await pickupModel.find({
+            pickupDate: {
+                $gte: formattedDate,
+                $lt: new Date(formattedDate.getTime() + 24 * 60 * 60 * 1000)
+            },
+            pickupTime: timeSlot
+        }, "_id PickupName status phone pickupDate pickupTime"); // Include additional fields
+
+        return res.json({ pickups });
+    } catch (err) {
+        console.error("Error fetching pickups:", err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+// Update day-wide capacity
+export const setDayCapacity = async (req, res) => {
+    try {
+        const { date, capacity } = req.body;
+        if (!date || !capacity) {
+            return res.status(400).json({ error: "Date and capacity are required." });
+        }
+
+        const isoDate = new Date(date).toISOString();
+        const slot = await DisabledSlot.findOneAndUpdate(
+            { date: isoDate, timeSlot: null },
+            { capacity },
+            { upsert: true, new: true }
+        );
+
+        return res.json({ message: "Day capacity updated", slot });
+    } catch (err) {
+        console.error("Error setting day capacity:", err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+// View pickups for a slot
+// export const getPickupsForSlot = async (req, res) => {
+//     try {
+//         const { date, timeSlot } = req.query;
+//         if (!date || !timeSlot) {
+//             return res.status(400).json({ error: "Date and timeSlot are required." });
+//         }
+//         const pickups = await pickupModel.find(
+//             { date, timeSlot },
+//             "_id" // only return IDs
+//         );
+//         return res.json({ pickups });
+//     } catch (err) {
+//         console.error("Error fetching pickups:", err);
+//         return res.status(500).json({ error: "Internal server error" });
+//     }
+// };
+
+// Update or add capacity for a slot
+export const setSlotCapacity = async (req, res) => {
+    try {
+        const { date, timeSlot, capacity } = req.body;
+        if (!date || !timeSlot || !capacity) {
+            return res.status(400).json({ error: "Date, timeSlot and capacity are required." });
+        }
+
+        const isoDate = new Date(date).toISOString();
+        const slot = await DisabledSlot.findOneAndUpdate(
+            { date: isoDate, timeSlot },
+            { capacity },
+            { upsert: true, new: true }
+        );
+
+        return res.json({ message: "Capacity updated", slot });
+    } catch (err) {
+        console.error("Error setting slot capacity:", err);
+        return res.status(500).json({ error: "Internal server error" });
     }
 };

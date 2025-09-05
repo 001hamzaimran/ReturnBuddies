@@ -48,37 +48,50 @@ const pickupSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+
     pickupDate: {
         type: Date,
         required: true
     },
+
     pickupTime: {
         type: String,
         required: true
     },
+
     pickupType: {
         type: String,
         required: true
     },
+
     deliveryDate: {
         type: Date
     },
+
     Payment: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Payment'
     },
+
     isOversize: {
         type: Boolean,
         default: false
     },
+
     totalPrice: {
         type: Number,
         required: true
     },
+
     phone: {
         type: String,
         required: true
-    }
+    },
+
+    extraCharge: {
+        type: Number,
+        default: 0
+    },
 }, {
     timestamps: true
 });

@@ -14,6 +14,7 @@ export default function PickupManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pickups, setPickups] = useState([]);
   const [selectedPickup, setSelectedPickup] = useState(null);
+  const [TotalPickups, setTotalPickups] = useState(0);
 
 
   const [pickedUpCount, setPickedUpCount] = useState(0);
@@ -59,8 +60,8 @@ export default function PickupManagement() {
       });
       if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();
-      onClose();
       getAllPickups(); // Refresh the list after updating
+      setSelectedPickup(null)
       console.log(data);
     } catch (error) {
       console.error("Error updating status:", error);
@@ -82,6 +83,7 @@ export default function PickupManagement() {
       const data = await response.json();
       setPickups(data.data);
       console.log(data.data);
+      setTotalPickups(data.data.length);
       setCurrentPage(1);
       calculateCounts(data.data);
     } catch (error) {
@@ -134,8 +136,29 @@ export default function PickupManagement() {
       });
       if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();
-      onClose();
       getAllPickups(); // Refresh the list after updating
+      setSelectedPickup(null)
+      console.log(data);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
+
+  const AddExtraCharges = async (pickupId, extraCharges) => {
+    try {
+      const response = await fetch(`${BASE_URL}add-extra-charges/${pickupId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          userid: userId,
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ extraCharges }),
+      });
+      if (!response.ok) throw new Error("Network response was not ok");
+      const data = await response.json();
+      getAllPickups(); // Refresh the list after updating
+      setSelectedPickup(null)
       console.log(data);
     } catch (error) {
       console.error("Error updating status:", error);
@@ -156,7 +179,7 @@ export default function PickupManagement() {
         <h2 className="text-2xl font-bold">Pickup Management</h2>
       </div>
 
-      <PickupStatus pickedUpCount={pickedUpCount} warehouseCount={warehouseCount} carrierCount={carrierCount} />
+      <PickupStatus pickedUpCount={pickedUpCount} warehouseCount={warehouseCount} carrierCount={carrierCount} TotalPickups={TotalPickups} />
 
       <div className="flex flex-row">
         <div className="mb-6 relative md:w-1/2 mr-2">
@@ -249,6 +272,7 @@ export default function PickupManagement() {
             formatDate={formatDate}
             onUpdateStatus={updateStatus}
             onUpdateCarrier={addTrackingCarrier}
+            onAddExtraCharges={AddExtraCharges}
           />
         )}
 

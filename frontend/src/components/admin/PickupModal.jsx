@@ -1,16 +1,34 @@
 import React, { useState } from "react";
-import { FaTruck, FaBoxOpen, FaWarehouse, FaShippingFast, FaCheckCircle, FaTimesCircle, FaSearch } from "react-icons/fa";
+import {
+    FaTruck,
+    FaBoxOpen,
+    FaWarehouse,
+    FaShippingFast,
+    FaCheckCircle,
+    FaTimesCircle,
+    FaSearch,
+    FaClock,
+} from "react-icons/fa";
 
-export default function PickupModal({ pickup, onClose, formatDate, onUpdateStatus, onUpdateCarrier }) {
+export default function PickupModal({
+    pickup,
+    onClose,
+    formatDate,
+    onUpdateStatus,
+    onUpdateCarrier,
+    onAddExtraCharges,
+}) {
     if (!pickup) return null;
 
     const [activeTab, setActiveTab] = useState("pickup");
     const [newStatus, setNewStatus] = useState(pickup.status || "");
-    const [carrier, setCarrier] = useState("");
-    const [tracking, setTracking] = useState("");
+    const [carrier, setCarrier] = useState(pickup?.Carrier || "");
+    const [tracking, setTracking] = useState(pickup?.TrackingNumber || "");
+    const [extraCharges, setExtraCharges] = useState(pickup?.extraCharge || "");
 
     const addressObj = pickup.pickupAddress || {};
-    const fullAddress = `${addressObj.street || ""}, ${addressObj.suite || ""}, ${addressObj.city || ""}, ${addressObj.state || ""}, ${addressObj.postalCode || ""}`;
+    const fullAddress = `${addressObj.street || ""}, ${addressObj.suite || ""}, ${addressObj.city || ""
+        }, ${addressObj.state || ""}, ${addressObj.postalCode || ""}`;
 
     const statusOptions = [
         "Pickup Requested",
@@ -19,19 +37,18 @@ export default function PickupModal({ pickup, onClose, formatDate, onUpdateStatu
         "Completed",
         "Pickup Cancelled",
         "In Transit",
-        "Delivered"
-    ]
+        "Delivered",
+    ];
 
-
-   const statusIcons = {
-  "pickup requested": <FaTruck className="text-purple-600" />,
-  "picked up": <FaBoxOpen className="text-green-600" />,
-  "inspected": <FaSearch className="text-yellow-600" />,
-  "completed": <FaCheckCircle className="text-green-700" />,
-  "pickup cancelled": <FaTimesCircle className="text-red-600" />,
-  "in transit": <FaShippingFast className="text-blue-600" />,
-  "delivered": <FaWarehouse className="text-indigo-600" />,
-};
+    const statusIcons = {
+        "pickup requested": <FaTruck className="text-purple-600" />,
+        "picked up": <FaBoxOpen className="text-green-600" />,
+        inspected: <FaSearch className="text-yellow-600" />,
+        completed: <FaCheckCircle className="text-green-700" />,
+        "pickup cancelled": <FaTimesCircle className="text-red-600" />,
+        "in transit": <FaShippingFast className="text-blue-600" />,
+        delivered: <FaWarehouse className="text-indigo-600" />,
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -51,8 +68,8 @@ export default function PickupModal({ pickup, onClose, formatDate, onUpdateStatu
                 </h3>
 
                 {/* Tabs */}
-                <div className="flex space-x-4 border-b border-gray-200 mb-4">
-                    {["pickup", "customer", "bundles", "actions"].map((tab) => (
+                <div className="flex flex-wrap gap-2 border-b border-gray-200 mb-4">
+                    {["pickup", "customer", "Pickup Items", "history", "actions"].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -65,9 +82,11 @@ export default function PickupModal({ pickup, onClose, formatDate, onUpdateStatu
                                 ? "Pickup Info"
                                 : tab === "customer"
                                     ? "Customer Info"
-                                    : tab === "bundles"
-                                        ? "Bundles"
-                                        : "Actions"}
+                                    : tab === "Pickup Items"
+                                        ? "Pickup Items"
+                                        : tab === "history"
+                                            ? "History"
+                                            : "Actions"}
                         </button>
                     ))}
                 </div>
@@ -77,14 +96,38 @@ export default function PickupModal({ pickup, onClose, formatDate, onUpdateStatu
                     {/* Pickup Info */}
                     {activeTab === "pickup" && (
                         <div className="space-y-2">
-                            <p><strong className="text-purple-700">ID:</strong> {pickup.PickupName}</p>
-                            <p><strong className="text-purple-700">Date:</strong> {formatDate(pickup.pickupDate)}</p>
-                            <p><strong className="text-purple-700">Time:</strong> {pickup.pickupTime}</p>
-                            <p><strong className="text-purple-700">Type:</strong> {pickup.pickupType}</p>
-                            <p><strong className="text-purple-700">Address:</strong> {fullAddress}</p>
-                            <p><strong className="text-purple-700">Phone:</strong> {pickup.phone}</p>
-                            <p><strong className="text-purple-700">Status:</strong> {pickup.status}</p>
-                            <p><strong className="text-purple-700">Total Price:</strong> ${pickup.totalPrice}</p>
+                            <p>
+                                <strong className="text-purple-700">ID:</strong>{" "}
+                                {pickup.PickupName}
+                            </p>
+                            <p>
+                                <strong className="text-purple-700">Date:</strong>{" "}
+                                {formatDate(pickup.pickupDate)}
+                            </p>
+                            <p>
+                                <strong className="text-purple-700">Time:</strong>{" "}
+                                {pickup.pickupTime}
+                            </p>
+                            <p>
+                                <strong className="text-purple-700">Type:</strong>{" "}
+                                {pickup.pickupType}
+                            </p>
+                            <p>
+                                <strong className="text-purple-700">Address:</strong>{" "}
+                                {fullAddress}
+                            </p>
+                            <p>
+                                <strong className="text-purple-700">Phone:</strong>{" "}
+                                {pickup.phone}
+                            </p>
+                            <p>
+                                <strong className="text-purple-700">Status:</strong>{" "}
+                                {pickup.status}
+                            </p>
+                            <p>
+                                <strong className="text-purple-700">Total Price:</strong> $
+                                {pickup.totalPrice}
+                            </p>
                         </div>
                     )}
 
@@ -98,34 +141,66 @@ export default function PickupModal({ pickup, onClose, formatDate, onUpdateStatu
                                     className="w-12 h-12 rounded-full border-2 border-purple-500"
                                 />
                                 <div>
-                                    <p className="font-bold text-purple-700">{pickup.userId?.name}</p>
+                                    <p className="font-bold text-purple-700">
+                                        {pickup.userId?.name}
+                                    </p>
                                     <p className="text-gray-600">{pickup.userId?.email}</p>
                                 </div>
                             </div>
-                            <p><strong className="text-purple-700">Phone:</strong> {pickup.userId?.phone}</p>
-                            <p><strong className="text-purple-700">Verified:</strong> {pickup.userId?.verified ? "Yes ✅" : "No ❌"}</p>
-                            <p><strong className="text-purple-700">Joined:</strong> {formatDate(pickup.userId?.createdAt)}</p>
+                            <p>
+                                <strong className="text-purple-700">Phone:</strong>{" "}
+                                {pickup.userId?.phone}
+                            </p>
+                            <p>
+                                <strong className="text-purple-700">Verified:</strong>{" "}
+                                {pickup.userId?.verified ? "Yes ✅" : "No ❌"}
+                            </p>
+                            <p>
+                                <strong className="text-purple-700">Joined:</strong>{" "}
+                                {formatDate(pickup.userId?.createdAt)}
+                            </p>
                         </div>
                     )}
 
                     {/* Bundles Info */}
-                    {activeTab === "bundles" && (
+                    {activeTab === "Pickup Items" && (
                         <div className="space-y-4">
                             {pickup.bundleId?.length > 0 ? (
                                 pickup.bundleId.map((bundle) => (
-                                    <div key={bundle._id} className="p-4 border border-gray-200 rounded-xl shadow-sm">
-                                        <p className="font-bold text-purple-700">{bundle.BundleName}</p>
-                                        <p className="text-gray-600 text-sm">Status: {bundle.status}</p>
-                                        <p className="text-gray-600 text-sm">Pickup Time: {formatDate(bundle.pickupTime)}</p>
+                                    <div
+                                        key={bundle._id}
+                                        className="p-4 border border-gray-200 rounded-xl shadow-sm"
+                                    >
+                                        <p className="font-bold text-purple-700">
+                                            {bundle.BundleName}
+                                        </p>
+                                        <p className="text-gray-600 text-sm">
+                                            Status: {bundle.status}
+                                        </p>
+                                        <p className="text-gray-600 text-sm">
+                                            Pickup Time: {formatDate(bundle.pickupTime)}
+                                        </p>
 
                                         {/* Products */}
                                         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {bundle.products.map((product) => (
-                                                <div key={product._id} className="p-3 border rounded-lg flex items-center space-x-3">
-                                                    <img src={product.thumbnail} alt={product.productName} className="w-16 h-16 object-cover rounded-lg border" />
+                                                <div
+                                                    key={product._id}
+                                                    className="p-3 border rounded-lg flex items-center space-x-3"
+                                                >
+                                                    <img
+                                                        src={product.thumbnail}
+                                                        alt={product.productName}
+                                                        className="w-16 h-16 object-cover rounded-lg border"
+                                                    />
                                                     <div>
                                                         <p className="font-medium">{product.productName}</p>
-                                                        <a href={product.labelReceipt} target="_blank" rel="noreferrer" className="text-sm text-purple-600 hover:underline">
+                                                        <a
+                                                            href={product.labelReceipt}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="text-sm text-purple-600 hover:underline"
+                                                        >
                                                             Print Label
                                                         </a>
                                                     </div>
@@ -140,19 +215,61 @@ export default function PickupModal({ pickup, onClose, formatDate, onUpdateStatu
                         </div>
                     )}
 
+                    {/* History Tab */}
+                    {activeTab === "history" && (
+                        <div className="space-y-4">
+                            {pickup.statusHistory?.length > 0 ? (
+                                <div className="relative">
+                                    <div className="absolute left-4 top-0 h-full w-1 bg-gray-200 rounded"></div>
+                                    <ul className="space-y-4">
+                                        {pickup.statusHistory
+                                            .slice()
+                                            .reverse()
+                                            .map((entry) => (
+                                                <li
+                                                    key={entry._id}
+                                                    className="relative pl-10 flex items-start"
+                                                >
+                                                    <div className="absolute left-1 top-1 flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-600">
+                                                        {statusIcons[entry.status.toLowerCase()] || (
+                                                            <FaClock />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-semibold text-gray-800">
+                                                            {entry.status}
+                                                        </p>
+                                                        <p className="text-sm text-gray-500">
+                                                            {formatDate(entry.updatedAt)}
+                                                        </p>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                    </ul>
+                                </div>
+                            ) : (
+                                <p className="text-gray-500">No status history available.</p>
+                            )}
+                        </div>
+                    )}
+
                     {/* Actions */}
                     {activeTab === "actions" && (
                         <div className="space-y-4">
                             {/* Update Status */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Update Status</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Update Status
+                                </label>
                                 <select
                                     value={newStatus}
                                     onChange={(e) => setNewStatus(e.target.value)}
                                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 >
                                     {statusOptions.map((status) => (
-                                        <option key={status} value={status}>{status}</option>
+                                        <option key={status} value={status}>
+                                            {status}
+                                        </option>
                                     ))}
                                 </select>
                                 <button
@@ -165,7 +282,9 @@ export default function PickupModal({ pickup, onClose, formatDate, onUpdateStatu
 
                             {/* Carrier & Tracking */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Carrier</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Carrier
+                                </label>
                                 <input
                                     type="text"
                                     value={carrier}
@@ -173,7 +292,9 @@ export default function PickupModal({ pickup, onClose, formatDate, onUpdateStatu
                                     placeholder="e.g., FedEx"
                                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 />
-                                <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">Tracking Number</label>
+                                <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">
+                                    Tracking Number
+                                </label>
                                 <input
                                     type="text"
                                     value={tracking}
@@ -182,12 +303,36 @@ export default function PickupModal({ pickup, onClose, formatDate, onUpdateStatu
                                     className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 />
                                 <button
-                                    onClick={() =>  onUpdateCarrier(pickup._id, carrier, tracking)}
+                                    onClick={() =>
+                                        onUpdateCarrier(pickup._id, carrier, tracking)
+                                    }
                                     className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                                 >
                                     Save Carrier Info
                                 </button>
                             </div>
+                            {pickup.status === "Inspected" && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Extra Charges
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={extraCharges}
+                                        onChange={(e) => setExtraCharges(e.target.value)}
+                                        placeholder="e.g., 321"
+                                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    />
+                                    <button
+                                        onClick={() =>
+                                            onAddExtraCharges(pickup._id, extraCharges)
+                                        }
+                                        className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                                    >
+                                        Add Extra Charges
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

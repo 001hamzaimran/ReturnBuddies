@@ -1,19 +1,9 @@
 import mongoose from "mongoose";
 
-const DisabledSlotSchema = new mongoose.Schema(
+const SlotCapacitySchema = new mongoose.Schema(
     {
         date: {
-            type: Date,
-            required: true,
-            // Store only the date portion without time
-            get: function () {
-                return this.getDataValue('date').toISOString().split('T')[0];
-            },
-            set: function (value) {
-                const date = new Date(value);
-                date.setUTCHours(0, 0, 0, 0);
-                return date;
-            }
+            type: Date, // format: 'yyyy-MM-dd'
         },
         timeSlot: {
             type: String, // e.g., '9:00 AM to 6:00 PM' or null
@@ -45,5 +35,5 @@ const DisabledSlotSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-const DisabledSlot = mongoose.model("DisabledSlot", DisabledSlotSchema);
-export default DisabledSlot;
+const SlotCapacity = mongoose.model("Slot Capacity", SlotCapacitySchema);
+export default SlotCapacity;

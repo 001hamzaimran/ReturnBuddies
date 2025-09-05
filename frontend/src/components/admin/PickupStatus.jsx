@@ -1,7 +1,7 @@
 import React from 'react'
-import { FaShippingFast, FaTruck, FaWarehouse } from 'react-icons/fa'
+import { FaBoxOpen, FaShippingFast, FaTruck, FaWarehouse } from 'react-icons/fa'
 
-function PickupStatus({pickedUpCount, warehouseCount, carrierCount}) {
+function PickupStatus({pickedUpCount, warehouseCount, carrierCount, TotalPickups}) {
     return (
         <>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -12,6 +12,7 @@ function PickupStatus({pickedUpCount, warehouseCount, carrierCount}) {
                     <p className="text-xl font-semibold">{pickedUpCount}</p>
                 </div>
             </div>
+           
             <div className="bg-white rounded-xl p-4 shadow flex items-center space-x-4">
                 <FaWarehouse className="text-yellow-600 text-2xl" />
                 <div>
@@ -24,6 +25,13 @@ function PickupStatus({pickedUpCount, warehouseCount, carrierCount}) {
                 <div>
                     <p className="text-sm text-gray-500">At Carrier</p>
                     <p className="text-xl font-semibold">{carrierCount}</p>
+                </div>
+            </div>
+             <div className="bg-white rounded-xl p-4 shadow flex items-center space-x-4">
+                <FaBoxOpen className="text-orange-600 text-2xl" />
+                <div>
+                    <p className="text-sm text-gray-500">Total Pickups</p>
+                    <p className="text-xl font-semibold">{TotalPickups}</p>
                 </div>
             </div>
         </div>
