@@ -16,13 +16,13 @@ export const disableSlot = async (req, res) => {
 
         // Validate input
         if (!date) {
-            return res.status(400).json({ error: "Date is required." });
+            return res.status(200).json({ error: "Date is required.",status:400 });
         }
 
         const existing = await DisabledSlot.findOne({ date, timeSlot: timeSlot || null });
 
         if (existing) {
-            return res.status(409).json({ message: "Slot already disabled." });
+            return res.status(200).json({ message: "Slot already disabled.", data: existing ,status:400});
         }
 
         // Create new disabled slot entry
@@ -35,7 +35,7 @@ export const disableSlot = async (req, res) => {
 
         await newDisabledSlot.save();
 
-        res.status(201).json({ message: "Pickup slot disabled successfully.", data: newDisabledSlot });
+        res.status(200).json({ message: "Pickup slot disabled successfully.", data: newDisabledSlot, status:200 });
     } catch (error) {
         console.error("Error disabling slot:", error);
         res.status(500).json({ error: "Internal server error." });
@@ -54,7 +54,7 @@ export const getDisabledSlots = async (req, res) => {
             status: getSlotStatus(slot),
         }));
 
-        return res.status(200).json({ data, success: true });
+        return res.status(200).json({ data, success: true, status: 200 });
     } catch (error) {
         console.error("Error fetching slots:", error);
         res.status(500).json({ error: "Internal server error." });
