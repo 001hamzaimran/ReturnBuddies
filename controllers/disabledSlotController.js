@@ -41,6 +41,7 @@ export const disableSlot = async (req, res) => {
         res.status(500).json({ error: "Internal server error." });
     }
 }
+
 export const getDisabledSlots = async (req, res) => {
     try {
         const slots = await DisabledSlot.find();
@@ -54,7 +55,7 @@ export const getDisabledSlots = async (req, res) => {
             status: getSlotStatus(slot),
         }));
 
-        return res.status(200).json({ data, success: true, status: 200 });
+        return res.status(200).json({ data, success: true, status: 200, message: "Slots fetched successfully." });
     } catch (error) {
         console.error("Error fetching slots:", error);
         res.status(500).json({ error: "Internal server error." });
