@@ -86,7 +86,7 @@ export const getDisabledSlots = async (req, res) => {
 
                 if (dbSlot) {
                     return {
-                        timeSlot: dbSlot.timeSlot,
+                        time: dbSlot.timeSlot,
                         capacity: dbSlot.capacity,
                         pickupsBooked: dbSlot.pickupsBooked || 0,
                         value: dbSlot.disabled,
@@ -94,7 +94,7 @@ export const getDisabledSlots = async (req, res) => {
                     };
                 } else {
                     return {
-                        timeSlot,
+                        time: timeSlot,
                         capacity,
                         pickupsBooked: 0,
                         value: false,
