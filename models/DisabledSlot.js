@@ -5,15 +5,13 @@ const DisabledSlotSchema = new mongoose.Schema(
         date: {
             type: Date,
             required: true,
-            // Store only the date portion without time
-            get: function () {
-                return this.getDataValue('date').toISOString().split('T')[0];
-            },
-            set: function (value) {
+            // ✅ Mongoose getter receives the value directly
+            get: (val) => (val ? val.toISOString().split("T")[0] : val),
+            set: (value) => {
                 const date = new Date(value);
-                date.setUTCHours(0, 0, 0, 0);
+                date.setUTCHours(0, 0, 0, 0); // store only date part
                 return date;
-            }
+            },
         },
         timeSlot: {
             type: String, // e.g., '9:00 AM to 6:00 PM' or null
@@ -26,7 +24,6 @@ const DisabledSlotSchema = new mongoose.Schema(
         capacity: {
             type: Number,
             default: function () {
-                // Use "this.timeSlot" to determine default capacity
                 switch (this.timeSlot) {
                     case "9:00 AM to 6:00 PM":
                         return 10;
@@ -37,12 +34,16 @@ const DisabledSlotSchema = new mongoose.Schema(
                     case "2:00 PM to 6:00 PM":
                         return 4;
                     default:
-                        return 5; // fallback default
+                        return 5;
                 }
             },
         },
     },
-    { timestamps: true }
+    {
+        timestamps: true,
+        toJSON: { getters: true }, // ensure getters run on JSON.stringify / API response
+        toObject: { getters: true },
+    }
 );
 
 const DisabledSlot = mongoose.model("DisabledSlot", DisabledSlotSchema);
