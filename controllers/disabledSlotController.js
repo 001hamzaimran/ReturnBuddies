@@ -89,7 +89,7 @@ export const getDisabledSlots = async (req, res) => {
                         timeSlot: dbSlot.timeSlot,
                         capacity: dbSlot.capacity,
                         pickupsBooked: dbSlot.pickupsBooked || 0,
-                        disabled: dbSlot.disabled,
+                        value: dbSlot.disabled,
                         status: getSlotStatus(dbSlot),
                     };
                 } else {
@@ -97,7 +97,7 @@ export const getDisabledSlots = async (req, res) => {
                         timeSlot,
                         capacity,
                         pickupsBooked: 0,
-                        disabled: false,
+                        value: false,
                         status: "enabled",
                     };
                 }
@@ -105,7 +105,7 @@ export const getDisabledSlots = async (req, res) => {
 
             return {
                 date: dateStr,
-                slots: daySlots,
+                timeSlots: daySlots,
             };
         });
 
