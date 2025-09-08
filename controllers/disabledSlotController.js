@@ -2,10 +2,10 @@ import DisabledSlot from "../models/DisabledSlot.js";
 import pickupModel from "../models/pickup.model.js";
 
 const TIME_SLOTS = {
-  "9:00 AM to 6:00 PM": 10,
-  "9:00 AM to 1:00 PM": 8,
-  "11:00 AM to 3:00 PM": 5,
-  "2:00 PM to 6:00 PM": 4,
+    "9:00 AM to 6:00 PM": 10,
+    "9:00 AM to 1:00 PM": 8,
+    "11:00 AM to 3:00 PM": 5,
+    "2:00 PM to 6:00 PM": 4,
 };
 
 // Add this helper function to the backend
@@ -22,13 +22,13 @@ export const disableSlot = async (req, res) => {
 
         // Validate input
         if (!date) {
-            return res.status(200).json({ error: "Date is required.",status:400 });
+            return res.status(200).json({ error: "Date is required.", status: 400 });
         }
 
         const existing = await DisabledSlot.findOne({ date, timeSlot: timeSlot || null });
 
         if (existing) {
-            return res.status(200).json({ message: "Slot already disabled.", data: existing ,status:400});
+            return res.status(200).json({ message: "Slot already disabled.", data: existing, status: 400 });
         }
 
         // Create new disabled slot entry
@@ -41,7 +41,7 @@ export const disableSlot = async (req, res) => {
 
         await newDisabledSlot.save();
 
-        res.status(200).json({ message: "Pickup slot disabled successfully.", data: newDisabledSlot, status:200 });
+        res.status(200).json({ message: "Pickup slot disabled successfully.", data: newDisabledSlot, status: 200 });
     } catch (error) {
         console.error("Error disabling slot:", error);
         res.status(500).json({ error: "Internal server error." });
@@ -49,77 +49,77 @@ export const disableSlot = async (req, res) => {
 }
 
 
+
 export const getDisabledSlots = async (req, res) => {
-  try {
-    // Step 1: Generate next 5 working days (skip Sat=6, Sun=0)
-    const dates = [];
-    let current = new Date();
+    try {
+        // Step 1: Generate next 5 working days (skip Sat=6, Sun=0)
+        const dates = [];
+        let current = new Date();
 
-    while (dates.length < 5) {
-      current.setDate(current.getDate() + 1);
-      const day = current.getDay();
-      if (day !== 0 && day !== 6) {
-        dates.push(new Date(current)); // push a copy
-      }
-    }
+        while (dates.length < 5) {
+            current.setDate(current.getDate() + 1);
+            const day = current.getDay();
+            if (day !== 0 && day !== 6) {
+                dates.push(new Date(current)); // push a copy
+            }
+        }
 
-    const dateStrings = dates.map((d) => d.toISOString().split("T")[0]);
+        const dateStrings = dates.map((d) => d.toISOString().split("T")[0]);
 
-    // Step 2: Fetch all slots in DB for these dates
-    const slots = await DisabledSlot.find({
-      date: { $in: dateStrings },
-    });
-
-    // Step 3: Build response data
-    const data = [];
-    for (const d of dates) {
-      const dateStr = d.toISOString().split("T")[0];
-
-      for (const [timeSlot, capacity] of Object.entries(TIME_SLOTS)) {
-        // Try to find this slot in DB
-        const dbSlot = slots.find((s) => {
-          const slotDate = new Date(s.date); // normalize
-          return (
-            slotDate.toISOString().split("T")[0] === dateStr &&
-            s.timeSlot === timeSlot
-          );
+        // Step 2: Fetch all slots in DB for these dates
+        const slots = await DisabledSlot.find({
+            date: { $in: dateStrings },
         });
 
-        if (dbSlot) {
-          // Slot exists in DB
-          data.push({
-            date: dateStr,
-            timeSlot: dbSlot.timeSlot,
-            capacity: dbSlot.capacity,
-            pickupsBooked: dbSlot.pickupsBooked || 0,
-            disabled: dbSlot.disabled,
-            status: getSlotStatus(dbSlot),
-          });
-        } else {
-          // Slot not in DB → treat as enabled
-          data.push({
-            date: dateStr,
-            timeSlot,
-            capacity,
-            pickupsBooked: 0,
-            disabled: false,
-            status: "enabled",
-          });
-        }
-      }
-    }
+        // Step 3: Build grouped response
+        const groupedData = dates.map((d) => {
+            const dateStr = d.toISOString().split("T")[0];
 
-    // Step 4: Return response
-    return res.status(200).json({
-      data,
-      success: true,
-      status: 200,
-      message: "Slots fetched successfully.",
-    });
-  } catch (error) {
-    console.error("Error fetching slots:", error);
-    res.status(500).json({ error: "Internal server error." });
-  }
+            const daySlots = Object.entries(TIME_SLOTS).map(([timeSlot, capacity]) => {
+                const dbSlot = slots.find((s) => {
+                    const slotDate = new Date(s.date);
+                    return (
+                        slotDate.toISOString().split("T")[0] === dateStr &&
+                        s.timeSlot === timeSlot
+                    );
+                });
+
+                if (dbSlot) {
+                    return {
+                        timeSlot: dbSlot.timeSlot,
+                        capacity: dbSlot.capacity,
+                        pickupsBooked: dbSlot.pickupsBooked || 0,
+                        disabled: dbSlot.disabled,
+                        status: getSlotStatus(dbSlot),
+                    };
+                } else {
+                    return {
+                        timeSlot,
+                        capacity,
+                        pickupsBooked: 0,
+                        disabled: false,
+                        status: "enabled",
+                    };
+                }
+            });
+
+            return {
+                date: dateStr,
+                slots: daySlots,
+            };
+        });
+
+        // Step 4: Return response
+        return res.status(200).json({
+            data: groupedData,
+            success: true,
+            status: 200,
+            message: "Slots fetched successfully.",
+        });
+    } catch (error) {
+        console.error("Error fetching slots:", error);
+        res.status(500).json({ error: "Internal server error." });
+    }
 };
 
 
