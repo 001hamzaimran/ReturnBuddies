@@ -1,6 +1,12 @@
 import DisabledSlot from "../models/DisabledSlot.js";
 import pickupModel from "../models/pickup.model.js";
 
+const TIME_SLOTS = {
+  "9:00 AM to 6:00 PM": 10,
+  "9:00 AM to 1:00 PM": 8,
+  "11:00 AM to 3:00 PM": 5,
+  "2:00 PM to 6:00 PM": 4,
+};
 
 // Add this helper function to the backend
 function getSlotStatus(slot) {
@@ -42,24 +48,78 @@ export const disableSlot = async (req, res) => {
     }
 }
 
+
 export const getDisabledSlots = async (req, res) => {
-    try {
-        const slots = await DisabledSlot.find();
+  try {
+    // Step 1: Generate next 5 working days (skip Sat=6, Sun=0)
+    const dates = [];
+    let current = new Date();
 
-        const data = slots.map(slot => ({
-            date: slot.date,
-            timeSlot: slot.timeSlot,
-            capacity: slot.capacity,
-            pickupsBooked: slot.pickupsBooked,
-            disabled: slot.disabled,
-            status: getSlotStatus(slot),
-        }));
-
-        return res.status(200).json({ data, success: true, status: 200, message: "Slots fetched successfully." });
-    } catch (error) {
-        console.error("Error fetching slots:", error);
-        res.status(500).json({ error: "Internal server error." });
+    while (dates.length < 5) {
+      current.setDate(current.getDate() + 1);
+      const day = current.getDay();
+      if (day !== 0 && day !== 6) {
+        dates.push(new Date(current)); // push a copy
+      }
     }
+
+    const dateStrings = dates.map((d) => d.toISOString().split("T")[0]);
+
+    // Step 2: Fetch all slots in DB for these dates
+    const slots = await DisabledSlot.find({
+      date: { $in: dateStrings },
+    });
+
+    // Step 3: Build response data
+    const data = [];
+    for (const d of dates) {
+      const dateStr = d.toISOString().split("T")[0];
+
+      for (const [timeSlot, capacity] of Object.entries(TIME_SLOTS)) {
+        // Try to find this slot in DB
+        const dbSlot = slots.find((s) => {
+          const slotDate = new Date(s.date); // normalize
+          return (
+            slotDate.toISOString().split("T")[0] === dateStr &&
+            s.timeSlot === timeSlot
+          );
+        });
+
+        if (dbSlot) {
+          // Slot exists in DB
+          data.push({
+            date: dateStr,
+            timeSlot: dbSlot.timeSlot,
+            capacity: dbSlot.capacity,
+            pickupsBooked: dbSlot.pickupsBooked || 0,
+            disabled: dbSlot.disabled,
+            status: getSlotStatus(dbSlot),
+          });
+        } else {
+          // Slot not in DB → treat as enabled
+          data.push({
+            date: dateStr,
+            timeSlot,
+            capacity,
+            pickupsBooked: 0,
+            disabled: false,
+            status: "enabled",
+          });
+        }
+      }
+    }
+
+    // Step 4: Return response
+    return res.status(200).json({
+      data,
+      success: true,
+      status: 200,
+      message: "Slots fetched successfully.",
+    });
+  } catch (error) {
+    console.error("Error fetching slots:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
 };
 
 
