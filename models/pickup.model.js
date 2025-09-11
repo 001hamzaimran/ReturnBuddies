@@ -35,7 +35,7 @@ const pickupSchema = new mongoose.Schema({
         {
             type: {
                 type: String,
-                enum: ["status", "extraCharge"], // differentiate
+                enum: ["status", "extraCharge", "Issue"], // differentiate
                 default: "status",
             },
             status: {

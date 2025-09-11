@@ -129,6 +129,7 @@ export default function PaymentManagement() {
             <thead className="text-left bg-gray-100">
               <tr>
                 <th className="p-2">Transaction ID</th>
+                <th className="p-2">Pickup ID</th>
                 <th className="p-2">User</th>
                 <th className="p-2">Email</th>
                 <th className="p-2">Amount</th>
@@ -141,6 +142,7 @@ export default function PaymentManagement() {
                 currentTransactions.map((txn, index) => (
                   <tr key={index} className="border-b hover:bg-gray-50">
                     <td className="p-2">{txn.id}</td>
+                    <td className="p-2">{txn.metadata?.pickupId || "N/A"}</td>
                     <td className="p-2">{txn.user?.name}</td>
                     <td className="p-2">{txn.user?.email}</td>
                     <td className="p-2">${txn.amount}</td>

@@ -19,7 +19,8 @@ export default function PickupModal({
     onUpdateStatus,
     onUpdateCarrier,
     onAddExtraCharges,
-    onUpdateDate
+    onUpdateDate,
+    onAddLabelIssue,
 }) {
     if (!pickup) return null;
 
@@ -304,8 +305,15 @@ export default function PickupModal({
                                             .map((entry) => (
                                                 <li key={entry._id} className="relative pl-10 flex items-start">
                                                     <div className="absolute left-1 top-1 flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600">
-                                                        {entry.type === "extraCharge" ? "💰" : statusIcons[entry.status?.toLowerCase()] || <FaClock />}
+                                                        {entry.type === "extraCharge" ? (
+                                                            "💰"
+                                                        ) : entry.type === "Issue" ? (
+                                                            "⚠️"
+                                                        ) : (
+                                                            statusIcons[entry.status?.toLowerCase()] || <FaClock />
+                                                        )}
                                                     </div>
+
                                                     <div>
                                                         {entry.type === "extraCharge" ? (
                                                             <>
@@ -314,12 +322,21 @@ export default function PickupModal({
                                                                 </p>
                                                                 <p className="text-sm text-gray-500">{entry.labelIssue}</p>
                                                             </>
+                                                        ) : entry.type === "Issue" ? (
+                                                            <>
+                                                                <p className="font-semibold text-yellow-700">Label Issue</p>
+                                                                <p className="text-sm text-gray-500">
+                                                                    {entry.labelIssue || "No details provided"}
+                                                                </p>
+                                                            </>
                                                         ) : (
                                                             <p className="font-semibold text-gray-800">{entry.status}</p>
                                                         )}
+
                                                         <p className="text-sm text-gray-500">{formatDateTime(entry.updatedAt)}</p>
                                                     </div>
                                                 </li>
+
                                             ))}
 
                                     </ul>
@@ -341,7 +358,7 @@ export default function PickupModal({
                                 <select
                                     value={newStatus}
                                     onChange={(e) => setNewStatus(e.target.value)}
-                                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
                                     {statusOptions.map((status) => (
                                         <option key={status} value={status}>
@@ -351,7 +368,7 @@ export default function PickupModal({
                                 </select>
                                 <button
                                     onClick={() => onUpdateStatus(pickup._id, newStatus)}
-                                    className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                                    className="mt-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 active:scale-95 transition"
                                 >
                                     Save Status
                                 </button>
@@ -367,7 +384,7 @@ export default function PickupModal({
                                     value={carrier}
                                     onChange={(e) => setCarrier(e.target.value)}
                                     placeholder="e.g., FedEx"
-                                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 />
                                 <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">
                                     Tracking Number
@@ -377,50 +394,59 @@ export default function PickupModal({
                                     value={tracking}
                                     onChange={(e) => setTracking(e.target.value)}
                                     placeholder="e.g., 123456789"
-                                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 />
                                 <button
-                                    onClick={() =>
-                                        onUpdateCarrier(pickup._id, carrier, tracking)
-                                    }
-                                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                    onClick={() => onUpdateCarrier(pickup._id, carrier, tracking)}
+                                    className="mt-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 active:scale-95 transition"
                                 >
                                     Save Carrier Info
                                 </button>
                             </div>
+
                             {pickup.status === "Inspected" && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Extra Charges
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={extraCharges}
-                                        onChange={(e) => setExtraCharges(e.target.value)}
-                                        placeholder="e.g., 321"
-                                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                    />
-                                    <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">
-                                        Label Issue
-                                    </label>
-                                    <textarea
-                                        value={labelIssue}
-                                        onChange={(e) => setLabelIssue(e.target.value)}
-                                        placeholder="Describe label issue..."
-                                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                    />
-                                    <button
-                                        onClick={() =>
-                                            onAddExtraCharges(pickup._id, extraCharges, labelIssue)
-                                        }
-                                        className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                                    >
-                                        Charge
-                                    </button>
-                                </div>
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Extra Charges
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={extraCharges}
+                                            onChange={(e) => setExtraCharges(e.target.value)}
+                                            placeholder="e.g., 321"
+                                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        />
+                                        <button
+                                            onClick={() => onAddExtraCharges(pickup._id, extraCharges)}
+                                            className="mt-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 active:scale-95 transition"
+                                        >
+                                            Charge
+                                        </button>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">
+                                            Label Issue
+                                        </label>
+                                        <textarea
+                                            value={labelIssue}
+                                            onChange={(e) => setLabelIssue(e.target.value)}
+                                            placeholder="Describe label issue..."
+                                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        />
+                                        <button
+                                            onClick={() => onAddLabelIssue(pickup._id, labelIssue)}
+                                            className="mt-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 active:scale-95 transition"
+                                        >
+                                            Add Issue
+                                        </button>
+                                    </div>
+                                </>
                             )}
                         </div>
                     )}
+
                 </div>
             </div>
         </div>

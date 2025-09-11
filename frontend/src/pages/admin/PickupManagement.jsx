@@ -172,6 +172,26 @@ export default function PickupManagement() {
       console.error("Error updating status:", error);
     }
   };
+  const AddLabelIssue = async (pickupId, labelIssue) => {
+    try {
+      const response = await fetch(`${BASE_URL}add-label-issue/${pickupId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          userid: userId,
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ labelIssue: labelIssue }),
+      });
+      if (!response.ok) throw new Error("Network response was not ok");
+      const data = await response.json();
+      getAllPickups(); // Refresh the list after updating
+      setSelectedPickup(null)
+      console.log(data);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
 
   const onUpdateDate = async (pickupId, newDate) => {
     try {
@@ -307,6 +327,7 @@ export default function PickupManagement() {
             onUpdateCarrier={addTrackingCarrier}
             onAddExtraCharges={AddExtraCharges}
             onUpdateDate={onUpdateDate}
+            onAddLabelIssue={AddLabelIssue}
           />
         )}
 

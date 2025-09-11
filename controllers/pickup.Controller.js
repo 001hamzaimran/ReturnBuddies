@@ -2,6 +2,7 @@ import pickupModel from '../models/pickup.model.js';
 import mongoose from 'mongoose';
 import Stripe from 'stripe';
 import CardModel from '../models/Card.Model.js';
+import { ExtraChargeEmail, LabelIssueEmail } from '../middlewares/Email/Email.js';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const createPickup = async (req, res) => {
@@ -55,6 +56,7 @@ export const createPickup = async (req, res) => {
             confirm: true,
             description: `Pickup Payment for ${PickupName}`,
             metadata: {
+                pickupId: String(PickupName),
                 userId: String(userId),
                 pickupType: String(pickupType),
                 pickupDate: new Date(pickupDate).toISOString(),
@@ -408,9 +410,9 @@ export const addCarrierAndTracking = async (req, res) => {
 export const addExtraCharges = async (req, res) => {
     try {
         const { id } = req.params;
-        const { extraCharges, labelIssue } = req.body;
+        const { extraCharges } = req.body;
 
-        if (!extraCharges || !labelIssue) {
+        if (!extraCharges) {
             return res.status(400).json({
                 success: false,
                 status: 400,
@@ -418,7 +420,7 @@ export const addExtraCharges = async (req, res) => {
             });
         }
 
-        const pickup = await pickupModel.findById(id);
+        const pickup = await pickupModel.findById(id).populate('userId');
 
         if (!pickup) {
             return res.status(404).json({
@@ -445,18 +447,82 @@ export const addExtraCharges = async (req, res) => {
         }
 
         pickup.extraCharge = extraCharges;
-        pickup.labelIssue = labelIssue;
         pickup.totalPrice += parseInt(extraCharges);
 
         pickup.statusHistory.push({
             type: "extraCharge",
             extraCharge: extraCharges,
+            updatedAt: new Date(),
+        });
+
+        await pickup.save();
+
+        await ExtraChargeEmail(pickup?.userId?.email, extraCharges)
+
+        return res.status(200).json({
+            success: true,
+            message: "extraCharges added successfully",
+            data: pickup,
+            status: 200
+        });
+    } catch (error) {
+        console.error("❌ Error adding extraCharges:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while adding extraCharges"
+        });
+    }
+}
+export const addLabelIssue = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { labelIssue } = req.body;
+
+        if (!labelIssue) {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "extraCharges is required"
+            });
+        }
+
+        const pickup = await pickupModel.findById(id).populate('userId');
+
+        if (!pickup) {
+            return res.status(404).json({
+                success: false,
+                status: 404,
+                message: "Pickup not found"
+            });
+        }
+
+        if (pickup.status === "Pickup Cancelled") {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "Cannot add issue to a cancelled pickup"
+            });
+        }
+
+        if (pickup.status !== "Inspected") {
+            return res.status(400).json({
+                success: false,
+                status: 400,
+                message: "First status must be 'Inspected' before adding Issue"
+            });
+        }
+
+        pickup.labelIssue = labelIssue;
+
+        pickup.statusHistory.push({
+            type: "Issue",
             labelIssue,
             updatedAt: new Date(),
         });
 
         await pickup.save();
 
+        await LabelIssueEmail(pickup?.userId?.email, labelIssue)
         return res.status(200).json({
             success: true,
             message: "extraCharges added successfully",
