@@ -393,7 +393,7 @@ export const uploadLabel = async (req, res) => {
     const fileExt = path.extname(req.files[0].originalname).toLowerCase();
     let resourceType = "image";
     if ([".pdf", ".docx", ".doc", ".zip"].includes(fileExt)) {
-      resourceType = "raw";
+      resourceType = "auto";
     }
 
     // Upload to Cloudinary
@@ -554,7 +554,7 @@ export const editLabel = async (req, res) => {
     const fileExt = path.extname(req.files[0].originalname).toLowerCase();
     let resourceType = "image";
     if ([".pdf", ".docx", ".doc", ".zip"].includes(fileExt)) {
-      resourceType = "raw";
+      resourceType = "auto";
     }
     // Upload to Cloudinary if file is provided
     let labelUrl = null;

@@ -123,6 +123,14 @@ export default function PickupManagement() {
     return d.toISOString().split("T")[0];
   };
 
+
+  const formatDateTime = (iso) => {
+    const d = new Date(iso);
+    const date = d.toISOString().split("T")[0]; // YYYY-MM-DD
+    const time = d.toISOString().split("T")[1].split(".")[0]; // HH:MM:SS
+    return `${date} ${time}`;
+  };
+
   const addTrackingCarrier = async (pickupId, carrier, trackingNumber) => {
     try {
       const response = await fetch(`${BASE_URL}add-tracking-carrier/${pickupId}`, {
@@ -144,7 +152,7 @@ export default function PickupManagement() {
     }
   };
 
-  const AddExtraCharges = async (pickupId, extraCharges) => {
+  const AddExtraCharges = async (pickupId, extraCharges, labelIssue) => {
     try {
       const response = await fetch(`${BASE_URL}add-extra-charges/${pickupId}`, {
         method: "POST",
@@ -153,7 +161,7 @@ export default function PickupManagement() {
           userid: userId,
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ extraCharges }),
+        body: JSON.stringify({ extraCharges, labelIssue }),
       });
       if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();
@@ -164,6 +172,27 @@ export default function PickupManagement() {
       console.error("Error updating status:", error);
     }
   };
+
+  const onUpdateDate = async (pickupId, newDate) => {
+    try {
+      const response = await fetch(`${BASE_URL}update-pickup-date/${pickupId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          userid: userId,
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ pickupDate: newDate }),
+      });
+      if (!response.ok) throw new Error("Network response was not ok");
+      const data = await response.json();
+      getAllPickups(); // Refresh the list after updating
+      setSelectedPickup(null)
+      console.log(data);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  }
 
   useEffect(() => {
     setCurrentPage(1); // reset pagination on filter/search change
@@ -203,7 +232,7 @@ export default function PickupManagement() {
             {[
               { value: "Pickup Requested", key: "Pickup Requested" },
               { value: "Picked up", key: "picked up" },
-              { value: "In Warehouse", key: "inspected" },
+              { value: "In Warehouse", key: "Inspected" },
               { value: "Dropped Off", key: "in transit" },
               { value: "Complete", key: "completed" },
             ].map((slot) => (
@@ -222,7 +251,9 @@ export default function PickupManagement() {
             <tr>
               <th className="px-4 py-3">Pickup ID</th>
               <th className="px-4 py-3">Customer</th>
-              <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3">Items</th>
+              <th className="px-4 py-3">Pickup Requested</th>
+              <th className="px-4 py-3">Pickup Date</th>
               <th className="px-4 py-3">Time</th>
               <th className="px-4 py-3">Address</th>
               <th className="px-4 py-3">Status</th>
@@ -231,8 +262,7 @@ export default function PickupManagement() {
           <tbody>
             {paginatedPickups.map((pickup) => {
               const addressObj = pickup.pickupAddress || {};
-              const fullAddress = `${addressObj.street || ""}, ${addressObj.suite || ""
-                }, ${addressObj.city || ""}, ${addressObj.state || ""}, ${addressObj.postalCode || ""
+              const fullAddress = ` ${addressObj.city || ""}, ${addressObj.state || ""}, ${addressObj.postalCode || ""
                 }`;
 
               return (
@@ -241,6 +271,8 @@ export default function PickupManagement() {
                     {pickup.PickupName}
                   </td>
                   <td className="px-4 py-5">{pickup.userId?.name || "N/A"}</td>
+                  <td className="px-4 py-5">{pickup.bundleId.length}</td>
+                  <td className="px-4 py-5">{formatDate(pickup.createdAt) || "N/A"}</td>
                   <td className="px-4 py-5">{formatDate(pickup.pickupDate)}</td>
                   <td className="px-4 py-5">{pickup.pickupTime}</td>
                   <td className="px-4 py-5">{fullAddress}</td>
@@ -270,9 +302,11 @@ export default function PickupManagement() {
             pickup={selectedPickup}
             onClose={() => setSelectedPickup(null)}
             formatDate={formatDate}
+            formatDateTime={formatDateTime}
             onUpdateStatus={updateStatus}
             onUpdateCarrier={addTrackingCarrier}
             onAddExtraCharges={AddExtraCharges}
+            onUpdateDate={onUpdateDate}
           />
         )}
 

@@ -408,9 +408,9 @@ export const addCarrierAndTracking = async (req, res) => {
 export const addExtraCharges = async (req, res) => {
     try {
         const { id } = req.params;
-        const { extraCharges } = req.body;
+        const { extraCharges, labelIssue } = req.body;
 
-        if (!extraCharges) {
+        if (!extraCharges || !labelIssue) {
             return res.status(400).json({
                 success: false,
                 status: 400,
@@ -445,6 +445,15 @@ export const addExtraCharges = async (req, res) => {
         }
 
         pickup.extraCharge = extraCharges;
+        pickup.labelIssue = labelIssue;
+        pickup.totalPrice += parseInt(extraCharges);
+
+        pickup.statusHistory.push({
+            type: "extraCharge",
+            extraCharge: extraCharges,
+            labelIssue,
+            updatedAt: new Date(),
+        });
 
         await pickup.save();
 
@@ -471,6 +480,26 @@ export const getPickupByDateandTime = async (req, res) => {
         }
         const pickup = await pickupModel.findOne({ pickupDate: date, pickupTime: timeSlot });
         return res.json({ pickup });
+    } catch (err) {
+        console.error("Error fetching pickups:", err);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+export const updatePickupDateAdmin = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { pickupDate } = req.body;
+        if (!pickupDate) {
+            return res.status(400).json({ error: "pickupDate is required." });
+        }
+        const pickup = await pickupModel.findById(id);
+        if (!pickup) {
+            return res.status(404).json({ error: "Pickup not found." });
+        }
+        pickup.pickupDate = pickupDate;
+        await pickup.save();
+        return res.json({ status: 200, pickup, message: "Pickup date updated successfully.", success: true });
     } catch (err) {
         console.error("Error fetching pickups:", err);
         return res.status(500).json({ error: "Internal server error" });

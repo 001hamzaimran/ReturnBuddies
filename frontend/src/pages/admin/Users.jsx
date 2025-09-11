@@ -31,9 +31,9 @@ export default function Users() {
         name: user.name,
         email: user.email,
         pickupCount: user.pickupCount || 0,
-        address: user.pickupAddress?.suite || "N/A",
-        state: user.pickupAddress?.state || "N/A",
-        postalCode: user.pickupAddress?.postalCode || "N/A",
+        address: user.pickupAddress?.city || "N/A",
+        state: user.pickupAddress?.state || " ",
+        postalCode: user.pickupAddress?.postalCode || " ",
         image: user.profile,
         phone: user.phone || "N/A",
       }));
@@ -94,7 +94,7 @@ export default function Users() {
                   Pickups: {user.pickupCount}
                 </span>
                 <p className="text-xs text-gray-400">
-                  {user.address}, {user.state}
+                  {user.address}, {user.state}, {user.postalCode}
                 </p>
               </div>
             ))
@@ -148,7 +148,7 @@ export default function Users() {
               </div>
             </div>
 
-            
+
           </div>
         </div>
       )}

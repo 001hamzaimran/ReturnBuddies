@@ -8,15 +8,18 @@ import {
     FaTimesCircle,
     FaSearch,
     FaClock,
+    FaEdit,
 } from "react-icons/fa";
 
 export default function PickupModal({
     pickup,
     onClose,
     formatDate,
+    formatDateTime,
     onUpdateStatus,
     onUpdateCarrier,
     onAddExtraCharges,
+    onUpdateDate
 }) {
     if (!pickup) return null;
 
@@ -25,6 +28,12 @@ export default function PickupModal({
     const [carrier, setCarrier] = useState(pickup?.Carrier || "");
     const [tracking, setTracking] = useState(pickup?.TrackingNumber || "");
     const [extraCharges, setExtraCharges] = useState(pickup?.extraCharge || "");
+    const [labelIssue, setLabelIssue] = useState(pickup?.labelIssue || "");
+
+    const [isEditingDate, setIsEditingDate] = useState(false);
+    const [editDate, setEditDate] = useState(
+        pickup.pickupDate ? pickup.pickupDate.split("T")[0] : ""
+    );
 
     const addressObj = pickup.pickupAddress || {};
     const fullAddress = `${addressObj.street || ""}, ${addressObj.suite || ""}, ${addressObj.city || ""
@@ -95,41 +104,102 @@ export default function PickupModal({
                 <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
                     {/* Pickup Info */}
                     {activeTab === "pickup" && (
-                        <div className="space-y-2">
-                            <p>
-                                <strong className="text-purple-700">ID:</strong>{" "}
-                                {pickup.PickupName}
-                            </p>
-                            <p>
-                                <strong className="text-purple-700">Date:</strong>{" "}
-                                {formatDate(pickup.pickupDate)}
-                            </p>
-                            <p>
-                                <strong className="text-purple-700">Time:</strong>{" "}
-                                {pickup.pickupTime}
-                            </p>
-                            <p>
-                                <strong className="text-purple-700">Type:</strong>{" "}
-                                {pickup.pickupType}
-                            </p>
-                            <p>
-                                <strong className="text-purple-700">Address:</strong>{" "}
-                                {fullAddress}
-                            </p>
-                            <p>
-                                <strong className="text-purple-700">Phone:</strong>{" "}
-                                {pickup.phone}
-                            </p>
-                            <p>
-                                <strong className="text-purple-700">Status:</strong>{" "}
-                                {pickup.status}
-                            </p>
-                            <p>
-                                <strong className="text-purple-700">Total Price:</strong> $
-                                {pickup.totalPrice}
-                            </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="p-3 border rounded-xl shadow-sm bg-gray-50">
+                                <p className="text-sm text-gray-500">ID</p>
+                                <p className="font-semibold text-purple-700">{pickup.PickupName}</p>
+                            </div>
+
+                            {/* Pickup Date (Editable) */}
+                            <div className="p-3 border rounded-xl shadow-sm bg-gray-50">
+                                <p className="text-sm text-gray-500">Pickup Date</p>
+                                {!isEditingDate ? (
+                                    <div className="flex items-center justify-between">
+                                        <p className="font-semibold">{formatDate(pickup.pickupDate)}</p>
+                                        <FaEdit
+                                            className="text-purple-700 cursor-pointer hover:text-gray-600"
+                                            onClick={() => setIsEditingDate(true)}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center space-x-2">
+                                        <input
+                                            type="date"
+                                            value={editDate}
+                                            onChange={(e) => setEditDate(e.target.value)}
+                                            className="px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        />
+                                        <button
+                                            onClick={() => {
+                                                onUpdateDate(pickup._id, editDate)
+                                                setIsEditingDate(false);
+                                            }}
+                                            className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700"
+                                        >
+                                            Update
+                                        </button>
+                                        <button
+                                            onClick={() => setIsEditingDate(false)}
+                                            className="px-3 py-1 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="p-3 border rounded-xl shadow-sm bg-gray-50">
+                                <p className="text-sm text-gray-500">Time</p>
+                                <p className="font-semibold">{pickup.pickupTime}</p>
+                            </div>
+
+                            <div className="p-3 border rounded-xl shadow-sm bg-gray-50">
+                                <p className="text-sm text-gray-500">Type</p>
+                                <p className="font-semibold">{pickup.pickupType}</p>
+                            </div>
+
+                            <div className="p-3 border rounded-xl shadow-sm bg-gray-50 sm:col-span-2">
+                                <p className="text-sm text-gray-500">Note</p>
+                                <p className="font-semibold">{pickup.note || "N/A"}</p>
+                            </div>
+
+                            <div className="p-3 border rounded-xl shadow-sm bg-gray-50 sm:col-span-2">
+                                <p className="text-sm text-gray-500">Address</p>
+                                <p className="font-semibold">{fullAddress}</p>
+                            </div>
+
+                            <div className="p-3 border rounded-xl shadow-sm bg-gray-50">
+                                <p className="text-sm text-gray-500">Phone</p>
+                                <p className="font-semibold">{pickup.phone}</p>
+                            </div>
+
+                            <div className="p-3 border rounded-xl shadow-sm bg-gray-50">
+                                <p className="text-sm text-gray-500">Status</p>
+                                <p className="font-semibold">{pickup.status}</p>
+                            </div>
+
+                            <div className="p-3 border rounded-xl shadow-sm bg-gray-50">
+                                <p className="text-sm text-gray-500">Total Price</p>
+                                <p className="font-semibold text-green-600">${pickup.totalPrice}</p>
+                            </div>
+
+                            {pickup.extraCharge !== undefined && pickup.extraCharge !== null && (
+                                <div className="p-3 border rounded-xl shadow-sm bg-gray-50">
+                                    <p className="text-sm text-gray-500">Extra Charges</p>
+                                    <p className="font-semibold text-red-600">${pickup.extraCharge}</p>
+                                </div>
+                            )}
+
+
+                            {pickup.labelIssue && (
+                                <div className="p-3 border rounded-xl shadow-sm bg-gray-50 sm:col-span-2">
+                                    <p className="text-sm text-gray-500">Label Issue</p>
+                                    <p className="font-semibold">{pickup.labelIssue || "N/A"}</p>
+                                </div>
+                            )}
                         </div>
                     )}
+
 
                     {/* Customer Info */}
                     {activeTab === "customer" && (
@@ -162,9 +232,15 @@ export default function PickupModal({
                         </div>
                     )}
 
-                    {/* Bundles Info */}
+                    {/* Pickup Info */}
                     {activeTab === "Pickup Items" && (
                         <div className="space-y-4">
+                            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl shadow-sm bg-gray-50">
+                                <p className="font-semibold text-gray-800">Total Items</p>
+                                <span className="text-purple-700 font-bold">
+                                    {pickup.bundleId?.length || 0}
+                                </span>
+                            </div>
                             {pickup.bundleId?.length > 0 ? (
                                 pickup.bundleId.map((bundle) => (
                                     <div
@@ -226,25 +302,26 @@ export default function PickupModal({
                                             .slice()
                                             .reverse()
                                             .map((entry) => (
-                                                <li
-                                                    key={entry._id}
-                                                    className="relative pl-10 flex items-start"
-                                                >
-                                                    <div className="absolute left-1 top-1 flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-600">
-                                                        {statusIcons[entry.status.toLowerCase()] || (
-                                                            <FaClock />
-                                                        )}
+                                                <li key={entry._id} className="relative pl-10 flex items-start">
+                                                    <div className="absolute left-1 top-1 flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-600">
+                                                        {entry.type === "extraCharge" ? "💰" : statusIcons[entry.status?.toLowerCase()] || <FaClock />}
                                                     </div>
                                                     <div>
-                                                        <p className="font-semibold text-gray-800">
-                                                            {entry.status}
-                                                        </p>
-                                                        <p className="text-sm text-gray-500">
-                                                            {formatDate(entry.updatedAt)}
-                                                        </p>
+                                                        {entry.type === "extraCharge" ? (
+                                                            <>
+                                                                <p className="font-semibold text-red-700">
+                                                                    Extra Charge: ${entry.extraCharge}
+                                                                </p>
+                                                                <p className="text-sm text-gray-500">{entry.labelIssue}</p>
+                                                            </>
+                                                        ) : (
+                                                            <p className="font-semibold text-gray-800">{entry.status}</p>
+                                                        )}
+                                                        <p className="text-sm text-gray-500">{formatDateTime(entry.updatedAt)}</p>
                                                     </div>
                                                 </li>
                                             ))}
+
                                     </ul>
                                 </div>
                             ) : (
@@ -323,13 +400,22 @@ export default function PickupModal({
                                         placeholder="e.g., 321"
                                         className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     />
+                                    <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">
+                                        Label Issue
+                                    </label>
+                                    <textarea
+                                        value={labelIssue}
+                                        onChange={(e) => setLabelIssue(e.target.value)}
+                                        placeholder="Describe label issue..."
+                                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    />
                                     <button
                                         onClick={() =>
-                                            onAddExtraCharges(pickup._id, extraCharges)
+                                            onAddExtraCharges(pickup._id, extraCharges, labelIssue)
                                         }
                                         className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                                     >
-                                        Add Extra Charges
+                                        Charge
                                     </button>
                                 </div>
                             )}

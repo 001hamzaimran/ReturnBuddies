@@ -33,10 +33,17 @@ const pickupSchema = new mongoose.Schema({
     // 🟢 New field to track status changes
     statusHistory: [
         {
+            type: {
+                type: String,
+                enum: ["status", "extraCharge"], // differentiate
+                default: "status",
+            },
             status: {
                 type: String,
                 enum: ['Pickup Requested', 'Picked Up', 'Inspected', 'Completed', 'Pickup Cancelled', 'In Transit', 'Delivered']
             },
+            extraCharge: Number,
+            labelIssue: String,
             updatedAt: {
                 type: Date,
                 default: Date.now
@@ -92,6 +99,10 @@ const pickupSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    labelIssue: {
+        type: String,
+        default: ''
+    }
 }, {
     timestamps: true
 });

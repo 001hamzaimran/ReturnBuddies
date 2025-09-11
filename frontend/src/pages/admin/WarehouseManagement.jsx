@@ -29,6 +29,41 @@ export default function WarehouseManagement() {
   const [activePickup, setActivePickup] = useState(null);
   const [activeBundle, setActiveBundle] = useState(null);
 
+  // Helper function to render media (image or pdf)
+  const renderMedia = (url, alt, height = "300px") => {
+    if (!url) return <p className="text-gray-500">No file</p>;
+
+    const isPdf = url.toLowerCase().endsWith(".pdf");
+
+    if (isPdf) {
+      return (
+        <object
+          data={url}
+          type="application/pdf"
+          width="100%"
+          height={height}
+          className="border rounded"
+        >
+          <p>
+            PDF cannot be displayed.
+            <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+              Open PDF
+            </a>
+          </p>
+        </object>
+      );
+    }
+
+    return (
+      <img
+        src={url}
+        alt={alt}
+        className="w-full max-w-xs h-64 object-contain rounded-lg border"
+      />
+    );
+  };
+
+
   useEffect(() => {
     console.log("Selected Product:", selectedProduct);
   }, [selectedProduct]);
@@ -121,127 +156,64 @@ export default function WarehouseManagement() {
   };
 
   const handlePrint = () => {
-    const { product, date, pickupstatus } = selectedProduct;
+    const { product } = selectedProduct;
 
-    const printWindow = window.open("");
-    printWindow.document.write(`
+    const renderPrintMedia = (url, alt) => {
+      if (!url) return "<p>No file</p>";
+      const isPdf = url.toLowerCase().endsWith(".pdf");
+
+      if (isPdf) {
+        return `
+        <p><strong>${alt}:</strong></p>
+        <embed src="${url}" type="application/pdf" width="100%" height="400px"/>
+      `;
+      }
+
+      return `
+      <p><strong>${alt}:</strong></p>
+      <img src="${url}" alt="${alt}" style="max-height:200px; border:1px solid #ccc; margin:10px 0; padding:5px;" />
+    `;
+    };
+
+    // Create a hidden iframe
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`
     <html>
       <head>
-        <title>Pickup Invoice</title>
+        <title>Pickup Receipt</title>
         <style>
-          body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
-          h1, h2, h3 { margin: 0; padding: 5px 0; }
-          .invoice-box {
-            max-width: 800px;
-            margin: auto;
-            border: 1px solid #eee;
-            box-shadow: 0 0 10px rgba(0,0,0,0.15);
-            padding: 30px;
-            font-size: 14px;
-            color: #555;
-          }
-          .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #eee;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-          }
-          .header h1 {
-            font-size: 24px;
-            color: #333;
-          }
-          .section {
-            margin-bottom: 20px;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-          }
-          table th, table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-          }
-          table th {
-            background: #f8f8f8;
-            font-weight: bold;
-          }
-          .images {
-            margin-top: 20px;
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-          }
-          .images img {
-            max-height: 150px;
-            border: 1px solid #ccc;
-            padding: 5px;
-          }
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h1 { margin-bottom: 20px; }
         </style>
       </head>
       <body>
-        <div class="invoice-box">
-          <div class="header">
-            <h1>Pickup Invoice</h1>
-            <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
-          </div>
-
-          <div class="section">
-            <h2>Pickup Information</h2>
-            <p><strong>Pickup Status:</strong> ${pickupstatus || "N/A"}</p>
-            <p><strong>Return By:</strong> ${date ? new Date(date).toLocaleDateString() : "N/A"}</p>
-            <p><strong>User ID:</strong> ${product.userId || "N/A"}</p>
-          </div>
-
-          <div class="section">
-            <h2>Product Information</h2>
-            <table>
-              <tr>
-                <th>Product Name</th>
-                <td>${product.productName}</td>
-              </tr>
-              <tr>
-                <th>Oversized</th>
-                <td>${product.oversized ? "Yes" : "No"}</td>
-              </tr>
-              <tr>
-                <th>Created At</th>
-                <td>${new Date(product.createdAt).toLocaleString()}</td>
-              </tr>
-              <tr>
-                <th>Updated At</th>
-                <td>${new Date(product.updatedAt).toLocaleString()}</td>
-              </tr>
-              <tr>
-                <th>Product ID</th>
-                <td>${product._id}</td>
-              </tr>
-            </table>
-          </div>
-
-          <div class="section">
-            <h2>Images</h2>
-            <div class="images">
-              <div>
-                <p><strong>Thumbnail:</strong></p>
-                <img src="${product.thumbnail}" alt="Thumbnail"/>
-              </div>
-              <div>
-                <p><strong>Label Receipt:</strong></p>
-                <img src="${product.labelReceipt}" alt="Label Receipt"/>
-              </div>
-            </div>
-          </div>
-        </div>
+        <h1>Pickup Receipt</h1>
+        ${renderPrintMedia(product.thumbnail, "Thumbnail")}
+        ${renderPrintMedia(product.labelReceipt, "Label Receipt")}
       </body>
     </html>
   `);
+    doc.close();
 
-    printWindow.document.close();
-    printWindow.onload = () => printWindow.print();
+    // Wait until all resources (images/PDFs) are loaded
+    iframe.onload = () => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      document.body.removeChild(iframe); // cleanup after print
+    };
   };
+
+
 
   // ✅ Filter by search (user, bundle, product)
   const filteredPickups = pickups.filter((pickup) => {
@@ -449,10 +421,11 @@ export default function WarehouseManagement() {
                                       </span>
                                     </td>
                                     <td className="px-3 py-2">
-                                      {product.date
-                                        ? new Date(product.date).toLocaleDateString()
+                                      {bundle.pickupTime
+                                        ? new Date(bundle.pickupTime).toLocaleDateString()
                                         : "N/A"}
                                     </td>
+
                                     <td className="px-3 py-2">
                                       {product.oversized ? (
                                         <span className="text-red-600 font-bold text-sm">
@@ -504,11 +477,11 @@ export default function WarehouseManagement() {
             </h2>
 
             <div className="mb-4 flex justify-center">
-              <img
-                src={selectedProduct.product.labelReceipt || "/placeholder-image.jpg"}
-                alt={selectedProduct.product.productName}
-                className="w-full max-w-xs h-64 object-contain rounded-lg border"
-              />
+              {renderMedia(
+                selectedProduct.product.labelReceipt,
+                selectedProduct.product.productName
+              )}
+
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
