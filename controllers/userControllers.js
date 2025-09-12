@@ -188,7 +188,7 @@ const phoneVerfication = async (req, res) => {
     const otp = crypto.randomInt(10000, 99999).toString();
     const message = `Your OTP is ${otp}`;
 
-    sendSms(phone, message);
+    await sendSms(phone, message);
 
     // Send OTP to user's phone number
     user.phoneOtp = otp;
