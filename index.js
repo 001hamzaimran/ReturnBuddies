@@ -4,6 +4,7 @@ import cors from 'cors'
 import passport from 'passport'
 import session from 'express-session'
 import DbCon from './utils/db.js'
+import cron from 'node-cron';
 
 import './middlewares/passport/googleStrategy.js'
 
@@ -18,6 +19,7 @@ import faqRouter from './routes/FAQ.routes.js'
 import { PromoRouter } from './routes/Promo.routes.js'
 import NotificationRouter from './routes/Notification.routes.js'
 import { disabledSlotRouter } from './routes/DisabledSlot.routes.js'
+import { getRoutificOrders } from './controllers/Routific.Controller.js'
 
 
 dotenv.config()
@@ -42,8 +44,28 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-const routes = [router, bundleRouter, ProductItemRoutes, addressRouter, PaymentRouter, basepriceRouter, pickupRouter,faqRouter,PromoRouter,NotificationRouter,disabledSlotRouter]
+const routes = [router, bundleRouter, ProductItemRoutes, addressRouter, PaymentRouter, basepriceRouter, pickupRouter, faqRouter, PromoRouter, NotificationRouter, disabledSlotRouter]
 
+function getTodayDate() {
+  return new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+}
+
+async function cronJob() {
+  // Run at minute 0 of every hour → once per hour
+  cron.schedule("0 * * * *", async () => {
+    const workspaceId = 759727;
+    const date = getTodayDate(); // today's date in YYYY-MM-DD
+
+    console.log(`Running cron job at ${new Date().toLocaleTimeString()} for date: ${date}`);
+
+    try {
+      const orders = await getRoutificOrders(workspaceId, date);
+      console.log("Delivered orders:", orders);
+    } catch (error) {
+      console.error("Error in cron job:", error);
+    }
+  });
+}
 
 routes.map(route => {
   app.use('/api', route)
@@ -59,32 +81,8 @@ app.get('/', (req, res) => {
   res.send("Hello World")
 })
 
-//time delay api
 
-app.get('/time-dealy', async (req, res) => {
-  try {
-    // Delay for 5 seconds
-    setTimeout(() => {
-      const data = {
-        name: "Farzam choutia",
-        age: 20,
-        gender: "male"
-      };
-      return res.status(200).json({
-        message: "success",
-        status: 200,
-        success: true,
-        data
-      });
-    }, 5000); // 5000 milliseconds = 5 seconds
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal Server Error",
-      status: 500,
-      success: false
-    });
-  }
-});
+cronJob();
 
 
 
