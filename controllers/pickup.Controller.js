@@ -220,7 +220,7 @@ export const pickupcancelled = async (req, res) => {
             });
         }
 
-        if (pickup.status === "Pickup cancelled") {
+        if (pickup.status === "Pickup Cancelled") {
             return res.status(200).json({
                 success: false,
                 status: 400,
@@ -228,7 +228,7 @@ export const pickupcancelled = async (req, res) => {
             });
         }
 
-        pickup.status = "Pickup cancelled";
+        pickup.status = "Pickup Cancelled";
         await pickup.save();
 
         return res.status(200).json({

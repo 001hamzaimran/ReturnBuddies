@@ -8,13 +8,41 @@ import useAuth from '../../hook/useAuth';
 export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
   const navigate = useNavigate()
   const { logout } = useAuth()
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [pickups, setPickups] = useState([]);
+  const notificationRef = useRef(null);
+
   const user = JSON.parse(localStorage.getItem("user"))
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+  const token = localStorage.getItem("token");
+  const userId = JSON.parse(localStorage.getItem("user")).user._id;
+
+
+  const getAllPickups = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}get-all-pickup`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          userid: userId,
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error("Network response was not ok");
+      const data = await response.json();
+      setPickups(data.data); // store pickups here
+    } catch (error) {
+      console.error("Error fetching pickups:", error);
+    }
+  };
+
+
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
-  useEffect(() => { 
+  useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
@@ -25,6 +53,23 @@ export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setNotificationsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+
+  useEffect(() => {
+    getAllPickups()
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -44,9 +89,50 @@ export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
       </div>
 
       <div className="flex items-center space-x-4">
-        {/* <button className="relative text-gray-500 hover:text-gray-700">
-          <HiBell size={23} color='#000000' />
-        </button> */}
+        <div className="relative" ref={notificationRef}>
+          <button
+            onClick={() => setNotificationsOpen(prev => !prev)}
+            className="relative"
+          >
+            <HiBell size={23} className="text-purple-800 hover:text-purple-900" />
+            {pickups.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 rounded-full">
+                {pickups.length}
+              </span>
+            )}
+          </button>
+
+          {notificationsOpen && (
+            <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+              <div className="flex justify-between items-center px-4 py-2 border-b">
+                <span className="font-semibold text-gray-800">Notifications</span>
+                {/* <span className="text-xs text-gray-500">{unreadPickups.length} new</span> */}
+              </div>
+              <div className="max-h-72 overflow-y-auto">
+                {pickups.length > 0 ? (
+                  pickups.map(pickup => (
+                    <div key={pickup._id} className="px-4 py-3 hover:bg-gray-50 border-b last:border-none cursor-pointer">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">{pickup.PickupName}</span>
+                        <span className="text-xs text-gray-500">{pickup.userId?.name}</span>
+                        <span className="text-xs text-gray-400">
+                          {pickup.pickupAddress?.city}, {pickup.pickupAddress?.state}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-4 text-sm text-gray-500 text-center">No new notifications</div>
+                )}
+              </div>
+              <div className="text-center px-4 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                <Link className="text-sm text-purple-600 font-medium">View all pickups</Link>
+              </div>
+            </div>
+          )}
+
+        </div>
+
 
         <div className="relative" ref={dropdownRef}>
           <button
