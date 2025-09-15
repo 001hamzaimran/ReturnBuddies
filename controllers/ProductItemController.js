@@ -2,6 +2,8 @@ import ProductItem from "../models/ProductItem.js";
 import ReturnBundle from "../models/ReturnBundle.js";
 import cloudinary from "../utils/cloundinary.js";
 import path from "path";
+import fs from 'fs';
+
 
 export const createProductItems = async (req, res) => {
   try {
@@ -342,6 +344,17 @@ function parseCustomDate(input) {
 // };
 
 
+function detectResourceType(file) {
+  const mimetype = (file.mimetype || '').toLowerCase();
+  const ext = path.extname(file.originalname || '').toLowerCase();
+
+  if (mimetype.startsWith('image/')) return 'image';
+  // treat common non-image as raw
+  if (['.pdf', '.doc', '.docx', '.zip', '.xlsx', '.csv'].includes(ext)) return 'raw';
+  if (mimetype.startsWith('application/')) return 'raw';
+  // fallback
+  return 'raw';
+}
 
 export const uploadLabel = async (req, res) => {
   let populatedBundle;
@@ -390,22 +403,60 @@ export const uploadLabel = async (req, res) => {
     }
     console.log("Label file received:", req.files);
     // Detect file type (image vs pdf vs doc)
-    const fileExt = path.extname(req.files[0].originalname).toLowerCase();
-    let resourceType = "auto";
-    if ([".pdf", ".docx", ".doc", ".zip"].includes(fileExt)) {
-      resourceType = "auto";
+    // const fileExt = path.extname(req.files[0].originalname).toLowerCase();
+    // let resourceType = "auto";
+    // if ([".pdf", ".docx", ".doc", ".zip"].includes(fileExt)) {
+    //   resourceType = "auto";
+    // }
+
+    // // Upload to Cloudinary
+    // const uploadResult = await cloudinary.uploader.upload(req.files[0].path, {
+    //   folder: 'return-bundles',
+    //   use_filename: true,
+    //   unique_filename: false,
+    //   type: "upload",
+    //   access_mode: "public",
+    //   resource_type: resourceType
+    // });
+    // const labelUrl = uploadResult.secure_url;
+
+    // file is req.files[0]
+    const file = req.files[0];
+    console.log('Incoming file:', file);
+
+    const resourceType = detectResourceType(file);
+
+    // Preferred: use uploader.upload and force resource_type = 'raw' for PDFs
+    let uploadResult;
+    try {
+      uploadResult = await cloudinary.uploader.upload(file.path, {
+        folder: 'return-bundles',
+        use_filename: true,
+        unique_filename: false,
+        access_mode: 'public',
+        resource_type: resourceType // explicit 'raw' for pdf
+        // do NOT set `type: "upload"` here (optional)
+      });
+    } catch (err) {
+      console.error('cloudinary.uploader.upload failed:', err);
+      throw err;
     }
 
-    // Upload to Cloudinary
-    const uploadResult = await cloudinary.uploader.upload(req.files[0].path, {
-      folder: 'return-bundles',
-      use_filename: true,
-      unique_filename: false,
-      type: "upload",
-      access_mode: "public",
-      resource_type: resourceType
-    });
-    const labelUrl = uploadResult.secure_url;
+    console.log('Cloudinary result:', uploadResult);
+    // sanity: if uploadResult.resource_type !== resourceType, log it and fallback
+    if (uploadResult.resource_type !== resourceType) {
+      console.warn('Resource type mismatch. requested=', resourceType, 'returned=', uploadResult.resource_type);
+    }
+
+    // labelUrl to store:
+    let labelUrl = uploadResult.secure_url;
+
+    // Fallback: if returned URL is /image/upload/... and it's a PDF, build /raw/ URL (temporary fix)
+    if (labelUrl.includes('/image/upload/') && /\.pdf$/i.test(labelUrl)) {
+      labelUrl = labelUrl.replace('/image/upload/', '/raw/upload/');
+      console.log('Using fallback raw URL:', labelUrl);
+    }
+
 
     console.log("Uploaded to Cloudinary:", labelUrl);
     console.log("Upload result:", uploadResult);
