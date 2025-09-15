@@ -369,6 +369,10 @@ function parseCustomDate(input) {
 
 
 // Helper function to detect resource type
+
+
+
+// Helper function to detect resource type
 const detectResourceType = (file) => {
   const ext = path.extname(file.originalname).toLowerCase();
   return ['.pdf', '.doc', '.docx', '.zip'].includes(ext) ? 'raw' : 'image';
@@ -419,15 +423,13 @@ export const uploadLabel = async (req, res) => {
     if (!req.files || req.files.length === 0) {
       return res.status(200).json({ status: 400, message: 'Label image is required.' });
     }
-
+    
     console.log("Label file received:", req.files);
-
+    
     // Upload to Cloudinary
     const file = req.files[0];
     const resourceType = detectResourceType(file);
-
-    // For PDFs, we'll use the upload method that converts them to images
-    // but keeps the original PDF as well
+    
     let uploadOptions = {
       folder: 'return-bundles',
       use_filename: true,
@@ -436,27 +438,35 @@ export const uploadLabel = async (req, res) => {
     };
 
     let labelUrl;
-
+    
     if (resourceType === 'raw') {
-      // For PDFs, upload as raw but also generate a preview image
+      // For PDFs, upload as raw
       uploadOptions.resource_type = 'raw';
-
+      
       const uploadResult = await cloudinary.uploader.upload(file.path, uploadOptions);
-
-      // Get the direct URL to the PDF (not the download URL)
-      labelUrl = uploadResult.secure_url;
-
-      console.log("PDF uploaded to Cloudinary:", labelUrl);
+      
+      // Generate a download URL for PDFs
+      const publicId = uploadResult.public_id;
+      const format = path.extname(file.originalname).replace('.', '');
+      
+      labelUrl = cloudinary.url(publicId, {
+        resource_type: 'raw',
+        flags: 'attachment', // This forces download behavior
+        sign_url: true // Sign the URL for security
+      });
+      
+      console.log("PDF uploaded to Cloudinary with download URL:", labelUrl);
     } else {
       // For images, upload normally
       uploadOptions.resource_type = 'image';
-
+      
       const uploadResult = await cloudinary.uploader.upload(file.path, uploadOptions);
       labelUrl = uploadResult.secure_url;
-
+      
       console.log("Image uploaded to Cloudinary:", labelUrl);
     }
 
+    // ... rest of your existing code remains the same
     // Get current bundle
     const currentBundle = await ReturnBundle.findById(bundleId).lean();
     if (!currentBundle) {
@@ -610,7 +620,6 @@ export const editLabel = async (req, res) => {
       const file = req.files[0];
       const resourceType = detectResourceType(file);
       
-      // Upload options
       let uploadOptions = {
         folder: 'return-bundles',
         use_filename: true,
@@ -624,10 +633,17 @@ export const editLabel = async (req, res) => {
         
         const uploadResult = await cloudinary.uploader.upload(file.path, uploadOptions);
         
-        // Get the direct URL to the PDF (not the download URL)
-        labelUrl = uploadResult.secure_url;
+        // Generate a download URL for PDFs
+        const publicId = uploadResult.public_id;
+        const format = path.extname(file.originalname).replace('.', '');
         
-        console.log("PDF uploaded to Cloudinary:", labelUrl);
+        labelUrl = cloudinary.url(publicId, {
+          resource_type: 'raw',
+          flags: 'attachment', // This forces download behavior
+          sign_url: true // Sign the URL for security
+        });
+        
+        console.log("PDF uploaded to Cloudinary with download URL:", labelUrl);
       } else {
         // For images, upload normally
         uploadOptions.resource_type = 'image';
