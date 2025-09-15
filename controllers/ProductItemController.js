@@ -421,41 +421,36 @@ export const uploadLabel = async (req, res) => {
     // const labelUrl = uploadResult.secure_url;
 
     // file is req.files[0]
+    // file is req.files[0]
     const file = req.files[0];
-    console.log('Incoming file:', file);
-
     const resourceType = detectResourceType(file);
 
-    // Preferred: use uploader.upload and force resource_type = 'raw' for PDFs
-    let uploadResult;
-    try {
-      uploadResult = await cloudinary.uploader.upload(file.path, {
-        folder: 'return-bundles',
-        use_filename: true,
-        unique_filename: false,
-        access_mode: 'public',
-        resource_type: resourceType // explicit 'raw' for pdf
-        // do NOT set `type: "upload"` here (optional)
-      });
-    } catch (err) {
-      console.error('cloudinary.uploader.upload failed:', err);
-      throw err;
-    }
+    // Upload to Cloudinary
+    let uploadResult = await cloudinary.uploader.upload(file.path, {
+      folder: 'return-bundles',
+      use_filename: true,
+      unique_filename: false,
+      access_mode: 'public',
+      resource_type: resourceType // raw for PDFs
+    });
 
-    console.log('Cloudinary result:', uploadResult);
-    // sanity: if uploadResult.resource_type !== resourceType, log it and fallback
-    if (uploadResult.resource_type !== resourceType) {
-      console.warn('Resource type mismatch. requested=', resourceType, 'returned=', uploadResult.resource_type);
-    }
-
-    // labelUrl to store:
+    // Build public URL
     let labelUrl = uploadResult.secure_url;
 
-    // Fallback: if returned URL is /image/upload/... and it's a PDF, build /raw/ URL (temporary fix)
-    if (labelUrl.includes('/image/upload/') && /\.pdf$/i.test(labelUrl)) {
-      labelUrl = labelUrl.replace('/image/upload/', '/raw/upload/');
-      console.log('Using fallback raw URL:', labelUrl);
+    // If it's raw and your account is untrusted, build signed download URL:
+    if (resourceType === 'raw') {
+      const publicId = uploadResult.public_id; // e.g. return-bundles/17579...
+      const format = path.extname(file.originalname).replace('.', ''); // pdf/docx etc.
+
+      // Signed URL
+      labelUrl = cloudinary.utils.private_download_url(
+        publicId,
+        format,
+        { resource_type: 'raw' }
+      );
     }
+
+    console.log("Uploaded to Cloudinary:", labelUrl);
 
 
     console.log("Uploaded to Cloudinary:", labelUrl);
@@ -607,95 +602,100 @@ export const editLabel = async (req, res) => {
         message: 'productIDs must be a non-empty array.'
       });
     }
-    const fileExt = path.extname(req.files[0].originalname).toLowerCase();
-    let resourceType = "auto";
-    if ([".pdf", ".docx", ".doc", ".zip"].includes(fileExt)) {
-      resourceType = "auto";
-    }
-    console.log("Label file received:", req.files);
-    // Upload to Cloudinary if file is provided
-    let labelUrl = null;
-    if (req.files && req.files.length > 0) {
-      const uploadResult = await cloudinary.uploader.upload(req.files[0].path, {
-        resource_type: resourceType,
-        folder: 'return-bundles',
-        use_filename: true,
-        unique_filename: false,
-        type: "upload",
-        access_mode: "public",
-      });
-      labelUrl = uploadResult.secure_url;
 
-      console.log("Uploaded to Cloudinary:", labelUrl);
-      console.log("Upload result:", uploadResult);
+    const file = req.files[0];
+    const resourceType = detectResourceType(file);
+
+    let uploadResult = await cloudinary.uploader.upload(file.path, {
+      folder: 'return-bundles',
+      use_filename: true,
+      unique_filename: false,
+      access_mode: 'public',
+      resource_type: resourceType
+    });
+
+    let labelUrl = uploadResult.secure_url;
+
+    if (resourceType === 'raw') {
+      const publicId = uploadResult.public_id;
+      const format = path.extname(file.originalname).replace('.', '');
+      labelUrl = cloudinary.utils.private_download_url(
+        publicId,
+        format,
+        { resource_type: 'raw' }
+      );
     }
+
+    console.log("Uploaded to Cloudinary:", labelUrl);
+    console.log("Upload result:", uploadResult);
+  }
 
     // Fetch current bundle
     const currentBundle = await ReturnBundle.findById(bundleId).lean();
-    if (!currentBundle) {
-      return res.status(404).json({
-        status: 404,
-        message: 'Bundle not found.'
-      });
-    }
-
-    const currentProductIds = currentBundle.products.map(id => id.toString());
-    const updatedProducts = [];
-
-    for (const item of productIDs) {
-      const updateData = {
-        date: new Date(date)
-      };
-      if (labelUrl) {
-        updateData.labelReceipt = labelUrl;
-      }
-
-      const updated = await ProductItem.findOneAndUpdate(
-        { _id: item.productId, userId },
-        updateData,
-        { new: true }
-      );
-
-      if (updated) {
-        updatedProducts.push(updated._id.toString());
-      }
-    }
-
-    if (updatedProducts.length === 0) {
-      return res.status(400).json({
-        status: 400,
-        message: 'No products were updated.'
-      });
-    }
-
-    // Mark bundle processed if all products updated
-    const allSelected = currentProductIds.length === updatedProducts.length &&
-      currentProductIds.every(id => updatedProducts.includes(id));
-
-    if (allSelected) {
-      await ReturnBundle.findByIdAndUpdate(bundleId, { status: 'processed' });
-    }
-
-    const updatedBundle = await ReturnBundle.findById(bundleId).populate('products');
-
-    return res.status(200).json({
-      status: 200,
-      message: labelUrl
-        ? 'Label uploaded to Cloudinary and updated successfully.'
-        : 'Date updated successfully (label unchanged).',
-      data: {
-        bundle: updatedBundle,
-        updatedProducts,
-        labelUrl
-      }
-    });
-
-  } catch (error) {
-    console.error('Error in editLabel:', error);
-    return res.status(500).json({
-      status: 500,
-      message: 'Internal server error',
-      error: error.message
+  if (!currentBundle) {
+    return res.status(404).json({
+      status: 404,
+      message: 'Bundle not found.'
     });
   }
+
+  const currentProductIds = currentBundle.products.map(id => id.toString());
+  const updatedProducts = [];
+
+  for (const item of productIDs) {
+    const updateData = {
+      date: new Date(date)
+    };
+    if (labelUrl) {
+      updateData.labelReceipt = labelUrl;
+    }
+
+    const updated = await ProductItem.findOneAndUpdate(
+      { _id: item.productId, userId },
+      updateData,
+      { new: true }
+    );
+
+    if (updated) {
+      updatedProducts.push(updated._id.toString());
+    }
+  }
+
+  if (updatedProducts.length === 0) {
+    return res.status(400).json({
+      status: 400,
+      message: 'No products were updated.'
+    });
+  }
+
+  // Mark bundle processed if all products updated
+  const allSelected = currentProductIds.length === updatedProducts.length &&
+    currentProductIds.every(id => updatedProducts.includes(id));
+
+  if (allSelected) {
+    await ReturnBundle.findByIdAndUpdate(bundleId, { status: 'processed' });
+  }
+
+  const updatedBundle = await ReturnBundle.findById(bundleId).populate('products');
+
+  return res.status(200).json({
+    status: 200,
+    message: labelUrl
+      ? 'Label uploaded to Cloudinary and updated successfully.'
+      : 'Date updated successfully (label unchanged).',
+    data: {
+      bundle: updatedBundle,
+      updatedProducts,
+      labelUrl
+    }
+  });
+
+} catch (error) {
+  console.error('Error in editLabel:', error);
+  return res.status(500).json({
+    status: 500,
+    message: 'Internal server error',
+    error: error.message
+  });
+}
 };
