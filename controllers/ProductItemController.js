@@ -391,7 +391,7 @@ export const uploadLabel = async (req, res) => {
 
     // Detect file type (image vs pdf vs doc)
     const fileExt = path.extname(req.files[0].originalname).toLowerCase();
-    let resourceType = "image";
+    let resourceType = "auto";
     if ([".pdf", ".docx", ".doc", ".zip"].includes(fileExt)) {
       resourceType = "auto";
     }
@@ -554,7 +554,7 @@ export const editLabel = async (req, res) => {
       });
     }
     const fileExt = path.extname(req.files[0].originalname).toLowerCase();
-    let resourceType = "image";
+    let resourceType = "auto";
     if ([".pdf", ".docx", ".doc", ".zip"].includes(fileExt)) {
       resourceType = "auto";
     }
