@@ -628,74 +628,74 @@ export const editLabel = async (req, res) => {
 
     console.log("Uploaded to Cloudinary:", labelUrl);
     console.log("Upload result:", uploadResult);
-  }
+
 
     // Fetch current bundle
     const currentBundle = await ReturnBundle.findById(bundleId).lean();
-  if (!currentBundle) {
-    return res.status(404).json({
-      status: 404,
-      message: 'Bundle not found.'
+    if (!currentBundle) {
+      return res.status(404).json({
+        status: 404,
+        message: 'Bundle not found.'
+      });
+    }
+
+    const currentProductIds = currentBundle.products.map(id => id.toString());
+    const updatedProducts = [];
+
+    for (const item of productIDs) {
+      const updateData = {
+        date: new Date(date)
+      };
+      if (labelUrl) {
+        updateData.labelReceipt = labelUrl;
+      }
+
+      const updated = await ProductItem.findOneAndUpdate(
+        { _id: item.productId, userId },
+        updateData,
+        { new: true }
+      );
+
+      if (updated) {
+        updatedProducts.push(updated._id.toString());
+      }
+    }
+
+    if (updatedProducts.length === 0) {
+      return res.status(400).json({
+        status: 400,
+        message: 'No products were updated.'
+      });
+    }
+
+    // Mark bundle processed if all products updated
+    const allSelected = currentProductIds.length === updatedProducts.length &&
+      currentProductIds.every(id => updatedProducts.includes(id));
+
+    if (allSelected) {
+      await ReturnBundle.findByIdAndUpdate(bundleId, { status: 'processed' });
+    }
+
+    const updatedBundle = await ReturnBundle.findById(bundleId).populate('products');
+
+    return res.status(200).json({
+      status: 200,
+      message: labelUrl
+        ? 'Label uploaded to Cloudinary and updated successfully.'
+        : 'Date updated successfully (label unchanged).',
+      data: {
+        bundle: updatedBundle,
+        updatedProducts,
+        labelUrl
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in editLabel:', error);
+    return res.status(500).json({
+      status: 500,
+      message: 'Internal server error',
+      error: error.message
     });
   }
-
-  const currentProductIds = currentBundle.products.map(id => id.toString());
-  const updatedProducts = [];
-
-  for (const item of productIDs) {
-    const updateData = {
-      date: new Date(date)
-    };
-    if (labelUrl) {
-      updateData.labelReceipt = labelUrl;
-    }
-
-    const updated = await ProductItem.findOneAndUpdate(
-      { _id: item.productId, userId },
-      updateData,
-      { new: true }
-    );
-
-    if (updated) {
-      updatedProducts.push(updated._id.toString());
-    }
-  }
-
-  if (updatedProducts.length === 0) {
-    return res.status(400).json({
-      status: 400,
-      message: 'No products were updated.'
-    });
-  }
-
-  // Mark bundle processed if all products updated
-  const allSelected = currentProductIds.length === updatedProducts.length &&
-    currentProductIds.every(id => updatedProducts.includes(id));
-
-  if (allSelected) {
-    await ReturnBundle.findByIdAndUpdate(bundleId, { status: 'processed' });
-  }
-
-  const updatedBundle = await ReturnBundle.findById(bundleId).populate('products');
-
-  return res.status(200).json({
-    status: 200,
-    message: labelUrl
-      ? 'Label uploaded to Cloudinary and updated successfully.'
-      : 'Date updated successfully (label unchanged).',
-    data: {
-      bundle: updatedBundle,
-      updatedProducts,
-      labelUrl
-    }
-  });
-
-} catch (error) {
-  console.error('Error in editLabel:', error);
-  return res.status(500).json({
-    status: 500,
-    message: 'Internal server error',
-    error: error.message
-  });
-}
 };
