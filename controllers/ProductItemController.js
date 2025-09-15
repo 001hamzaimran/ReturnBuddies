@@ -388,7 +388,7 @@ export const uploadLabel = async (req, res) => {
     if (!req.files || req.files.length === 0) {
       return res.status(200).json({ status: 400, message: 'Label image is required.' });
     }
-
+    console.log("Label file received:", req.files);
     // Detect file type (image vs pdf vs doc)
     const fileExt = path.extname(req.files[0].originalname).toLowerCase();
     let resourceType = "auto";
@@ -406,6 +406,9 @@ export const uploadLabel = async (req, res) => {
       resource_type: resourceType
     });
     const labelUrl = uploadResult.secure_url;
+
+    console.log("Uploaded to Cloudinary:", labelUrl);
+    console.log("Upload result:", uploadResult);
 
     // Get current bundle
     const currentBundle = await ReturnBundle.findById(bundleId).lean();
@@ -558,6 +561,7 @@ export const editLabel = async (req, res) => {
     if ([".pdf", ".docx", ".doc", ".zip"].includes(fileExt)) {
       resourceType = "auto";
     }
+    console.log("Label file received:", req.files);
     // Upload to Cloudinary if file is provided
     let labelUrl = null;
     if (req.files && req.files.length > 0) {
@@ -570,6 +574,9 @@ export const editLabel = async (req, res) => {
         access_mode: "public",
       });
       labelUrl = uploadResult.secure_url;
+
+      console.log("Uploaded to Cloudinary:", labelUrl);
+      console.log("Upload result:", uploadResult);
     }
 
     // Fetch current bundle
