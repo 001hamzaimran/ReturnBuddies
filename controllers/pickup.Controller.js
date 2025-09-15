@@ -207,6 +207,7 @@ export const pickupById = async (req, res) => {
     }
 };
 
+
 export const pickupcancelled = async (req, res) => {
     try {
         const { id } = req.params;
