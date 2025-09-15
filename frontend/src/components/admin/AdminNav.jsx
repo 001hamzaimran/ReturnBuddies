@@ -15,7 +15,7 @@ export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
   const user = JSON.parse(localStorage.getItem("user"))
   const BASE_URL = import.meta.env.VITE_BASE_URL;
   const token = localStorage.getItem("token");
-  const userId = JSON.parse(localStorage.getItem("user")).user._id;
+  const userId = JSON.parse(localStorage.getItem("user"))?.user?._id;
 
 
   const getAllPickups = async () => {
@@ -36,6 +36,7 @@ export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
     }
   };
 
+  const unreadPickups = pickups.filter(p => !p.isRead);
 
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -66,6 +67,16 @@ export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
     };
   }, []);
 
+  const markAsRead = async (id) => {
+    await fetch(`${BASE_URL}mark-pickup-read/${id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    });
+    getAllPickups();
+  };
 
   useEffect(() => {
     getAllPickups()
@@ -95,11 +106,12 @@ export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
             className="relative"
           >
             <HiBell size={23} className="text-purple-800 hover:text-purple-900" />
-            {pickups.length > 0 && (
+            {unreadPickups.length > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 rounded-full">
-                {pickups.length}
+                {unreadPickups.length}
               </span>
             )}
+
           </button>
 
           {notificationsOpen && (
@@ -109,9 +121,13 @@ export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
                 {/* <span className="text-xs text-gray-500">{unreadPickups.length} new</span> */}
               </div>
               <div className="max-h-72 overflow-y-auto">
-                {pickups.length > 0 ? (
-                  pickups.map(pickup => (
-                    <div key={pickup._id} className="px-4 py-3 hover:bg-gray-50 border-b last:border-none cursor-pointer">
+                {unreadPickups.length > 0 ? (
+                  unreadPickups.map(pickup => (
+                    <div
+                      key={pickup._id}
+                      onClick={() => markAsRead(pickup._id)}
+                      className="px-4 py-3 cursor-pointer border-b hover:bg-gray-100 bg-purple-50"
+                    >
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-gray-900">{pickup.PickupName}</span>
                         <span className="text-xs text-gray-500">{pickup.userId?.name}</span>
@@ -124,10 +140,16 @@ export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
                 ) : (
                   <div className="px-4 py-4 text-sm text-gray-500 text-center">No new notifications</div>
                 )}
+
               </div>
-              <div className="text-center px-4 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer">
-                <Link className="text-sm text-purple-600 font-medium">View all pickups</Link>
-              </div>
+              <Link to="/admin/dashboard/Pickup-Management">
+                <div className="text-center px-4 py-2 bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                  <span className="text-sm text-purple-600 font-medium">
+                    View all pickups
+                  </span>
+                </div>
+              </Link>
+
             </div>
           )}
 

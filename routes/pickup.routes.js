@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addCarrierAndTracking, addExtraCharges, addLabelIssue, createPickup, getAllCompletedPickupsCount, getAllPickups, getAllPickupsAdmin, getPickupByDateandTime, pickupById, PickupbyStatus, pickupcancelled, updatePickupDateAdmin, updatePickupStatus } from "../controllers/pickup.Controller.js";
+import { addCarrierAndTracking, addExtraCharges, addLabelIssue, createPickup, getAllCompletedPickupsCount, getAllPickups, getAllPickupsAdmin, getPickupByDateandTime, markPickupAsRead, pickupById, PickupbyStatus, pickupcancelled, updatePickupDateAdmin, updatePickupStatus } from "../controllers/pickup.Controller.js";
 import { isLogin } from "../middlewares/authMiddleware.js";
 
 const pickupRouter = Router();
@@ -17,6 +17,7 @@ pickupRouter.post('/add-tracking-carrier/:id', isLogin, addCarrierAndTracking);
 pickupRouter.post('/add-extra-charges/:id', isLogin, addExtraCharges);
 pickupRouter.post('/add-label-issue/:id', isLogin, addLabelIssue);
 pickupRouter.post('/update-pickup-date/:id', isLogin, updatePickupDateAdmin);
+pickupRouter.post('/mark-pickup-read/:id', isLogin, markPickupAsRead);
 
 
 export default pickupRouter;

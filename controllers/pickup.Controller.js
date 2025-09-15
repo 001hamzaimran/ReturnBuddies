@@ -474,6 +474,7 @@ export const addExtraCharges = async (req, res) => {
         });
     }
 }
+
 export const addLabelIssue = async (req, res) => {
     try {
         const { id } = req.params;
@@ -570,5 +571,22 @@ export const updatePickupDateAdmin = async (req, res) => {
     } catch (err) {
         console.error("Error fetching pickups:", err);
         return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+
+export const markPickupAsRead = async (req, res) => {
+    try {
+        const pickupId = req.params.id;
+        const pickup = await pickupModel.findByIdAndUpdate(
+            pickupId,
+            { isRead: true },
+            { new: true }
+        );
+        if (!pickup) return res.status(404).json({ message: "Pickup not found" });
+        return res.json({ message: "Marked as read", pickup });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error" });
     }
 };

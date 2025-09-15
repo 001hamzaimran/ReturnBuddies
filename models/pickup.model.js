@@ -102,7 +102,9 @@ const pickupSchema = new mongoose.Schema({
     labelIssue: {
         type: String,
         default: ''
-    }
+    },
+    isRead: { type: Boolean, default: false },
+
 }, {
     timestamps: true
 });
