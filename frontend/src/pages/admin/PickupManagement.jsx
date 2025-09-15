@@ -251,16 +251,19 @@ export default function PickupManagement() {
             <option value="">ALL</option>
             {[
               { value: "Pickup Requested", key: "Pickup Requested" },
-              { value: "Picked up", key: "picked up" },
-              { value: "In Warehouse", key: "Inspected" },
-              { value: "Dropped Off", key: "in transit" },
-              { value: "Complete", key: "completed" },
+              { value: "Picked Up", key: "Picked Up" },
+              { value: "Inspected", key: "Inspected" },
+              { value: "In Transit", key: "In Transit" },
+              { value: "Completed", key: "Completed" },
+              { value: "Pickup Cancelled", key: "Pickup Cancelled" },
+              { value: "Delivered", key: "Delivered" },
             ].map((slot) => (
               <option key={slot.key} value={slot.value}>
                 {slot.value}
               </option>
             ))}
           </select>
+
         </div>
       </div>
 

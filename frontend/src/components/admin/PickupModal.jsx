@@ -321,7 +321,7 @@ export default function PickupModal({
                                                                 <p className="font-semibold text-red-700">
                                                                     Extra Charge: ${entry.extraCharge}
                                                                 </p>
-                                                                <p className="text-sm text-gray-500">{entry.labelIssue}</p>
+                                                                <p className="text-sm text-gray-500">{entry.chargeDetail}</p>
                                                             </>
                                                         ) : entry.type === "Issue" ? (
                                                             <>

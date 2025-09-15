@@ -109,7 +109,11 @@ const Login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await UserModel.findOne({ email }).populate("pickupAddress").populate("payment");
+    const user = await UserModel.findOne({ email })
+      .populate({ path: "pickupAddress", model: "Address" })
+      .populate({ path: "payment", model: "Card" });
+
+
 
     if (!user) {
       return res

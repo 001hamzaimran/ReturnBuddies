@@ -401,6 +401,8 @@ export const uploadLabel = async (req, res) => {
       folder: 'return-bundles',
       use_filename: true,
       unique_filename: false,
+      type: "upload",
+      access_mode: "public",
       resource_type: resourceType
     });
     const labelUrl = uploadResult.secure_url;
@@ -564,7 +566,8 @@ export const editLabel = async (req, res) => {
         folder: 'return-bundles',
         use_filename: true,
         unique_filename: false,
-        access_mode: "public"
+        type: "upload",
+        access_mode: "public",
       });
       labelUrl = uploadResult.secure_url;
     }
