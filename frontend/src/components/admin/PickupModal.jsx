@@ -29,6 +29,7 @@ export default function PickupModal({
     const [carrier, setCarrier] = useState(pickup?.Carrier || "");
     const [tracking, setTracking] = useState(pickup?.TrackingNumber || "");
     const [extraCharges, setExtraCharges] = useState(pickup?.extraCharge || "");
+    const [chargeDetail, setChargeDetail] = useState(pickup?.chargeDetail || "");
     const [labelIssue, setLabelIssue] = useState(pickup?.labelIssue || "");
 
     const [isEditingDate, setIsEditingDate] = useState(false);
@@ -417,8 +418,14 @@ export default function PickupModal({
                                             placeholder="e.g., 321"
                                             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                         />
+                                        <textarea
+                                            value={chargeDetail}
+                                            onChange={(e) => setChargeDetail(e.target.value)}
+                                            placeholder="Describe charge Detail..."
+                                            className="w-full mt-2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        />
                                         <button
-                                            onClick={() => onAddExtraCharges(pickup._id, extraCharges)}
+                                            onClick={() => onAddExtraCharges(pickup._id, extraCharges,chargeDetail)}
                                             className="mt-2 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 active:scale-95 transition"
                                         >
                                             Charge

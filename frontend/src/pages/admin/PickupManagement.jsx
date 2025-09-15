@@ -152,7 +152,7 @@ export default function PickupManagement() {
     }
   };
 
-  const AddExtraCharges = async (pickupId, extraCharges, labelIssue) => {
+  const AddExtraCharges = async (pickupId, extraCharges, chargeDetail) => {
     try {
       const response = await fetch(`${BASE_URL}add-extra-charges/${pickupId}`, {
         method: "POST",
@@ -161,7 +161,7 @@ export default function PickupManagement() {
           userid: userId,
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ extraCharges, labelIssue }),
+        body: JSON.stringify({ extraCharges, chargeDetail }),
       });
       if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();

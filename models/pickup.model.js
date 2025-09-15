@@ -43,6 +43,7 @@ const pickupSchema = new mongoose.Schema({
                 enum: ['Pickup Requested', 'Picked Up', 'Inspected', 'Completed', 'Pickup Cancelled', 'In Transit', 'Delivered']
             },
             extraCharge: Number,
+            chargeDetail: String,
             labelIssue: String,
             updatedAt: {
                 type: Date,
@@ -98,6 +99,10 @@ const pickupSchema = new mongoose.Schema({
     extraCharge: {
         type: Number,
         default: 0
+    },
+    chargeDetail: {
+        type: String,
+        default: ''
     },
     labelIssue: {
         type: String,

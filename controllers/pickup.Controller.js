@@ -144,7 +144,7 @@ export const PickupbyStatus = async (req, res) => {
             });
         }
         // pickups whose status are not "cancelled","completed","delivered"
-        const recentPickups = await pickupModel.find({ userId, status: { $nin: ["Pickup cancelled", "completed", "delivered"] } }).populate({
+        const recentPickups = await pickupModel.find({ userId, status: { $nin: ["Pickup Cancelled", "Completed", "Delivered"] } }).populate({
             path: 'bundleId',
             populate: {
                 path: 'products', // nested field inside bundle
@@ -153,7 +153,9 @@ export const PickupbyStatus = async (req, res) => {
         }).populate('userId');
 
         // pickups whose status are  "Pickup cancelled","completed","delivered"
-        const pastPickups = await pickupModel.find({ userId, status: { $in: ["Pickup cancelled", "completed", "delivered"] } }).populate({
+        const pastPickups = await pickupModel.find({
+            userId, status: { $in: ["Pickup Cancelled", "Completed", "Delivered"] }
+        }).populate({
             path: 'bundleId',
             populate: {
                 path: 'products', // nested field inside bundle
@@ -411,7 +413,7 @@ export const addCarrierAndTracking = async (req, res) => {
 export const addExtraCharges = async (req, res) => {
     try {
         const { id } = req.params;
-        const { extraCharges } = req.body;
+        const { extraCharges, chargeDetail } = req.body;
 
         if (!extraCharges) {
             return res.status(400).json({
@@ -448,11 +450,13 @@ export const addExtraCharges = async (req, res) => {
         }
 
         pickup.extraCharge = extraCharges;
+        pickup.chargeDetail = chargeDetail || "";
         pickup.totalPrice += parseInt(extraCharges);
 
         pickup.statusHistory.push({
             type: "extraCharge",
             extraCharge: extraCharges,
+            chargeDetail: chargeDetail || "",
             updatedAt: new Date(),
         });
 
