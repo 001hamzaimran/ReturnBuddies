@@ -124,15 +124,15 @@ export default function AdminNav({ sidebarOpen, setSidebarOpen }) {
                 {unreadPickups.length > 0 ? (
                   unreadPickups.map(pickup => (
                     <div
-                      key={pickup._id}
-                      onClick={() => markAsRead(pickup._id)}
+                      key={pickup?._id}
+                      onClick={() => markAsRead(pickup?._id)}
                       className="px-4 py-3 cursor-pointer border-b hover:bg-gray-100 bg-purple-50"
                     >
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-900">{pickup.PickupName}</span>
-                        <span className="text-xs text-gray-500">{pickup.userId?.name}</span>
+                        <span className="text-sm font-medium text-gray-900">{pickup?.PickupName}</span>
+                        <span className="text-xs text-gray-500">{pickup?.userId?.name}</span>
                         <span className="text-xs text-gray-400">
-                          {pickup.pickupAddress?.city}, {pickup.pickupAddress?.state}
+                          {pickup?.pickupAddress?.city}, {pickup?.pickupAddress?.state}
                         </span>
                       </div>
                     </div>

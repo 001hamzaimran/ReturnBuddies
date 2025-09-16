@@ -12,8 +12,7 @@ const API = {
     enableDay: (base) => `${base}update-disabled-slot`,
     setSlotCapacity: (base) => `${base}set-slot-capacity`,
     setDayCapacity: (base) => `${base}set-day-capacity`,
-    getPickups: (base, date, timeSlot) =>
-        `${base}pickups?date=${date}&timeSlot=${encodeURIComponent(timeSlot)}`,
+    getPickups: (base, date, timeSlot) => `${base}pickups?date=${date}&timeSlot=${encodeURIComponent(timeSlot)}`,
 };
 
 const DEFAULT_SLOTS = [
@@ -234,20 +233,30 @@ export default function PickupSlotsDashboard() {
             const results = await Promise.all(
                 days.map((d) => axios.get(API.getDay(BASE_URL, d)).catch(() => ({ data: {} })))
             );
-            const mapped = results.map((r, i) => ({
-                date: days[i],
-                slots: r.data?.slots || [],
-                dayBooked:
-                    r.data?.dayBooked ??
-                    (r.data?.slots || []).reduce((a, s) => a + (s.pickupsBooked || 0), 0),
-                dayCapacity: r.data?.dayCapacity ?? null,
-            }));
+
+            const mapped = results.map((r, i) => {
+                const map = new Map((r.data?.slots || []).map((s) => [s.timeSlot, s]));
+                const mergedSlots = DEFAULT_SLOTS.map((t) =>
+                    map.get(t) || { timeSlot: t, disabled: false, capacity: 0, pickupsBooked: 0 }
+                );
+                return {
+                    date: days[i],
+                    slots: mergedSlots,
+                    dayBooked:
+                        r.data?.dayBooked ??
+                        mergedSlots.reduce((a, s) => a + (s.pickupsBooked || 0), 0),
+                    dayCapacity: r.data?.dayCapacity ?? null,
+                };
+            });
+
             setWeekData(mapped);
         } catch (err) {
             console.error(err);
             toast.error("Failed to load week data");
         }
     }
+
+
 
     useEffect(() => {
         if (viewMode === "weekly") fetchWeek();
@@ -553,13 +562,17 @@ export default function PickupSlotsDashboard() {
                                                 {(d.slots || []).map((s) => {
                                                     const st = statusFor(s);
                                                     return (
-                                                        <span key={s.timeSlot} className={`px-2 py-1 rounded text-xs ${st.color} border`}>
-                                                            {s.timeSlot.split(" ")[0]}: {s.pickupsBooked}/{s.capacity || 0}
+                                                        <span
+                                                            key={s.timeSlot}
+                                                            className={`px-2 py-1 rounded text-xs ${st.color} border`}
+                                                        >
+                                                            {s.timeSlot}: {s.pickupsBooked}/{s.capacity || 0}
                                                         </span>
                                                     );
                                                 })}
                                             </div>
                                         </td>
+
                                     </tr>
                                 ))}
                             </tbody>

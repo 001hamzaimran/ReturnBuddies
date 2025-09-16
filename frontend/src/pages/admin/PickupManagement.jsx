@@ -28,7 +28,7 @@ export default function PickupManagement() {
   const filteredPickups = pickups.filter((pickup) => {
     const search = searchProductByID.trim().toLowerCase();
 
-    const matchesProductId = pickup.PickupName
+    const matchesProductId = pickup?.PickupName
       ?.toLowerCase()
       .includes(search);
 
