@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { addPromo, deletePromos, getAllPromo, getPromo } from "../controllers/Promo.Controller.js";
 import { get } from "mongoose";
-import { isAdmin } from "../middlewares/authMiddleware.js";
+import { isAdmin, isLogin } from "../middlewares/authMiddleware.js";
 
 export const PromoRouter = Router();
 
