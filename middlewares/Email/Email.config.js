@@ -1,16 +1,16 @@
+import nodemailer from "nodemailer";
 
-import nodemailer from 'nodemailer'
+const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // must be false for STARTTLS
+    auth: {
+        user: "developpment.mail@gmail.com",
+        pass: "wizw klyf yeuw fdpn", // your App Password
+    },
+    tls: {
+        rejectUnauthorized: false, // helps with some hosting issues
+    },
+});
 
-
-const transporter=nodemailer.createTransport({
-    host:'smtp.gmail.com',
-    secure:false,
-    port:587,
-    auth:{
-   
-        user:`developpment.mail@gmail.com`,
-        pass: 'wizw klyf yeuw fdpn',
-    }
-})
-
-export default transporter
+export default transporter;
