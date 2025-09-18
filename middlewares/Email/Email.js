@@ -1,13 +1,10 @@
-
-import transporter from "../Email/Email.config.js"
-
+// import transporter from "../Email/Email.config.js";
+import { sendMail } from "../Email/Email.config.js";
 
 const sendVerficationEmail = async (email, verificationCode) => {
-
-
   try {
-    await transporter.sendMail({
-      from: `"RETURNBUDDIES" <${process.env.Email_Sender}>`,
+    await sendMail({
+      to,
       to: email,
       subject: "Verify your Email",
       text: "Verify your Email",
@@ -40,8 +37,6 @@ const sendVerficationEmail = async (email, verificationCode) => {
   `,
     });
 
-
-
     return { success: true };
   } catch (error) {
     console.log("Email error", error);
@@ -53,13 +48,12 @@ const sendVerficationEmail = async (email, verificationCode) => {
   }
 };
 
-export default sendVerficationEmail
-
+export default sendVerficationEmail;
 
 const LabelIssueEmail = async (email, labelIssue) => {
   try {
-    await transporter.sendMail({
-      from: `"RETURNBUDDIES" <${process.env.Email_Sender}>`,
+    await sendMail({
+      to,
       to: email,
       subject: "Label Issue Report - RETURNBUDDIES",
       text: `Dear user, we detected an issue: ${labelIssue}`,
@@ -110,8 +104,7 @@ const LabelIssueEmail = async (email, labelIssue) => {
 
 const ExtraChargeEmail = async (email, extraCharge) => {
   try {
-    await transporter.sendMail({
-      from: `"RETURNBUDDIES" <${process.env.Email_Sender}>`,
+    await sendMail({
       to: email,
       subject: "Extra Charge Notification - RETURNBUDDIES",
       text: `Dear user, an extra charge of $${extraCharge} has been applied to your account.`,
@@ -152,4 +145,4 @@ const ExtraChargeEmail = async (email, extraCharge) => {
   }
 };
 
-export { LabelIssueEmail, ExtraChargeEmail }
+export { LabelIssueEmail, ExtraChargeEmail };

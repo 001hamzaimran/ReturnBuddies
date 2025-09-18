@@ -283,7 +283,7 @@ export default function PickupManagement() {
             </tr>
           </thead>
           <tbody>
-            {paginatedPickups.map((pickup) => {
+            {paginatedPickups.reverse().map((pickup) => {
               const addressObj = pickup.pickupAddress || {};
               const fullAddress = ` ${addressObj.city || ""}, ${addressObj.state || ""}, ${addressObj.postalCode || ""
                 }`;
