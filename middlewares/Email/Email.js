@@ -50,11 +50,10 @@ const sendVerficationEmail = async (email, verificationCode) => {
 
 export default sendVerficationEmail;
 
-const LabelIssueEmail = async (email, labelIssue) => {
+const LabelIssueEmail = async (to, labelIssue) => {
   try {
     await sendMail({
       to,
-      to: email,
       subject: "Label Issue Report - RETURNBUDDIES",
       text: `Dear user, we detected an issue: ${labelIssue}`,
       html: `
@@ -102,10 +101,10 @@ const LabelIssueEmail = async (email, labelIssue) => {
   }
 };
 
-const ExtraChargeEmail = async (email, extraCharge) => {
+const ExtraChargeEmail = async (to, extraCharge) => {
   try {
     await sendMail({
-      to: email,
+      to,
       subject: "Extra Charge Notification - RETURNBUDDIES",
       text: `Dear user, an extra charge of $${extraCharge} has been applied to your account.`,
       html: `

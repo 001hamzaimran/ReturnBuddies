@@ -1,5 +1,7 @@
 import sgMail from "@sendgrid/mail";
 
-// Load your SendGrid API key
-sgMail.setApiKey(process.env.Return_Buddies_SendGrid_API_Key);
+// sgMail.setApiKey(process.env.SendGrid_API_Key);
+sgMail.setApiKey(
+  "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"
+);
 export default sgMail;
