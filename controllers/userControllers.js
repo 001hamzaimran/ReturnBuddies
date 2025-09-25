@@ -1,7 +1,7 @@
 import UserModel from "../models/User.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import sendVerficationEmail from "../middlewares/Email/Email.js";
+import sendVerificationEmail from "../middlewares/Email/Email.js";
 
 import jsonwebtoken from "jsonwebtoken";
 import ForgotModal from "../models/ForgotPassword.js";
@@ -29,7 +29,7 @@ const Register = async (req, res) => {
     const otp = crypto.randomInt(10000, 99999).toString();
 
     // Send email
-    const emailResponse = await sendVerficationEmail(email, otp);
+    const emailResponse = await sendVerificationEmail(email, otp);
     if (!emailResponse.success) {
       return res.status(500).json({
         success: false,
@@ -137,7 +137,7 @@ const Login = async (req, res) => {
     if (!user.verified) {
       const verificationToken = crypto.randomInt(10000, 99999).toString();
 
-      await sendVerficationEmail(email, verificationToken);
+      await sendVerificationEmail(email, verificationToken);
       await UserModel.findOneAndUpdate({ email }, { otp: verificationToken });
       return res
         .status(200)
@@ -257,7 +257,7 @@ const ForgotPassword = async (req, res) => {
     const otp = crypto.randomInt(10000, 99999).toString();
 
     // Send OTP to email
-    await sendVerficationEmail(email, otp);
+    await sendVerificationEmail(email, otp);
 
     // Upsert OTP record in ForgotModal
     const expiresAt = new Date(Date.now() + 5 * 60 * 60 * 1000); // 5 hours from now
