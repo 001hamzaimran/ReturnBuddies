@@ -11,7 +11,7 @@ import {
   FiUser,
   FiCalendar,
   FiMapPin,
-  FiLoader
+  FiLoader,
 } from "react-icons/fi";
 import { date } from "zod";
 
@@ -28,6 +28,7 @@ export default function WarehouseManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [activePickup, setActivePickup] = useState(null);
   const [activeBundle, setActiveBundle] = useState(null);
+  const [selectedWareHouse, setSelectedWarehouse] = useState("");
 
   // Helper function to render media (image or pdf)
   const renderMedia = (url, alt, height = "300px") => {
@@ -46,7 +47,12 @@ export default function WarehouseManagement() {
         >
           <p>
             PDF cannot be displayed.
-            <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
               Open PDF
             </a>
           </p>
@@ -62,7 +68,6 @@ export default function WarehouseManagement() {
       />
     );
   };
-
 
   useEffect(() => {
     console.log("Selected Product:", selectedProduct);
@@ -213,26 +218,30 @@ export default function WarehouseManagement() {
     };
   };
 
+// ✅ Filter by search + dropdown (status)
+const filteredPickups = pickups.filter((pickup) => {
+  // Match text input (user, bundle, product)
+  const searchLower = searchTerm.toLowerCase();
+  const userMatch = pickup.user?.name?.toLowerCase().includes(searchLower) ;
 
+  console.log("==>",pickup)
+  const bundleMatch = pickup.pickupName.toLowerCase().includes(searchLower)
 
-  // ✅ Filter by search (user, bundle, product)
-  const filteredPickups = pickups.filter((pickup) => {
-    const userMatch = pickup.user?.name
-      ?.toLowerCase()
-      .includes(searchTerm.toLowerCase());
+  const productMatch = pickup.bundles.some((bundle) =>
+    bundle.products.some((p) =>
+      p.productName.toLowerCase().includes(searchLower)
+    )
+  );
 
-    const bundleMatch = pickup.bundles.some((bundle) =>
-      bundle.BundleName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const textMatch = userMatch || bundleMatch || productMatch;
 
-    const productMatch = pickup.bundles.some((bundle) =>
-      bundle.products.some((p) =>
-        p.productName.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
+  // Match dropdown (status filter)
+  const statusMatch =
+    selectedWareHouse === "" ||
+    pickup.status?.toLowerCase() === selectedWareHouse.toLowerCase();
 
-    return userMatch || bundleMatch || productMatch;
-  });
+  return textMatch && statusMatch;
+});
 
   // Toggle pickup details
   const togglePickup = (pickupId) => {
@@ -272,16 +281,39 @@ export default function WarehouseManagement() {
       </h1>
 
       {/* ✅ Search Bar */}
-      <div className="mb-6 flex items-center max-w-md mx-auto md:mx-0">
-        <div className="relative w-full">
-          <FiSearch className="absolute left-3 top-3 text-gray-400" />
+      <div className="flex flex-row">
+        <div className="mb-6 relative md:w-1/2 mr-2">
+          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg" />
           <input
             type="text"
-            placeholder="Search by product, bundle or user..."
             value={searchTerm}
+            placeholder="Search by product, bundle or user..."
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors duration-200"
           />
+        </div>
+
+        <div className="mb-6 relative md:w-1/2">
+          <select
+            value={selectedWareHouse}
+            onChange={(e) => setSelectedWarehouse(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-purple-500"
+          >
+            <option value="">ALL</option>
+            {[
+              { value: "Pickup Requested", key: "Pickup Requested" },
+              { value: "Picked Up", key: "Picked Up" },
+              { value: "Inspected", key: "Inspected" },
+              { value: "In Transit", key: "In Transit" },
+              { value: "Completed", key: "Completed" },
+              { value: "Pickup Cancelled", key: "Pickup Cancelled" },
+              { value: "Delivered", key: "Delivered" },
+            ].map((slot) => (
+              <option key={slot.key} value={slot.value}>
+                {slot.value}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -299,7 +331,9 @@ export default function WarehouseManagement() {
           <FiInfo className="mx-auto text-3xl mb-3 text-gray-400" />
           <p className="text-lg font-medium mb-1">No pickups found</p>
           <p className="text-gray-500">
-            {searchTerm ? "Try adjusting your search query" : "No pickups available at the moment"}
+            {searchTerm
+              ? "Try adjusting your search query"
+              : "No pickups available at the moment"}
           </p>
         </div>
       )}
@@ -321,13 +355,20 @@ export default function WarehouseManagement() {
                   <h2 className="text-lg md:text-xl font-semibold mr-2">
                     Pickup: {pickup.pickupName || pickup.pickupId}
                   </h2>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(pickup.status)}`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                      pickup.status
+                    )}`}
+                  >
                     {pickup.status}
                   </span>
                 </div>
                 <div className="flex items-center mt-1 text-gray-500 text-sm">
                   <FiCalendar className="mr-1" />
-                  <span>{new Date(pickup.pickupDate).toLocaleDateString()} | {pickup.pickupTime}</span>
+                  <span>
+                    {new Date(pickup.pickupDate).toLocaleDateString()} |{" "}
+                    {pickup.pickupTime}
+                  </span>
                 </div>
               </div>
               <div className="transform transition-transform duration-200">
@@ -354,11 +395,16 @@ export default function WarehouseManagement() {
                       <FiUser className="mr-1 text-blue-600" />
                       {pickup.user.name}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-1">{pickup.user.email}</p>
+                    <p className="text-sm text-gray-600 mb-1">
+                      {pickup.user.email}
+                    </p>
                     {pickup.pickupAddress && (
                       <p className="text-sm text-gray-600 flex items-start">
                         <FiMapPin className="mr-1 text-blue-600 mt-0.5 flex-shrink-0" />
-                        <span>{pickup.pickupAddress.street}, {pickup.pickupAddress.city}</span>
+                        <span>
+                          {pickup.pickupAddress.street},{" "}
+                          {pickup.pickupAddress.city}
+                        </span>
                       </p>
                     )}
                   </div>
@@ -367,7 +413,10 @@ export default function WarehouseManagement() {
                 {/* Bundles */}
                 <div className="space-y-4">
                   {pickup.bundles.map((bundle, bundleIndex) => (
-                    <div key={bundleIndex} className="border rounded-lg overflow-hidden">
+                    <div
+                      key={bundleIndex}
+                      className="border rounded-lg overflow-hidden"
+                    >
                       {/* Bundle Header */}
                       <div
                         className="bg-gray-50 p-3 cursor-pointer flex justify-between items-center"
@@ -376,7 +425,11 @@ export default function WarehouseManagement() {
                         <div className="flex items-center">
                           <FiPackage className="mr-2 text-blue-600" />
                           <h3 className="font-semibold">{bundle.BundleName}</h3>
-                          <span className={`ml-3 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(bundle.status)}`}>
+                          <span
+                            className={`ml-3 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                              bundle.status
+                            )}`}
+                          >
                             {bundle.status}
                           </span>
                         </div>
@@ -406,8 +459,13 @@ export default function WarehouseManagement() {
                               </thead>
                               <tbody>
                                 {bundle.products.map((product) => (
-                                  <tr key={product._id} className="border-b hover:bg-gray-50 transition-colors duration-150">
-                                    <td className="px-3 py-2 font-medium">{product.productName}</td>
+                                  <tr
+                                    key={product._id}
+                                    className="border-b hover:bg-gray-50 transition-colors duration-150"
+                                  >
+                                    <td className="px-3 py-2 font-medium">
+                                      {product.productName}
+                                    </td>
                                     <td className="px-3 py-2">
                                       <img
                                         src={product.thumbnail}
@@ -416,13 +474,19 @@ export default function WarehouseManagement() {
                                       />
                                     </td>
                                     <td className="px-3 py-2">
-                                      <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(product.status)}`}>
+                                      <span
+                                        className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
+                                          product.status
+                                        )}`}
+                                      >
                                         {pickup.status}
                                       </span>
                                     </td>
                                     <td className="px-3 py-2">
                                       {bundle.pickupTime
-                                        ? new Date(bundle.pickupTime).toLocaleDateString()
+                                        ? new Date(
+                                            bundle.pickupTime
+                                          ).toLocaleDateString()
                                         : "N/A"}
                                     </td>
 
@@ -437,7 +501,14 @@ export default function WarehouseManagement() {
                                     </td>
                                     <td className="px-3 py-2">
                                       <button
-                                        onClick={() => handleView(product, bundle.products, pickup.status, product.date)}
+                                        onClick={() =>
+                                          handleView(
+                                            product,
+                                            bundle.products,
+                                            pickup.status,
+                                            product.date
+                                          )
+                                        }
                                         className="text-blue-600 hover:text-blue-800 flex items-center space-x-1 transition-colors duration-150 p-1 rounded hover:bg-blue-50"
                                       >
                                         <FiEye className="text-sm" />
@@ -481,13 +552,14 @@ export default function WarehouseManagement() {
                 selectedProduct.product.labelReceipt,
                 selectedProduct.product.productName
               )}
-
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
               <div className="p-3 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-500">Product Name</p>
-                <p className="font-medium">{selectedProduct.product.productName}</p>
+                <p className="font-medium">
+                  {selectedProduct.product.productName}
+                </p>
               </div>
 
               <div className="p-3 bg-gray-50 rounded-lg">
@@ -546,8 +618,14 @@ export default function WarehouseManagement() {
 
       <style jsx>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-out;

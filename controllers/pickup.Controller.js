@@ -328,7 +328,7 @@ export const getAllPickupsAdmin = async (req, res) => {
           path: "products", // inside each bundle, populate products
           model: "ProductItem", // must match your Product model name
         },
-      });
+      }).sort({ createdAt: -1 }); 
 
     res.status(200).json({
       success: true,
@@ -567,7 +567,7 @@ export const addExtraCharges = async (req, res) => {
 
     await pickup.save();
 
-    await ExtraChargeEmail(pickup?.userId?.email, extraCharges);
+    await ExtraChargeEmail(pickup?.userId?.email,paymentIntent, extraCharges);
 
     return res.status(200).json({
       success: true,

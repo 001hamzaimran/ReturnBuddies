@@ -225,7 +225,7 @@ export default function PickupManagement() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Pickup Management</h2>
+        <h2 className="text-2xl font-bold">Pickup Management</h2> 
       </div>
 
       <PickupStatus pickedUpCount={pickedUpCount} warehouseCount={warehouseCount} carrierCount={carrierCount} TotalPickups={TotalPickups} />
@@ -283,7 +283,7 @@ export default function PickupManagement() {
             </tr>
           </thead>
           <tbody>
-            {paginatedPickups.reverse().map((pickup) => {
+            {paginatedPickups.map((pickup) => {
               const addressObj = pickup.pickupAddress || {};
               const fullAddress = ` ${addressObj.city || ""}, ${addressObj.state || ""}, ${addressObj.postalCode || ""
                 }`;

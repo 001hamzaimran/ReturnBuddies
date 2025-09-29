@@ -4,6 +4,7 @@ import toast, { Toaster } from "react-hot-toast";
 import "react-datepicker/dist/react-datepicker.css";
 import React, { useEffect, useMemo, useState } from "react";
 import { addDays, format, startOfWeek, addWeeks, subWeeks } from "date-fns";
+import moment from "moment";
 
 const API = {
   getDay: (base, date) => `${base}get-slots-data?date=${date}`,
@@ -112,7 +113,7 @@ function PickupsModal({ open, onClose, pickups }) {
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-gray-600">
-                      {new Date(p.pickupDate).toLocaleDateString()}
+                    {moment(p.pickupDate).format("MM/D/yyyy")}
                     </div>
                     <div className="text-sm text-gray-600">{p.pickupTime}</div>
                   </div>

@@ -257,6 +257,7 @@ const ForgotPassword = async (req, res) => {
     const otp = crypto.randomInt(10000, 99999).toString();
 
     // Send OTP to email
+    console.log(email)
     await sendVerificationEmail(email, otp);
 
     // Upsert OTP record in ForgotModal
