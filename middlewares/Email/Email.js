@@ -3,7 +3,7 @@ import { sendMail } from "../Email/Email.config.js";
 
 const sendVerificationEmail = async (to, verificationCode) => {
   try {
-    await sendMail({
+    await sendMail({ 
       to,
       subject: "Verify your Email - RETURNBUDDIES",
       text: `Thanks for signing up! Please verify your email using this code: ${verificationCode}`,

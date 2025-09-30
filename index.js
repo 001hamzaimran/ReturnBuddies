@@ -1,62 +1,76 @@
-import express from 'express'
-import dotenv from 'dotenv'
-import cors from 'cors'
-import passport from 'passport'
-import session from 'express-session'
-import DbCon from './utils/db.js'
-import cron from 'node-cron';
+import cors from "cors";
+import path from "path";
+import dotenv from "dotenv";
+import cron from "node-cron";
+import express from "express";
+import passport from "passport";
+import DbCon from "./utils/db.js";
+import session from "express-session";
 
-import './middlewares/passport/googleStrategy.js'
+import "./middlewares/passport/googleStrategy.js";
 
-import router from './routes/index.js'
-import bundleRouter from './routes/BundleRoute.js'
-import ProductItemRoutes from './routes/productItem.js'
-import { addressRouter } from './routes/Address.routes.js'
-import { PaymentRouter } from './routes/payment.routes.js'
-import basepriceRouter from './routes/baseprice.routes.js'
-import pickupRouter from './routes/pickup.routes.js'
-import faqRouter from './routes/FAQ.routes.js'
-import { PromoRouter } from './routes/Promo.routes.js'
-import NotificationRouter from './routes/Notification.routes.js'
-import { disabledSlotRouter } from './routes/DisabledSlot.routes.js'
-import { getRoutificOrders } from './controllers/Routific.Controller.js'
+import router from "./routes/index.js";
+import faqRouter from "./routes/FAQ.routes.js";
+import bundleRouter from "./routes/BundleRoute.js";
+import pickupRouter from "./routes/pickup.routes.js";
+import { PromoRouter } from "./routes/Promo.routes.js";
+import ProductItemRoutes from "./routes/productItem.js";
+import { addressRouter } from "./routes/Address.routes.js";
+import { PaymentRouter } from "./routes/payment.routes.js";
+import basepriceRouter from "./routes/baseprice.routes.js";
+import NotificationRouter from "./routes/Notification.routes.js";
+import { disabledSlotRouter } from "./routes/DisabledSlot.routes.js";
+import { getRoutificOrders } from "./controllers/Routific.Controller.js";
 
+dotenv.config();
 
-dotenv.config()
+// db connection
 
-// db connection 
+const PORT = process.env.PORT;
+const app = express();
+app.use(express.json());
+app.use("/public", express.static("public"));
 
-
-const PORT = process.env.PORT
-const app = express()
-app.use(express.json())
-app.use('/public', express.static('public'));
-
-app.use(cors())
+app.use(cors());
 
 // google login setup
-app.use(session({
-  secret: "some-secret",
-  resave: false,
-  saveUninitialized: true,
+app.use(
+  session({
+    secret: "some-secret",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
-}))
-app.use(passport.initialize())
-app.use(passport.session())
+const routes = [
+  router,
+  faqRouter,
+  PromoRouter,
+  bundleRouter,
+  pickupRouter,
+  addressRouter,
+  PaymentRouter,
+  basepriceRouter,
+  ProductItemRoutes,
+  NotificationRouter,
+  disabledSlotRouter,
+];
 
-const routes = [router, bundleRouter, ProductItemRoutes, addressRouter, PaymentRouter, basepriceRouter, pickupRouter, faqRouter, PromoRouter, NotificationRouter, disabledSlotRouter]
-
-function getTodayDate() {
+const getTodayDate = () => {
   return new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
-}
+};
 
-async function cronJob() {
+const cronJob = async () => {
   // Run at minute 0 of every hour → once per hour
   cron.schedule("0 * * * *", async () => {
     const workspaceId = 759727;
     const date = getTodayDate(); // today's date in YYYY-MM-DD
 
-    console.log(`Running cron job at ${new Date().toLocaleTimeString()} for date: ${date}`);
+    console.log(
+      `Running cron job at ${new Date().toLocaleTimeString()} for date: ${date}`
+    );
 
     try {
       const orders = await getRoutificOrders(workspaceId, date);
@@ -65,26 +79,16 @@ async function cronJob() {
       console.error("Error in cron job:", error);
     }
   });
-}
+};
 
-routes.map(route => {
-  app.use('/api', route)
-})
-// app.use('/api', router)
-// app.use('/api', bundleRouter)
-// app.use('/api', ProductItemRoutes)
-// app.use('/api', addressRouter)
-// app.use('/api', PaymentRouter)
-// app.use('/api', PaymentRouter)
+app.get("/privacy-policy", (req, res) => {
+  res.sendFile(path.resolve("public/privacy-policy.html"));
+});
+routes.map((route) => app.use("/api", route));
 
-app.get('/', (req, res) => {
-  res.send("Hello World")
-})
-
+app.get("/", (_, res) => res.send("Hello World"));
 
 cronJob();
-
-
 
 const startServer = async () => {
   try {
@@ -93,15 +97,9 @@ const startServer = async () => {
       console.log(`✅ Server is running on PORT ${PORT}`);
     });
   } catch (error) {
-    console.error('❌ Failed to connect to DB:', error.message);
+    console.error("❌ Failed to connect to DB:", error.message);
     process.exit(1); // Exit the process if DB fails
   }
 };
 
 startServer();
-
-
-
-
-
-
