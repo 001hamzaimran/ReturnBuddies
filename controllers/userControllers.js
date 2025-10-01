@@ -144,6 +144,7 @@ const Login = async (req, res) => {
         .json({
           message: `Please verify your email, email send to ${email}`,
           status: 201,
+          otp: verificationToken,
         });
     }
 
