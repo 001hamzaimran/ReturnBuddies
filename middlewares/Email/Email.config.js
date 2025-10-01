@@ -1,5 +1,8 @@
 import nodemailer from "nodemailer";
 import sgMail from "../../utils/mailer.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -16,6 +19,7 @@ const transporter = nodemailer.createTransport({
 
 export default transporter;
 
+console.log("process.env.Email_Sender",process.env.Email_Sender)
 export const sendMail = async ({ to, subject, text, html }) => {
   try {
     const msg = {
