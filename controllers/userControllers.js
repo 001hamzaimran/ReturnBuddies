@@ -640,7 +640,7 @@ const updateNameandPhoneVerification = async (req, res) => {
       user._id,
       { name, phone },
       { new: true, runValidators: true }
-    )
+    ).populate("pickupAddress").populate("payment");
     if (!currentUser) {
       return res.status(200).json({
         success: false,
@@ -648,6 +648,8 @@ const updateNameandPhoneVerification = async (req, res) => {
         message: "User not found",
       });
     }
+
+    console.log({currentUser})
 
     return res.status(200).json({
       success: true,

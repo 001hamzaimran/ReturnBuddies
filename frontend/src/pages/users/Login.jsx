@@ -12,8 +12,8 @@ export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
   const [value, setValue] = useState({
-    email: "syed.hamza2004@gmail.com",
-    password: "hamza123456"
+    email: "admin@gmail.com",
+    password: "12345678"
   })
   const [showPassword, setShowPassword] = useState(false);
 
