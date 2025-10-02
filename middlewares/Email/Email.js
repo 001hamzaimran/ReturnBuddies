@@ -66,7 +66,6 @@ const sendVerificationEmail = async (to, verificationCode) => {
     </td>
   </tr>
 </table>
-
          <!-- Social End Icons -->
       </div>
     </div>
@@ -132,21 +131,32 @@ const LabelIssueEmail = async (to, labelIssue) => {
           <a href="https://www.returnbuddies.com/contact" style="color: #7e3ff2; text-decoration: none; font-family: 'Poppins', sans-serif;">Contact us</a>.
         </p>
 
-        <!-- Social Icons -->
-         <div style="display: flex; justify-content: center; gap: 12px; margin-top: 16px;">
-          <a target="_blank" href="https://www.facebook.com/profile.php?id=61561992180995" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #f3f4f6; text-decoration: none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/2175/2175193.png" alt="Facebook" style="width:20px; height:20px;" />
-          </a>
-          <a href="https://www.instagram.com/returnbuddies/" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #f3f4f6; text-decoration: none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/1384/1384015.png" alt="Instagram" style="width:20px; height:20px;" />
-          </a>
-          <a href="https://x.com/returnbuddies" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #f3f4f6; text-decoration: none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" alt="Twitter" style="width:20px; height:20px;" />
-          </a>
-          <a href="https://www.linkedin.com/company/returnbuddies" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #f3f4f6; text-decoration: none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/1384/1384014.png" alt="Linkedin" style="width:20px; height:20px;" />
-          </a>
-        </div>
+              <!-- Social Icons -->
+        <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+  <tr valign="middle">
+    <td align="center" style="padding: 0 6px; text-align:center;">
+      <a href="https://www.facebook.com/profile.php?id=61561992180995" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/2175/2175193.png" alt="Facebook" width="40" height="40" style="display:block; border-radius:50%; background:#f3f4f6; padding:10px;" />
+      </a>
+    </td>
+    <td align="center" style="padding: 0 6px; text-align:center;">
+      <a href="https://www.instagram.com/returnbuddies/" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/1384/1384015.png" alt="Instagram" width="40" height="40" style="display:block; border-radius:50%; background:#f3f4f6; padding:10px;" />
+      </a>
+    </td>
+    <td align="center" style="padding: 0 6px; text-align:center;">
+      <a href="https://x.com/returnbuddies" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" alt="Twitter" width="40" height="40" style="display:block; border-radius:50%; background:#f3f4f6; padding:10px;" />
+      </a>
+    </td>
+    <td align="center" style="padding: 0 6px; text-align:center;">
+      <a href="https://www.linkedin.com/company/returnbuddies" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/1384/1384014.png" alt="LinkedIn" width="40" height="40" style="display:block; border-radius:50%; background:#f3f4f6; padding:10px;" />
+      </a>
+    </td>
+  </tr>
+</table>
+         <!-- Social End Icons -->
       </div>
     </div>
     
@@ -226,21 +236,32 @@ const ExtraChargeEmail = async (to, paymentIntent, extraCharge) => {
           <a href="https://www.returnbuddies.com/contact" style="color: #7e3ff2; text-decoration: none; font-family: 'Poppins', sans-serif;">Contact us</a>.
         </p>
 
-        <!-- Social Icons -->
-          <div style="display: flex; justify-content: center; gap: 12px; margin-top: 16px;">
-          <a target="_blank" href="https://www.facebook.com/profile.php?id=61561992180995" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #f3f4f6; text-decoration: none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/2175/2175193.png" alt="Facebook" style="width:20px; height:20px;" />
-          </a>
-          <a href="https://www.instagram.com/returnbuddies/" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #f3f4f6; text-decoration: none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/1384/1384015.png" alt="Instagram" style="width:20px; height:20px;" />
-          </a>
-          <a href="https://x.com/returnbuddies" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #f3f4f6; text-decoration: none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" alt="Twitter" style="width:20px; height:20px;" />
-          </a>
-          <a href="https://www.linkedin.com/company/returnbuddies" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #f3f4f6; text-decoration: none;">
-            <img src="https://cdn-icons-png.flaticon.com/512/1384/1384014.png" alt="Linkedin" style="width:20px; height:20px;" />
-          </a>
-        </div>
+               <!-- Social Icons -->
+        <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+  <tr valign="middle">
+    <td align="center" style="padding: 0 6px; text-align:center;">
+      <a href="https://www.facebook.com/profile.php?id=61561992180995" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/2175/2175193.png" alt="Facebook" width="40" height="40" style="display:block; border-radius:50%; background:#f3f4f6; padding:10px;" />
+      </a>
+    </td>
+    <td align="center" style="padding: 0 6px; text-align:center;">
+      <a href="https://www.instagram.com/returnbuddies/" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/1384/1384015.png" alt="Instagram" width="40" height="40" style="display:block; border-radius:50%; background:#f3f4f6; padding:10px;" />
+      </a>
+    </td>
+    <td align="center" style="padding: 0 6px; text-align:center;">
+      <a href="https://x.com/returnbuddies" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/5969/5969020.png" alt="Twitter" width="40" height="40" style="display:block; border-radius:50%; background:#f3f4f6; padding:10px;" />
+      </a>
+    </td>
+    <td align="center" style="padding: 0 6px; text-align:center;">
+      <a href="https://www.linkedin.com/company/returnbuddies" target="_blank">
+        <img src="https://cdn-icons-png.flaticon.com/512/1384/1384014.png" alt="LinkedIn" width="40" height="40" style="display:block; border-radius:50%; background:#f3f4f6; padding:10px;" />
+      </a>
+    </td>
+  </tr>
+</table>
+         <!-- Social End Icons -->
       </div>
     </div>
     
