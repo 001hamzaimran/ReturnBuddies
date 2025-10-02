@@ -3,7 +3,7 @@ import { sendMail } from "../Email/Email.config.js";
 
 const sendVerificationEmail = async (to, verificationCode) => {
   try {
-    await sendMail({ 
+    await sendMail({
       to,
       subject: "Verify your Email - RETURNBUDDIES",
       text: `Thanks for signing up! Please verify your email using this code: ${verificationCode}`,
@@ -27,7 +27,7 @@ const sendVerificationEmail = async (to, verificationCode) => {
       </p>
       
       <!-- Extra Charge Details -->
-      <div style="background-color: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 16px; margin-bottom: 24px; text-align: center; "> <span style="color: #7e3ff2; font-weight: 600; font-size: 18px; font-family: Arial, sans-serif;">$${verificationCode}</span> </div>
+      <div style="background-color: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 16px; margin-bottom: 24px; text-align: center; "> <span style="color: #7e3ff2; font-weight: 600; font-size: 18px; font-family: Arial, sans-serif;">${verificationCode}</span> </div>
       
       <p style="color: #6b7280; font-size: 14px; text-align: center; margin-bottom: 24px; font-family: 'Poppins', sans-serif;">
         If you didn’t request this, you can safely ignore this email.
@@ -42,7 +42,7 @@ const sendVerificationEmail = async (to, verificationCode) => {
         </p>
 
         <!-- Social Icons -->
-        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 16px;">
+          <div style="display: flex; justify-content: center; gap: 12px; margin-top: 16px;">
           <a target="_blank" href="https://www.facebook.com/profile.php?id=61561992180995" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #f3f4f6; text-decoration: none;">
             <img src="https://cdn-icons-png.flaticon.com/512/2175/2175193.png" alt="Facebook" style="width:20px; height:20px;" />
           </a>
@@ -121,7 +121,7 @@ const LabelIssueEmail = async (to, labelIssue) => {
         </p>
 
         <!-- Social Icons -->
-        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 16px;">
+         <div style="display: flex; justify-content: center; gap: 12px; margin-top: 16px;">
           <a target="_blank" href="https://www.facebook.com/profile.php?id=61561992180995" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #f3f4f6; text-decoration: none;">
             <img src="https://cdn-icons-png.flaticon.com/512/2175/2175193.png" alt="Facebook" style="width:20px; height:20px;" />
           </a>
@@ -215,7 +215,7 @@ const ExtraChargeEmail = async (to, paymentIntent, extraCharge) => {
         </p>
 
         <!-- Social Icons -->
-        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 16px;">
+          <div style="display: flex; justify-content: center; gap: 12px; margin-top: 16px;">
           <a target="_blank" href="https://www.facebook.com/profile.php?id=61561992180995" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #f3f4f6; text-decoration: none;">
             <img src="https://cdn-icons-png.flaticon.com/512/2175/2175193.png" alt="Facebook" style="width:20px; height:20px;" />
           </a>

@@ -19,12 +19,11 @@ const transporter = nodemailer.createTransport({
 
 export default transporter;
 
-console.log("process.env.Email_Sender",process.env.Email_Sender)
 export const sendMail = async ({ to, subject, text, html }) => {
   try {
     const msg = {
       to,
-      from: `"RETURNBUDDIES" <${process.env.Email_Sender}>`,
+      from: process.env.Email_Sender,
       subject,
       text,
       html,
