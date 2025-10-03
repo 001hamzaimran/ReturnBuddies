@@ -189,14 +189,12 @@ const phoneVerfication = async (req, res) => {
     user.phone = phone;
     await user.save();
 
-    return res
-      .status(200)
-      .json({
-        message: "Phone number updated successfully",
-        status: 200,
-        user,
-        otp,
-      });
+    return res.status(200).json({
+      message: "Phone number updated successfully",
+      status: 200,
+      user,
+      otp,
+    });
   } catch (error) {
     console.log("error", error);
     return res
@@ -220,13 +218,11 @@ const verifyPhone = async (req, res) => {
     user.phoneOtp = null;
     user.phoneVerified = true;
     await user.save();
-    return res
-      .status(200)
-      .json({
-        message: "Phone number verified successfully",
-        status: 200,
-        user,
-      });
+    return res.status(200).json({
+      message: "Phone number verified successfully",
+      status: 200,
+      user,
+    });
   } catch (error) {
     console.log("error", error);
     return res
@@ -682,7 +678,9 @@ const editProfile = async (req, res) => {
       user,
       { name, phone },
       { new: true, runValidators: true }
-    );
+    )
+      .populate("pickupAddress")
+      .populate("payment");
     if (!currentUser) {
       return res.status(200).json({
         success: false,

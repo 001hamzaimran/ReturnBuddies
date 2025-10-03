@@ -30,23 +30,19 @@ export const createPickup = async (req, res) => {
 
     // === Basic Validation ===
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res
-        .status(200)
-        .json({
-          status: 400,
-          success: false,
-          message: "Invalid or missing user ID",
-        });
+      return res.status(200).json({
+        status: 400,
+        success: false,
+        message: "Invalid or missing user ID",
+      });
     }
 
     if (!Array.isArray(bundleId) || bundleId.length === 0) {
-      return res
-        .status(200)
-        .json({
-          status: 400,
-          success: false,
-          message: "bundleId must be a non-empty array",
-        });
+      return res.status(200).json({
+        status: 400,
+        success: false,
+        message: "bundleId must be a non-empty array",
+      });
     }
 
     if (
@@ -57,13 +53,11 @@ export const createPickup = async (req, res) => {
       !phone ||
       total === undefined
     ) {
-      return res
-        .status(200)
-        .json({
-          status: 400,
-          success: false,
-          message: "Required fields are missing",
-        });
+      return res.status(200).json({
+        status: 400,
+        success: false,
+        message: "Required fields are missing",
+      });
     }
 
     if (typeof phone !== "string" || !/^\+[1-9][0-9]{9,14}$/.test(phone)) {
@@ -74,16 +68,13 @@ export const createPickup = async (req, res) => {
       });
     }
 
-
     const card = await CardModel.findById(Payment);
     if (!card) {
-      return res
-        .status(200)
-        .json({
-          status: 400,
-          success: false,
-          message: "Invalid Payment method",
-        });
+      return res.status(200).json({
+        status: 400,
+        success: false,
+        message: "Invalid Payment method",
+      });
     }
 
     // === Process Payment with Stripe ===
@@ -158,7 +149,8 @@ export const getAllPickups = async (req, res) => {
       .find({ userId })
       .populate("bundleId")
       .populate("userId")
-      .populate("Payment");
+      .populate("Payment")
+      .populate("pickupAddress");
 
     res.status(200).json({
       success: true,
@@ -248,7 +240,9 @@ export const pickupById = async (req, res) => {
       .findById(id)
       .populate("bundleId")
       .populate("userId")
-      .populate("pickupAddress");
+      .populate("pickupAddress")
+      .populate("Payment");
+
     return res.status(200).json({
       success: true,
       message: "Pickup fetched successfully",
@@ -327,7 +321,8 @@ export const getAllPickupsAdmin = async (req, res) => {
           path: "products", // inside each bundle, populate products
           model: "ProductItem", // must match your Product model name
         },
-      }).sort({ createdAt: -1 });
+      })
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -396,12 +391,10 @@ export const updatePickupStatus = async (req, res) => {
     }
 
     if (pickup.status === "Pickup Cancelled") {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Cannot update status of a cancelled pickup",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Cannot update status of a cancelled pickup",
+      });
     }
 
     // update current status
@@ -422,12 +415,10 @@ export const updatePickupStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error updating pickup status:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error while updating pickup status",
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating pickup status",
+    });
   }
 };
 
@@ -504,9 +495,7 @@ export const addExtraCharges = async (req, res) => {
       });
     }
 
-    const pickup = await pickupModel
-      .findById(id)
-      .populate("userId")
+    const pickup = await pickupModel.findById(id).populate("userId");
 
     if (!pickup) {
       return res.status(404).json({
@@ -666,7 +655,6 @@ export const addLabelIssue = async (req, res) => {
 //   }
 // };
 
-
 export const getPickupByDateandTime = async (req, res) => {
   try {
     const { date, timeSlot } = req.query;
@@ -693,7 +681,6 @@ export const getPickupByDateandTime = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-
 
 export const updatePickupDateAdmin = async (req, res) => {
   try {
