@@ -208,7 +208,9 @@ const verifyPhone = async (req, res) => {
   const userId = req.headers["userid"];
 
   try {
-    const user = await UserModel.findById(userId);
+    const user = await UserModel.findById(userId)
+      .populate("pickupAddress")
+      .populate("payment");
     if (!user) {
       return res.status(200).json({ message: "User not found", status: 404 });
     }
