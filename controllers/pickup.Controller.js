@@ -35,7 +35,7 @@ export const createPickup = async (req, res) => {
       return res.status(200).json({
         status: 400,
         success: false,
-        message: "Required fields are missing",
+        message: `${pickupType}, ${pickupDate}, ${pickupTime}, ${pickupAddress}, ${phone}, ${total} are missing`,
       });
     }
 
