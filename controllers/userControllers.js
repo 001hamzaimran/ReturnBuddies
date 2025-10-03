@@ -44,7 +44,7 @@ const Register = async (req, res) => {
       email,
       password: hashedPassword,
       otp,
-      FirstLogin: true
+      FirstLogin: true,
     });
     await newUser.save();
 
@@ -88,14 +88,12 @@ const VerifyEmail = async (req, res) => {
     user.otp = null;
     user.save();
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        status: 200,
-        message: "Email verified successfully",
-        user: user,
-      });
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      message: "Email verified successfully",
+      user: user,
+    });
   } catch (error) {
     console.log("error", error);
     return res
@@ -113,12 +111,8 @@ const Login = async (req, res) => {
       .populate({ path: "pickupAddress", model: "Address" })
       .populate({ path: "payment", model: "Card" });
 
-
-
     if (!user) {
-      return res
-        .status(200)
-        .json({ message: "User Not Found", status: 400 });
+      return res.status(200).json({ message: "User Not Found", status: 400 });
     }
 
     if (user.googleId || user.appleId) {
@@ -139,13 +133,11 @@ const Login = async (req, res) => {
 
       await sendVerificationEmail(email, verificationToken);
       await UserModel.findOneAndUpdate({ email }, { otp: verificationToken });
-      return res
-        .status(200)
-        .json({
-          message: `Please verify your email, email send to ${email}`,
-          status: 201,
-          otp: verificationToken,
-        });
+      return res.status(200).json({
+        message: `Please verify your email, email send to ${email}`,
+        status: 201,
+        otp: verificationToken,
+      });
     }
 
     // Track FirstLogin only after verification
@@ -156,22 +148,17 @@ const Login = async (req, res) => {
       await user.save(); // update in DB
     }
 
-
-    const token = jsonwebtoken.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-    return res
-      .status(200)
-      .json({
-        message: "Login Successfully",
-        status: 200,
-        success: true,
-        user,
-        firstLogin: isFirstLogin,
-        token,
-      });
+    const token = jsonwebtoken.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    return res.status(200).json({
+      message: "Login Successfully",
+      status: 200,
+      success: true,
+      user,
+      firstLogin: isFirstLogin,
+      token,
+    });
   } catch (error) {
     console.log("error", error);
     return res
@@ -185,7 +172,9 @@ const phoneVerfication = async (req, res) => {
   const userId = req.headers["userid"];
 
   try {
-    const user = await UserModel.findById(userId);
+    const user = await UserModel.findById(userId)
+      .populate("pickupAddress")
+      .populate("payment");
     if (!user) {
       return res.status(200).json({ message: "User not found", status: 404 });
     }
@@ -202,14 +191,19 @@ const phoneVerfication = async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "Phone number updated successfully", status: 200, user, otp });
+      .json({
+        message: "Phone number updated successfully",
+        status: 200,
+        user,
+        otp,
+      });
   } catch (error) {
     console.log("error", error);
     return res
       .status(500)
       .json({ message: "Internal server error", status: 500 });
   }
-}
+};
 
 const verifyPhone = async (req, res) => {
   const { otp } = req.body;
@@ -226,12 +220,20 @@ const verifyPhone = async (req, res) => {
     user.phoneOtp = null;
     user.phoneVerified = true;
     await user.save();
-    return res.status(200).json({ message: "Phone number verified successfully", status: 200, user });
+    return res
+      .status(200)
+      .json({
+        message: "Phone number verified successfully",
+        status: 200,
+        user,
+      });
   } catch (error) {
     console.log("error", error);
-    return res.status(500).json({ message: "Internal server error", status: 500 });
+    return res
+      .status(500)
+      .json({ message: "Internal server error", status: 500 });
   }
-}
+};
 
 // Forgot password
 const ForgotPassword = async (req, res) => {
@@ -258,7 +260,7 @@ const ForgotPassword = async (req, res) => {
     const otp = crypto.randomInt(10000, 99999).toString();
 
     // Send OTP to email
-    console.log(email)
+    console.log(email);
     await sendVerificationEmail(email, otp);
 
     // Upsert OTP record in ForgotModal
@@ -343,7 +345,6 @@ const ResetPassword = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-
     const user = await UserModel.findOne({ email });
     if (!user) {
       return res.status(200).json({
@@ -373,7 +374,7 @@ const ResetPassword = async (req, res) => {
       message: "Internal server error",
     });
   }
-}
+};
 
 const UpdateProfile = async (req, res) => {
   try {
@@ -448,7 +449,7 @@ const UpdateProfile = async (req, res) => {
 
 const DeleteAccount = async (req, res) => {
   try {
-    const user = req.headers['userid'];
+    const user = req.headers["userid"];
 
     if (!user) {
       return res.status(200).json({
@@ -477,10 +478,9 @@ const DeleteAccount = async (req, res) => {
       success: false,
       status: 500,
       message: "Internal server error",
-    })
+    });
   }
 };
-
 
 const changePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
@@ -492,7 +492,7 @@ const changePassword = async (req, res) => {
       return res.status(200).json({
         success: false,
         status: 400,
-        message: 'Both current and new passwords are required'
+        message: "Both current and new passwords are required",
       });
     }
 
@@ -501,7 +501,7 @@ const changePassword = async (req, res) => {
       return res.status(200).json({
         success: false,
         status: 404,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
@@ -511,7 +511,7 @@ const changePassword = async (req, res) => {
       return res.status(200).json({
         success: false,
         status: 404,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
@@ -521,7 +521,7 @@ const changePassword = async (req, res) => {
       return res.status(200).json({
         success: false,
         status: 400,
-        message: 'Current password is incorrect'
+        message: "Current password is incorrect",
       });
     }
 
@@ -530,7 +530,7 @@ const changePassword = async (req, res) => {
       return res.status(200).json({
         success: false,
         status: 400,
-        message: 'New password must be at least 8 characters'
+        message: "New password must be at least 8 characters",
       });
     }
 
@@ -545,21 +545,20 @@ const changePassword = async (req, res) => {
     return res.status(200).json({
       success: true,
       status: 200,
-      message: 'Password updated successfully'
+      message: "Password updated successfully",
     });
-
   } catch (error) {
-    console.error('Password change error:', error);
+    console.error("Password change error:", error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: "Internal server error",
     });
   }
 };
 
 const updateNameandPhone = async (req, res) => {
   try {
-    const { phone } = req.body
+    const { phone } = req.body;
     const user = req.user;
 
     if (!user) {
@@ -611,13 +610,13 @@ const updateNameandPhone = async (req, res) => {
       success: false,
       status: 500,
       message: "Internal server error",
-    })
+    });
   }
-}
+};
 
 const updateNameandPhoneVerification = async (req, res) => {
   try {
-    const { phone, name } = req.body
+    const { phone, name } = req.body;
 
     const user = req.user;
 
@@ -640,7 +639,9 @@ const updateNameandPhoneVerification = async (req, res) => {
       user._id,
       { name, phone },
       { new: true, runValidators: true }
-    ).populate("pickupAddress").populate("payment");
+    )
+      .populate("pickupAddress")
+      .populate("payment");
     if (!currentUser) {
       return res.status(200).json({
         success: false,
@@ -649,28 +650,27 @@ const updateNameandPhoneVerification = async (req, res) => {
       });
     }
 
-    console.log({currentUser})
+    console.log({ currentUser });
 
     return res.status(200).json({
       success: true,
       status: 200,
       message: "User Updated Successfully",
-      user: currentUser
+      user: currentUser,
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
       status: 500,
       message: "Internal server error",
-    })
+    });
   }
-}
+};
 
 const editProfile = async (req, res) => {
   try {
-    const user = req.headers['userid'];
-    const { phone, name } = req.body
+    const user = req.headers["userid"];
+    const { phone, name } = req.body;
     if (!user) {
       return res.status(200).json({
         success: false,
@@ -682,7 +682,7 @@ const editProfile = async (req, res) => {
       user,
       { name, phone },
       { new: true, runValidators: true }
-    )
+    );
     if (!currentUser) {
       return res.status(200).json({
         success: false,
@@ -694,16 +694,16 @@ const editProfile = async (req, res) => {
       success: true,
       status: 200,
       message: "User Updated Successfully",
-      user: currentUser
+      user: currentUser,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
       status: 500,
       message: "Internal server error",
-    })
+    });
   }
-}
+};
 
 export {
   Register,
@@ -719,5 +719,5 @@ export {
   phoneVerfication,
   verifyPhone,
   editProfile,
-  ResetPassword
+  ResetPassword,
 };
