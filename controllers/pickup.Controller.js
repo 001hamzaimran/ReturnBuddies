@@ -66,15 +66,14 @@ export const createPickup = async (req, res) => {
         });
     }
 
-    if (typeof phone !== "string" || !/^[0-9]{10,15}$/.test(phone)) {
-      return res
-        .status(200)
-        .json({
-          status: 400,
-          success: false,
-          message: "Invalid phone number format",
-        });
+    if (typeof phone !== "string" || !/^\+[1-9][0-9]{9,14}$/.test(phone)) {
+      return res.status(200).json({
+        status: 400,
+        success: false,
+        message: "Invalid phone number format. Use E.164 (e.g., +923001234567)",
+      });
     }
+
 
     const card = await CardModel.findById(Payment);
     if (!card) {
@@ -328,7 +327,7 @@ export const getAllPickupsAdmin = async (req, res) => {
           path: "products", // inside each bundle, populate products
           model: "ProductItem", // must match your Product model name
         },
-      }).sort({ createdAt: -1 }); 
+      }).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -567,7 +566,7 @@ export const addExtraCharges = async (req, res) => {
 
     await pickup.save();
 
-    await ExtraChargeEmail(pickup?.userId?.email,paymentIntent, extraCharges);
+    await ExtraChargeEmail(pickup?.userId?.email, paymentIntent, extraCharges);
 
     return res.status(200).json({
       success: true,
@@ -656,10 +655,10 @@ export const addLabelIssue = async (req, res) => {
 //     if (!date || !timeSlot) {
 //       return res.status(400).json({ error: "Date and timeSlot are required." });
 //     }
-    // const pickup = await pickupModel.findOne({
-    //   pickupDate: date,
-    //   pickupTime: timeSlot,
-    // });
+// const pickup = await pickupModel.findOne({
+//   pickupDate: date,
+//   pickupTime: timeSlot,
+// });
 //     return res.json({ pickup });
 //   } catch (err) {
 //     console.error("Error fetching pickups:", err);
@@ -669,31 +668,31 @@ export const addLabelIssue = async (req, res) => {
 
 
 export const getPickupByDateandTime = async (req, res) => {
-    try {
-      const { date, timeSlot } = req.query;
-  
-      if (!date || !timeSlot) {
-        return res.status(400).json({ error: "Date and timeSlot are required." });
-      }
-  
-      console.log({ date, timeSlot });
-  
-      // Create start and end of the day for the given date
-      const startOfDay = moment(date, "YYYY-MM-DD").startOf("day").toDate();
-      const endOfDay = moment(date, "YYYY-MM-DD").endOf("day").toDate();
-  
-      // Get all pickups for that day and timeSlot
-      const pickups = await pickupModel.find({
-        pickupDate: { $gte: startOfDay, $lte: endOfDay },
-        pickupTime: timeSlot,
-      });
-  
-      return res.json({ pickups });
-    } catch (err) {
-      console.error("Error fetching pickups:", err);
-      return res.status(500).json({ error: "Internal server error" });
+  try {
+    const { date, timeSlot } = req.query;
+
+    if (!date || !timeSlot) {
+      return res.status(400).json({ error: "Date and timeSlot are required." });
     }
-  };
+
+    console.log({ date, timeSlot });
+
+    // Create start and end of the day for the given date
+    const startOfDay = moment(date, "YYYY-MM-DD").startOf("day").toDate();
+    const endOfDay = moment(date, "YYYY-MM-DD").endOf("day").toDate();
+
+    // Get all pickups for that day and timeSlot
+    const pickups = await pickupModel.find({
+      pickupDate: { $gte: startOfDay, $lte: endOfDay },
+      pickupTime: timeSlot,
+    });
+
+    return res.json({ pickups });
+  } catch (err) {
+    console.error("Error fetching pickups:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 
 export const updatePickupDateAdmin = async (req, res) => {
