@@ -24,21 +24,6 @@ export const createPickup = async (req, res) => {
       isOversize,
     } = req.body;
 
-    if (
-      !pickupType ||
-      !pickupDate ||
-      !pickupTime ||
-      !pickupAddress ||
-      !phone ||
-      total === undefined
-    ) {
-      return res.status(200).json({
-        status: 400,
-        success: false,
-        message: `${pickupType}, ${pickupDate}, ${pickupTime}, ${pickupAddress}, ${phone}, ${total} are missing`,
-      });
-    }
-
     // Extract userId from middleware-authenticated headers
     const userId = req.user?._id || req.headers["x-user-id"];
     const PickupName = "RB-" + Math.floor(100 + Math.random() * 900);
@@ -71,7 +56,7 @@ export const createPickup = async (req, res) => {
       return res.status(200).json({
         status: 400,
         success: false,
-        message: "Required fields are missing",
+        message: `${pickupType}, ${pickupDate}, ${pickupTime}, ${pickupAddress}, ${phone}, ${total} are missing`,
       });
     }
 
