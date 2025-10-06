@@ -272,6 +272,7 @@ const ForgotPassword = async (req, res) => {
     );
 
     return res.status(200).json({
+      otp,
       message: `OTP has been sent to ${email}`,
       status: 200,
       success: true,
@@ -325,7 +326,6 @@ const ForgotVerification = async (req, res) => {
     await user.save();
 
     return res.status(200).json({
-      otp,
       success: true,
       status: 200,
       message: "OTP verified successfully",
