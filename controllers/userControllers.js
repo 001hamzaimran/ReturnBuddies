@@ -325,6 +325,7 @@ const ForgotVerification = async (req, res) => {
     await user.save();
 
     return res.status(200).json({
+      otp,
       success: true,
       status: 200,
       message: "OTP verified successfully",
