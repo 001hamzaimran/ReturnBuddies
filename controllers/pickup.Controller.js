@@ -241,7 +241,7 @@ export const pickupById = async (req, res) => {
       .populate("bundleId")
       .populate("userId")
       .populate("pickupAddress")
-      .populate("Payment");
+      .populate("payment");
 
     return res.status(200).json({
       success: true,

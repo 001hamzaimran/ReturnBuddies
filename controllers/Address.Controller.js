@@ -40,7 +40,7 @@ export const addAddress = async (req, res) => {
     const userId = req.params.userid || req.headers['userid'];
 
     if (!ZipCodes.includes(Number(postalCode))) {
-      return res.status(200).json({ status: 400, message: "OOPS, looks like we’re not in your area", success: false });
+      return res.status(200).json({ status: 400, message: "Oops! Look like we're not in your area yet.", success: false });
     }
 
     if (!street || !city || !state || !postalCode) {
@@ -148,7 +148,7 @@ export const editAddress = async (req, res) => {
     const userId = req.params.userid || req.headers['userid'];
 
     if (!ZipCodes.includes(Number(postalCode))) {
-      return res.status(200).json({ status: 400, message: "OOPS, looks like we’re not in your area", success: false });
+      return res.status(200).json({ status: 400, message: "Oops! Look like we're not in your area yet.", success: false });
     }
 
     // Step 1: Find address
