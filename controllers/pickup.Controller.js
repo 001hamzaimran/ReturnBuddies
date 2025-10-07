@@ -60,11 +60,12 @@ export const createPickup = async (req, res) => {
       });
     }
 
-    if (typeof phone !== "string" || !/^\+[1-9][0-9]{9,14}$/.test(phone)) {
+    if (typeof phone !== "string" || !/^\d{10}$/.test(phone)) {
       return res.status(200).json({
         status: 400,
         success: false,
-        message: "Invalid phone number format. Use E.164 (e.g., +923001234567)",
+        message:
+          "Invalid phone number. Enter a 10-digit US number (e.g., 1234567890)",
       });
     }
 
@@ -240,7 +241,7 @@ export const pickupById = async (req, res) => {
       .findById(id)
       .populate("bundleId")
       .populate("userId")
-      .populate("pickupAddress")
+      .populate("pickupAddress");
 
     return res.status(200).json({
       success: true,
