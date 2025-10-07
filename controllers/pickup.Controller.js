@@ -149,7 +149,7 @@ export const getAllPickups = async (req, res) => {
       .find({ userId })
       .populate("bundleId")
       .populate("userId")
-      .populate("Payment")
+      .populate("payment")
       .populate("pickupAddress");
 
     res.status(200).json({
