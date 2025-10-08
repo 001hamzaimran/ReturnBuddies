@@ -130,8 +130,8 @@ export const createPickup = async (req, res) => {
         playerIds,
         "📦 Your return is confirmed!",
         `Pickup #${pickup.PickupName}
-         Pickup Date: ${pickup.pickupDate}
-         Pickup Window: ${pickup.pickupTime}`
+Pickup Date: ${moment(pickup.pickupDate).format("dddd, MMM D")}
+Pickup Window: ${pickup.pickupTime}`
       );
     } else {
       console.warn(`⚠️ No player IDs found for user ${userId}`);
