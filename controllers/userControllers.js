@@ -8,27 +8,38 @@ import ForgotModal from "../models/ForgotPassword.js";
 import { sendSms } from "../middlewares/Phone/Phone.js";
 
 export const registerDevice = async (req, res) => {
-  const { userId, playerId, os } = req.body;
+  try {
+    const { userId, playerId, os } = req.body;
 
-  const user = await UserModel.findById(userId);
-  if (!user) return res.status(404).json({ success: false });
+    if (!userId || !playerId || !os) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields (userId, playerId, os)",
+      });
+    }
 
-  // Initialize if not exists
-  if (!user.devices) user.devices = [];
+    const user = await UserModel.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-  // Check if this playerId already exists
-  const existing = user.devices.find((d) => d.playerId === playerId);
+    if (!user.devices) user.devices = [];
 
-  if (!existing) {
-    user.devices.push({ playerId, os, lastActive: new Date() });
-  } else {
-    existing.lastActive = new Date();
-    existing.os = os; // Update OS if changed
+    const existing = user.devices.find((d) => d.playerId === playerId);
+
+    if (!existing) {
+      user.devices.push({ playerId, os, lastActive: new Date() });
+    } else {
+      existing.lastActive = new Date();
+      existing.os = os;
+    }
+
+    await user.save();
+    return res.status(200).json({ status: 200, success: true });
+  } catch (error) {
+    console.error("registerDevice error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
-
-  await user.save();
-  return res.status(200).json({status: 200, success: true });
 };
+
 
 // Register
 const Register = async (req, res) => {
