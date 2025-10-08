@@ -101,7 +101,7 @@ export const createPickup = async (req, res) => {
         .status(200)
         .json({ success: false, message: "Payment failed", paymentIntent });
     }
-  
+
     const pickup = new pickupModel({
       userId,
       pickupAddress,
@@ -122,29 +122,26 @@ export const createPickup = async (req, res) => {
 
     // const playerIds = req.user?.devices?.map((device) => device.playerId);
     const user = await UserModel.findById(userId);
-    const playerIds = user?.devices?.map((d) => d.playerId).filter(Boolean) || [];
-    
+    const playerIds =
+      user?.devices?.map((d) => d.playerId).filter(Boolean) || [];
 
-  // console.log(playerIds)
-  //   if (pickup) {
-  //     await sendNotification(playerIds, "Pickup Requested", "Your pickup has been requested.");
-  //   }
-  if (playerIds.length > 0) {
-    await sendNotification(
-      playerIds,
-      "Pickup Requested",
-      "Your pickup has been requested."
-    );
-  } else {
-    console.warn(`⚠️ No player IDs found for user ${userId}`);
-  }
+    if (playerIds.length > 0) {
+      await sendNotification(
+        playerIds,
+        "📦 Your return is confirmed!",
+        `Pickup #${pickup.PickupName}
+         Pickup Date: ${pickup.pickupDate}
+         Pickup Window: ${pickup.pickupTime}`
+      );
+    } else {
+      console.warn(`⚠️ No player IDs found for user ${userId}`);
+    }
     res.status(200).json({
       success: true,
       status: 200,
       message: "Pickup created successfully",
       data: pickup,
     });
-
   } catch (error) {
     console.error("❌ Error creating pickup:", error);
     res.status(500).json({
