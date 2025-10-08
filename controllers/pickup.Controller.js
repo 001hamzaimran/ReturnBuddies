@@ -122,7 +122,7 @@ export const createPickup = async (req, res) => {
 
     // const playerIds = req.user?.devices?.map((device) => device.playerId);
     const playerIds = UserModel?.devices?.map((device) => device.playerId);
-
+  console.log(playerIds)
     if (pickup) {
       await sendNotification(playerIds, "Pickup Requested", "Your pickup has been requested.");
     }
