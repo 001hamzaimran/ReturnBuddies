@@ -27,7 +27,7 @@ export const registerDevice = async (req, res) => {
   }
 
   await user.save();
-  return res.status(200).json({ success: true });
+  return res.status(200).json({status: 200, success: true });
 };
 
 // Register
