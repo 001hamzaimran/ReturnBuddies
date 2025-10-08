@@ -1,14 +1,14 @@
-import pickupModel from "../models/pickup.model.js";
-import mongoose from "mongoose";
-import Stripe from "stripe";
-import CardModel from "../models/Card.Model.js";
 import {
-  ExtraChargeEmail,
   LabelIssueEmail,
+  ExtraChargeEmail,
 } from "../middlewares/Email/Email.js";
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 import moment from "moment";
-import { pick } from "zod/v4-mini";
+import Stripe from "stripe";
+import mongoose from "mongoose";
+import UserModel from "../models/User.js";
+import CardModel from "../models/Card.Model.js";
+import pickupModel from "../models/pickup.model.js";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 import { sendNotification } from "../utils/sendNotification.js";
 
 export const createPickup = async (req, res) => {
@@ -29,7 +29,6 @@ export const createPickup = async (req, res) => {
     // Extract userId from middleware-authenticated headers
     const userId = req.user?._id || req.headers["x-user-id"];
     const PickupName = "RB-" + Math.floor(100 + Math.random() * 900);
-    const playerIds = req.user?.devices?.map((device) => device.playerId);
     // === Basic Validation ===
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(200).json({
@@ -120,6 +119,9 @@ export const createPickup = async (req, res) => {
     });
 
     await pickup.save();
+
+    // const playerIds = req.user?.devices?.map((device) => device.playerId);
+    const playerIds = UserModel?.devices?.map((device) => device.playerId);
 
     if (pickup) {
       await sendNotification(playerIds, "Pickup Requested", "Your pickup has been requested.");

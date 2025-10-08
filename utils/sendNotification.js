@@ -11,11 +11,11 @@ export const sendNotification = async (playerIds, title, message, data = {}) => 
     const response = await axios.post(
       "https://onesignal.com/api/v1/notifications",
       {
+        data,
         app_id: ONESIGNAL_APP_ID,
-        include_player_ids: playerIds,
         headings: { en: title },
         contents: { en: message },
-        data, // Optional extra payload data
+        include_player_ids: playerIds,
       },
       {
         headers: {
