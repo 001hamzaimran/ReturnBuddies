@@ -7,6 +7,29 @@ import jsonwebtoken from "jsonwebtoken";
 import ForgotModal from "../models/ForgotPassword.js";
 import { sendSms } from "../middlewares/Phone/Phone.js";
 
+export const registerDevice = async (req, res) => {
+  const { userId, playerId, os } = req.body;
+
+  const user = await UserModel.findById(userId);
+  if (!user) return res.status(404).json({ success: false });
+
+  // Initialize if not exists
+  if (!user.devices) user.devices = [];
+
+  // Check if this playerId already exists
+  const existing = user.devices.find((d) => d.playerId === playerId);
+
+  if (!existing) {
+    user.devices.push({ playerId, os, lastActive: new Date() });
+  } else {
+    existing.lastActive = new Date();
+    existing.os = os; // Update OS if changed
+  }
+
+  await user.save();
+  return res.status(200).json({ success: true });
+};
+
 // Register
 const Register = async (req, res) => {
   const { name, email, password } = req.body;

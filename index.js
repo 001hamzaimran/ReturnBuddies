@@ -21,6 +21,7 @@ import basepriceRouter from "./routes/baseprice.routes.js";
 import NotificationRouter from "./routes/Notification.routes.js";
 import { disabledSlotRouter } from "./routes/DisabledSlot.routes.js";
 import { getRoutificOrders } from "./controllers/Routific.Controller.js";
+import notificationRoutes from "./routes/notification.route.js";
 
 dotenv.config();
 
@@ -56,6 +57,7 @@ const routes = [
   ProductItemRoutes,
   NotificationRouter,
   disabledSlotRouter,
+  notificationRoutes,
 ];
 
 const getTodayDate = () => {

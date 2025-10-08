@@ -9,6 +9,13 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    devices: [
+        {
+          playerId: String,
+          os: String, // "android" or "ios"
+          lastActive: { type: Date, default: Date.now },
+        },
+    ],
     profile: {
         type: String,
         default: "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?ga=GA1.1.756143352.1747218968&semt=ais_hybrid&w=740"

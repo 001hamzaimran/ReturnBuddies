@@ -8,6 +8,7 @@ import {
 } from "../middlewares/Email/Email.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 import moment from "moment";
+import { pick } from "zod/v4-mini";
 
 export const createPickup = async (req, res) => {
   try {
@@ -27,7 +28,7 @@ export const createPickup = async (req, res) => {
     // Extract userId from middleware-authenticated headers
     const userId = req.user?._id || req.headers["x-user-id"];
     const PickupName = "RB-" + Math.floor(100 + Math.random() * 900);
-
+    const playerIds = req.user?.devices?.map((device) => device.playerId);
     // === Basic Validation ===
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(200).json({
@@ -100,7 +101,7 @@ export const createPickup = async (req, res) => {
         .status(200)
         .json({ success: false, message: "Payment failed", paymentIntent });
     }
-
+  
     const pickup = new pickupModel({
       userId,
       pickupAddress,
@@ -119,12 +120,16 @@ export const createPickup = async (req, res) => {
 
     await pickup.save();
 
+    if (pickup) {
+      await sendNotification(playerIds, "Pickup Requested", "Your pickup has been requested.");
+    }
     res.status(200).json({
       success: true,
       status: 200,
       message: "Pickup created successfully",
       data: pickup,
     });
+
   } catch (error) {
     console.error("❌ Error creating pickup:", error);
     res.status(500).json({
