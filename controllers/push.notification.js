@@ -55,16 +55,18 @@ export const testNotification = async (req, res) => {
 
 export const oneDayBeforePickup = async () => {
   try {
-
-    const pickup = await pickupModel.findOne({
-      pickupDate: {
-        $gte: new Date(),
-        $lt: new Date(new Date().setDate(new Date().getDate() + 1)),
-      },
-    }).populate('userId');
+    const pickup = await pickupModel
+      .findOne({
+        pickupDate: {
+          $gte: new Date(),
+          $lt: new Date(new Date().setDate(new Date().getDate() + 1)),
+        },
+      })
+      .populate("userId");
 
     const playerIds =
-      pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];    if (!pickup) {
+      pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
+    if (!pickup) {
       return;
     }
     await sendNotification(
