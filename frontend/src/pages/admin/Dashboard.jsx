@@ -16,7 +16,6 @@ export default function Dashboard() {
       const response = await fetch(`${import.meta.env.VITE_BASE_URL}get-All-Payment`);
       const data = await response.json();
       setTransactions(data.payments || []);
-      console.log("Payments:", data.payments);
     } catch (error) {
       console.error("Error fetching payment data:", error);
     }
@@ -28,9 +27,6 @@ export default function Dashboard() {
       const token = localStorage.getItem("token");
 
       const url = `${import.meta.env.VITE_BASE_URL}admin/dashboard`;
-      // console.log("Fetching:", url);
-      // console.log("Token being sent:", token);
-      // console.log(`Authorization: Bearer ${token}`);
 
       const response = await fetch(url, {
         method: "GET",
@@ -91,7 +87,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     setTotalRevenue(transactions.reduce((sum, t) => sum + t.amount, 0));
-    console.log("Total Revenue:", totalRevenue);
   }, [transactions]);
 
 

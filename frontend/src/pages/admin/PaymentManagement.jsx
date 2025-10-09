@@ -29,14 +29,12 @@ export default function PaymentManagement() {
       const data = await response.json();
       setTransactions(data.payments || []);
       setFilteredTransactions(data.payments || []);
-      console.log("Payments:", data.payments);
     } catch (error) {
       console.error("Error fetching payment data:", error);
     }
   };
 
   useEffect(() => {
-    console.log("User ID:", userId);
     GetPayment();
   }, []);
 
