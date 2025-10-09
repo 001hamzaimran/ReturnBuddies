@@ -1,7 +1,7 @@
 export const getBasePrice = async (req, res) => {
     try {
         const basePrice = {
-            BASE_PRICE: 10,
+            BASE_PRICE: 11.99,
             FREE_ITEMS_THRESHOLD: 10,
             ADDITIONAL_ITEM_PRICE: 1,
         }
