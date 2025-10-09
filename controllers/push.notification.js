@@ -1,7 +1,7 @@
 import moment from "moment";
-import UserModel from "../models/User";
-import { sendNotification } from "../utils/sendNotification";
-import pickupModel from "../models/pickup.model";
+import UserModel from "../models/User.js";
+import { sendNotification } from "../utils/sendNotification.js";
+import pickupModel from "../models/pickup.model.js";
 
 export const testNotification = async (req, res) => {
   try {
@@ -53,28 +53,28 @@ export const testNotification = async (req, res) => {
   }
 };
 
-// export const oneDayBeforePickup = async () => {
-//   try {
+export const oneDayBeforePickup = async () => {
+  try {
 
-//     const pickup = await pickupModel.findOne({
-//       pickupDate: {
-//         $gte: new Date(),
-//         $lt: new Date(new Date().setDate(new Date().getDate() + 1)),
-//       },
-//     }).populate('userId');
+    const pickup = await pickupModel.findOne({
+      pickupDate: {
+        $gte: new Date(),
+        $lt: new Date(new Date().setDate(new Date().getDate() + 1)),
+      },
+    }).populate('userId');
 
-//     const playerIds =
-//       pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];    if (!pickup) {
-//       return;
-//     }
-//     await sendNotification(
-//       playerIds,
-//       "Reminder",
-//       `Your Pickup #${pickup.PickupName} is scheduled for tomorrow.
-//       Time Window: ${moment(pickup.pickupDate).format("dddd, MMMM, D")}
-//       Please have your item(s) ready.`
-//     );
-//   } catch (err) {
-//     console.error("Error sending one day before pickup notification:", err);
-//   }
-// };
+    const playerIds =
+      pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];    if (!pickup) {
+      return;
+    }
+    await sendNotification(
+      playerIds,
+      "Reminder",
+      `Your Pickup #${pickup.PickupName} is scheduled for tomorrow.
+      Time Window: ${moment(pickup.pickupDate).format("dddd, MMMM, D")}
+      Please have your item(s) ready.`
+    );
+  } catch (err) {
+    console.error("Error sending one day before pickup notification:", err);
+  }
+};
