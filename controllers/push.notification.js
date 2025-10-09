@@ -53,32 +53,58 @@ export const testNotification = async (req, res) => {
   }
 };
 
-export const oneDayBeforePickup = async () => {
+  export const oneDayBeforePickup = async () => {
+    try {
+      const pickup = await pickupModel
+        .findOne({
+          pickupDate: {
+            $gte: new Date(),
+            $lt: new Date(new Date().setDate(new Date().getDate() + 1)),
+          },
+        })
+        .populate("userId");
+
+      const playerIds =
+        pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
+      if (!pickup) {
+        return;
+      }
+      await sendNotification(
+        playerIds,
+        "⏰ Reminder",
+        `Your Pickup #${pickup.PickupName} is scheduled for ${moment(pickup.pickupDate).format("dddd, MMMM, D")}.
+Make sure your item(s) are ready. You’ll also receive a text message from the driver when they are on the way.
+`
+      );
+    } catch (err) {
+      console.error("Error sending one day before pickup notification:", err);
+    }
+  };
+
+export const morningOfPickup = async () => {
   try {
     const pickup = await pickupModel
       .findOne({
         pickupDate: {
           $gte: new Date(),
-          $lt: new Date(new Date().setDate(new Date().getDate() + 1)),
+          $lt: new Date(new Date().setDate(new Date().getDate() )),
         },
       })
       .populate("userId");
 
-    console.log(pickup);
-
-    const playerIds =
+      const playerIds =
       pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
     if (!pickup) {
       return;
     }
     await sendNotification(
       playerIds,
-      "Reminder",
-      `Your Pickup #${pickup.PickupName} is scheduled for tomorrow.
-      Time Window: ${moment(pickup.pickupDate).format("dddd, MMMM, D")}
-      Please have your item(s) ready.`
+      "It’s Pickup day!",
+      `Your Pickup #${pickup.PickupName} is scheduled for ${moment(pickup.pickupDate).format("dddd, MMMM, D")}.
+Make sure your item(s) are ready. You’ll also receive a text message from the driver when they are on the way.
+`
     );
   } catch (err) {
-    console.error("Error sending one day before pickup notification:", err);
+    console.error("Error sending morning of pickup notification:", err);
   }
 };

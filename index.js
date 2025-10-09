@@ -18,11 +18,11 @@ import ProductItemRoutes from "./routes/productItem.js";
 import { addressRouter } from "./routes/Address.routes.js";
 import { PaymentRouter } from "./routes/payment.routes.js";
 import basepriceRouter from "./routes/baseprice.routes.js";
+import notificationRoutes from "./routes/notification.route.js";
 import NotificationRouter from "./routes/Notification.routes.js";
 import { disabledSlotRouter } from "./routes/DisabledSlot.routes.js";
 import { getRoutificOrders } from "./controllers/Routific.Controller.js";
-import notificationRoutes from "./routes/notification.route.js";
-import { oneDayBeforePickup } from "./controllers/push.notification.js";
+import { oneDayBeforePickup ,morningOfPickup} from "./controllers/push.notification.js";
 
 dotenv.config();
 
@@ -83,10 +83,18 @@ const cronJob = async () => {
     }
   });
 }
+
 const oneDayBeforePickupCronJob = async () => {
-  // Run at minute 0 of every hour → once per hour
-  cron.schedule("* * * * *", async () => {
+  cron.schedule("0 19 * * *", async () => {
+    console.log("Running one day before pickup job at 7 PM");
     await oneDayBeforePickup();
+  });
+};
+  
+const morningOfPickup = async () => {
+  cron.schedule("0 7 * * *", async () => {
+    console.log("Running morning of pickup job at 7 AM");
+    await morningOfPickup();
   });
 };
 
@@ -99,6 +107,7 @@ app.get("/", (_, res) => res.send("Hello World"));
 
 cronJob();
 oneDayBeforePickupCronJob();
+
 const startServer = async () => {
   try {
     await DbCon(); // Ensure DB is connected before server starts

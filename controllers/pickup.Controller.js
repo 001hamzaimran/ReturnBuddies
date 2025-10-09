@@ -425,6 +425,25 @@ export const updatePickupStatus = async (req, res) => {
 
     await pickup.save();
 
+    const user = await pickupModel.findById(id).populate("userId");
+    const playerIds =
+      user?.devices?.map((d) => d.playerId).filter(Boolean) || [];
+    if (status === "Picked Up") {
+      await sendNotification(
+        playerIds,
+        "✅ Pickup complete",
+        `Your Pickup #${pickup.PickupName} have been collected.
+  We’ll let you know once it’s dropped off.`
+      );
+    }
+
+    if (status === "Completed") {
+      await sendNotification(
+        playerIds,
+        "Good news!",
+        `Your return #${pickup.PickupName} has been dropped off at the carrier and is on its way.`
+      );
+    }
     return res.status(200).json({
       success: true,
       message: "Pickup status updated successfully",
@@ -638,6 +657,16 @@ export const addLabelIssue = async (req, res) => {
     });
 
     await pickup.save();
+
+    const playerIds =
+      pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
+    if (labelIssue) {
+      await sendNotification(
+        playerIds,
+        `⚠️ Label issue detected for #${pickup.PickupName}
+The return label is invalid or can’t be processed. Please update or re-upload your label to avoid delays.`
+      );
+    }
 
     await LabelIssueEmail(pickup?.userId?.email, labelIssue);
     return res.status(200).json({
