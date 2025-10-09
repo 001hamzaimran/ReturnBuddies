@@ -20,6 +20,7 @@ import PromoCode from './pages/admin/PromoCode'
 import Profile from './pages/admin/Profile'
 import FAQ from './pages/admin/FAQ'
 import Settings from './pages/admin/Settings'
+import PriceManagement from './pages/admin/PriceManagement'
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
               <Route path='profile' element={<Profile />} />
               <Route path='FAQ' element={<FAQ />} />
               <Route path='Settings' element={<Settings />} />
+              <Route path='Price-Management' element={<PriceManagement />} />
             </Route>
 
             <Route path='/admin/dashboard/login' element={<Login />} />

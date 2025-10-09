@@ -91,7 +91,7 @@ const oneDayBeforePickupCronJob = async () => {
   });
 };
   
-const morningOfPickup = async () => {
+const morningOfPickupCronJob = async () => {
   cron.schedule("0 7 * * *", async () => {
     console.log("Running morning of pickup job at 7 AM");
     await morningOfPickup();
@@ -106,6 +106,7 @@ routes.map((route) => app.use("/api", route));
 app.get("/", (_, res) => res.send("Hello World"));
 
 cronJob();
+morningOfPickupCronJob();
 oneDayBeforePickupCronJob();
 
 const startServer = async () => {

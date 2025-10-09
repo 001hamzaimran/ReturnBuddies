@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import React from "react";
+import { NavLink } from "react-router-dom";
 import {
   FaTruck,
   FaUsers,
@@ -9,15 +9,15 @@ import {
   FaDollarSign,
   FaQuestionCircle,
   FaCogs,
-  FaMountain
-} from 'react-icons/fa';
-import Logo from '../../assets/Images/logo.png';
+  FaMountain,
+} from "react-icons/fa";
+import Logo from "../../assets/Images/logo.png";
 
 export default function AdminSidebar({ onClose }) {
   const navLinkClass = ({ isActive }) =>
-    `flex items-center px-4 py-2 rounded-md space-x-2 ${isActive ? 'bg-gray-800 text-white' : 'hover:bg-gray-800 text-gray-300'
+    `flex items-center px-4 py-2 rounded-md space-x-2 ${
+      isActive ? "bg-gray-800 text-white" : "hover:bg-gray-800 text-gray-300"
     }`;
-
 
   return (
     <aside className="h-full bg-gray-900 text-white flex flex-col justify-between w-64">
@@ -51,17 +51,26 @@ export default function AdminSidebar({ onClose }) {
             <span>Promo Code</span>
           </NavLink>
 
-          <NavLink to="/admin/dashboard/Pickup-Management" className={navLinkClass}>
+          <NavLink
+            to="/admin/dashboard/Pickup-Management"
+            className={navLinkClass}
+          >
             <FaTruck />
             <span>Pickup Management</span>
           </NavLink>
 
-          <NavLink to="/admin/dashboard/Warehouse-Management" className={navLinkClass}>
+          <NavLink
+            to="/admin/dashboard/Warehouse-Management"
+            className={navLinkClass}
+          >
             <FaWarehouse />
             <span>Warehouse Management</span>
           </NavLink>
 
-          <NavLink to="/admin/dashboard/Payment-Management" className={navLinkClass}>
+          <NavLink
+            to="/admin/dashboard/Payment-Management"
+            className={navLinkClass}
+          >
             <FaMoneyBillWave />
             <span>Payment Management</span>
           </NavLink>
@@ -75,15 +84,22 @@ export default function AdminSidebar({ onClose }) {
             <FaCogs />
             <span>Settings</span>
           </NavLink>
+          <NavLink to="/admin/dashboard/Price-Management" className={navLinkClass}>
+            <FaCogs />
+            <span>Price Management</span>
+          </NavLink>
         </nav>
       </div>
 
       {/* Bottom Settings Link */}
-      <div className="p-4">
-        <a href="#" className="flex items-center text-sm text-gray-400 hover:text-white">
+      {/* <div className="p-4">
+        <a
+          href="#"
+          className="flex items-center text-sm text-gray-400 hover:text-white"
+        >
           ⚙️ <span className="ml-2">Settings</span>
         </a>
-      </div>
+      </div> */}
     </aside>
   );
 }

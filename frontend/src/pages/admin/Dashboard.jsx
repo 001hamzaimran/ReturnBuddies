@@ -115,7 +115,7 @@ export default function Dashboard() {
         />
         <DashboardCard
           title="Revenue Generated"
-          value={`$${totalRevenue}`}
+          value={`$${totalRevenue.toFixed(2)}`}
           icon={<FaMoneyBillWave className="text-yellow-500 text-3xl" />}
           bg="bg-yellow-100"
         />
