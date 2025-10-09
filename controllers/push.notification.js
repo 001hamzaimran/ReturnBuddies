@@ -53,30 +53,28 @@ export const testNotification = async (req, res) => {
   }
 };
 
-export const oneDayBeforePickup = async (req, res) => {
-  try {
-    const { userId } = req.body;
+// export const oneDayBeforePickup = async () => {
+//   try {
 
-    const pickup = await pickupModel.findOne({
-      pickupDate: {
-        $gte: new Date(),
-        $lt: new Date(new Date().setDate(new Date().getDate() + 1)),
-      },
-    });
+//     const pickup = await pickupModel.findOne({
+//       pickupDate: {
+//         $gte: new Date(),
+//         $lt: new Date(new Date().setDate(new Date().getDate() + 1)),
+//       },
+//     }).populate('userId');
 
-    const user = await UserModel.findById(userId);
-    const playerIds =
-      user?.devices?.map((d) => d.playerId).filter(Boolean) || [];    if (!pickup) {
-      return;
-    }
-    await sendNotification(
-      playerIds,
-      "Reminder",
-      `Your Pickup #${pickup.PickupName} is scheduled for tomorrow.
-      Time Window: ${moment(pickup.pickupDate).format("dddd, MMMM, D")}
-      Please have your item(s) ready.`
-    );
-  } catch (err) {
-    console.error("Error sending one day before pickup notification:", err);
-  }
-};
+//     const playerIds =
+//       pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];    if (!pickup) {
+//       return;
+//     }
+//     await sendNotification(
+//       playerIds,
+//       "Reminder",
+//       `Your Pickup #${pickup.PickupName} is scheduled for tomorrow.
+//       Time Window: ${moment(pickup.pickupDate).format("dddd, MMMM, D")}
+//       Please have your item(s) ready.`
+//     );
+//   } catch (err) {
+//     console.error("Error sending one day before pickup notification:", err);
+//   }
+// };
