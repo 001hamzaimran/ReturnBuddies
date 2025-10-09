@@ -64,6 +64,8 @@ export const oneDayBeforePickup = async () => {
       })
       .populate("userId");
 
+    console.log(pickup);
+
     const playerIds =
       pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
     if (!pickup) {

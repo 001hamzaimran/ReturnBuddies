@@ -22,6 +22,7 @@ import NotificationRouter from "./routes/Notification.routes.js";
 import { disabledSlotRouter } from "./routes/DisabledSlot.routes.js";
 import { getRoutificOrders } from "./controllers/Routific.Controller.js";
 import notificationRoutes from "./routes/notification.route.js";
+import { oneDayBeforePickup } from "./controllers/push.notification.js";
 
 dotenv.config();
 
@@ -81,6 +82,12 @@ const cronJob = async () => {
       console.error("Error in cron job:", error);
     }
   });
+}
+const oneDayBeforePickupCronJob = async () => {
+  // Run at minute 0 of every hour → once per hour
+  cron.schedule("* * * * *", async () => {
+    await oneDayBeforePickup();
+  });
 };
 
 app.get("/privacy-policy", (req, res) => {
@@ -91,7 +98,7 @@ routes.map((route) => app.use("/api", route));
 app.get("/", (_, res) => res.send("Hello World"));
 
 cronJob();
-
+oneDayBeforePickupCronJob();
 const startServer = async () => {
   try {
     await DbCon(); // Ensure DB is connected before server starts
