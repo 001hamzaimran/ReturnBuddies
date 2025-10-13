@@ -683,8 +683,6 @@ const updateNameandPhoneVerification = async (req, res) => {
       });
     }
 
-    console.log({ currentUser });
-
     return res.status(200).json({
       success: true,
       status: 200,
