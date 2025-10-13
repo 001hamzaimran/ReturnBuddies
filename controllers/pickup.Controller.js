@@ -709,7 +709,6 @@ export const getPickupByDateandTime = async (req, res) => {
       return res.status(400).json({ error: "Date and timeSlot are required." });
     }
 
-    // console.log({ date, timeSlot });
 
     // Create start and end of the day for the given date
     const startOfDay = moment(date, "YYYY-MM-DD").startOf("day").toDate();

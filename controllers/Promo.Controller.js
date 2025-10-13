@@ -61,7 +61,6 @@ const getPromo = async (req, res) => {
   try {
     const userid = req.headers["userid"];
     const discountCode = req.query.code || req.params.code;
-    console.log({discountCode})
 
     if (!userid) {
       return res
@@ -96,8 +95,6 @@ const getPromo = async (req, res) => {
       status: true,
     });
 
-    console.log({promo})
-
     if (!promo) {
       return res
         .status(200)
@@ -108,7 +105,6 @@ const getPromo = async (req, res) => {
         });
     }
 
-    console.log(res)
     return res
       .status(200)
       .json({
@@ -128,7 +124,6 @@ const getPromo = async (req, res) => {
 const getAllPromo = async (req, res) => {
   try {
     const promos = await PromoCodeModal.find();
-    console.log(promos);
     return res.status(200).json({ data: promos, success: true });
   } catch (error) {
     return res
