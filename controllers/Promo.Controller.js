@@ -92,7 +92,7 @@ const getPromo = async (req, res) => {
 
     const promo = await PromoCodeModal.findOne({
       PromoCode: discountCode,
-      $or: [{ userId: userid }, { userId: "All" }],
+      $or: [{ userId: userid }, { userId: "all" }],
       status: true,
     });
 
