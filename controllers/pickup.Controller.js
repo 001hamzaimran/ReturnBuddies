@@ -426,33 +426,27 @@ export const updatePickupStatus = async (req, res) => {
     await pickup.save();
 
     const user = await pickupModel.findById(id).populate("userId");
-
-    const playerIds = user.devices?.map((d) => d.playerId).filter(Boolean);
+console.log('user.userId?.devices', user.userId?.devices)
+    const playerIds = user.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
+    
     if (status === "Picked Up") {
       await sendNotification(
         playerIds,
         "✅ Pickup complete",
-        `Your Pickup #${pickup.PickupName} have been collected.
-  We’ll let you know once it’s dropped off.`
+        `Your Pickup #${pickup.PickupName} has been collected. We’ll let you know once it’s dropped off.`
       );
     }
     
-    const playerIds2 =
-    pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
-    
-    console.log("playerIds", playerIds);
-
-
     if (status === "Completed") {
       await sendNotification(
-        playerIds2,
+        playerIds,
         "Good news!",
         `Your return #${pickup.PickupName} has been dropped off at the carrier and is on its way.`,
-        {
-          pickupId: pickup._id,
-        }
+        { pickupId: pickup._id }
       );
     }
+    
+
     return res.status(200).json({
       success: true,
       message: "Pickup status updated successfully",
