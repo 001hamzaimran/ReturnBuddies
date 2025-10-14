@@ -659,13 +659,14 @@ export const addLabelIssue = async (req, res) => {
     await pickup.save();
 
     await LabelIssueEmail(pickup?.userId?.email, labelIssue);
-    
+
     const playerIds =
       pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
+
     await sendNotification(
       playerIds,
-      `⚠️ Label issue detected for #${pickup.PickupName}
-The return label is invalid or can’t be processed. Please update or re-upload your label to avoid delays.`
+      `⚠️ Label issue detected for #${pickup.PickupName}`,
+      "The return label is invalid or can’t be processed. Please update or re-upload your label to avoid delays."
     );
     return res.status(200).json({
       success: true,
