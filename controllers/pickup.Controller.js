@@ -436,7 +436,7 @@ export const updatePickupStatus = async (req, res) => {
   We’ll let you know once it’s dropped off.`
       );
     }
-console.log('status', status)
+console.log('playerIds', playerIds)
     if (status === "Completed") {
       await sendNotification(
         playerIds,
