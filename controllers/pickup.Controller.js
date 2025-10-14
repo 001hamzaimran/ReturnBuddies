@@ -436,10 +436,13 @@ export const updatePickupStatus = async (req, res) => {
   We’ll let you know once it’s dropped off.`
       );
     }
+    
+    const playerIds2 =
+    pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
+    
     console.log("playerIds", playerIds);
 
-    const playerIds2 =
-      pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
+
     if (status === "Completed") {
       await sendNotification(
         playerIds2,
