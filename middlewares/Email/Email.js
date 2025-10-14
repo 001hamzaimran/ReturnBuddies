@@ -176,7 +176,7 @@ const LabelIssueEmail = async (to, labelIssue) => {
       </p>
       
       <!-- Extra Charge Details -->
-      <div style="background-color: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 16px; margin-bottom: 24px; text-align: center; "> <span style="color: #7e3ff2; font-weight: 600; font-size: 18px; font-family: Arial, sans-serif;">$${labelIssue}</span> </div>
+      <div style="background-color: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 16px; margin-bottom: 24px; text-align: center; "> <span style="color: #7e3ff2; font-weight: 600; font-size: 18px; font-family: Arial, sans-serif;">${labelIssue}</span> </div>
       
       <p style="color: #6b7280; font-size: 14px; text-align: center; margin-bottom: 24px; font-family: 'Poppins', sans-serif;">
         Please review and update the label information at your earliest convenience.

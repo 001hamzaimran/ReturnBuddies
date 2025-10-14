@@ -658,17 +658,15 @@ export const addLabelIssue = async (req, res) => {
 
     await pickup.save();
 
+    await LabelIssueEmail(pickup?.userId?.email, labelIssue);
+    
     const playerIds =
       pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
-    if (labelIssue) {
-      await sendNotification(
-        playerIds,
-        `⚠️ Label issue detected for #${pickup.PickupName}
+    await sendNotification(
+      playerIds,
+      `⚠️ Label issue detected for #${pickup.PickupName}
 The return label is invalid or can’t be processed. Please update or re-upload your label to avoid delays.`
-      );
-    }
-
-    await LabelIssueEmail(pickup?.userId?.email, labelIssue);
+    );
     return res.status(200).json({
       success: true,
       message: "extraCharges added successfully",
@@ -708,7 +706,6 @@ export const getPickupByDateandTime = async (req, res) => {
     if (!date || !timeSlot) {
       return res.status(400).json({ error: "Date and timeSlot are required." });
     }
-
 
     // Create start and end of the day for the given date
     const startOfDay = moment(date, "YYYY-MM-DD").startOf("day").toDate();
