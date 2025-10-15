@@ -1,15 +1,16 @@
-import UserModel from '../models/User.js';
-import oauth2client from '../utils/googleConfig.js';
-import axios from 'axios';
-import jsonwebtoken from 'jsonwebtoken';
+import axios from "axios";
+import UserModel from "../models/User.js";
 import appleSignin from "apple-signin-auth";
+import oauth2client from "../utils/googleConfig.js";
 
 export const googleLogin = async (req, res) => {
   try {
     const { idToken } = req.body;
 
     if (!idToken) {
-      return res.status(400).json({ message: "Missing ID token", success: false });
+      return res
+        .status(400)
+        .json({ message: "Missing ID token", success: false });
     }
 
     const ticket = await oauth2client.verifyIdToken({
@@ -20,7 +21,9 @@ export const googleLogin = async (req, res) => {
     const payload = ticket.getPayload();
 
     const { email, name, picture, sub } = payload;
-    let user = await UserModel.findOne({ email }).populate("pickupAddress").populate("payment");
+    let user = await UserModel.findOne({ email })
+      .populate("pickupAddress")
+      .populate("payment");
 
     if (!user) {
       user = new UserModel({
@@ -32,7 +35,9 @@ export const googleLogin = async (req, res) => {
       await user.save();
     }
 
-    const token = jsonwebtoken.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const token = jsonwebtoken.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
 
     return res.status(200).json({
       message: "User login successful",
@@ -42,18 +47,21 @@ export const googleLogin = async (req, res) => {
       token,
     });
   } catch (error) {
-    console.error('Google login error:', error);
-    return res.status(500).json({ message: "Internal server error", success: false, status: 500 });
+    console.error("Google login error:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", success: false, status: 500 });
   }
 };
-
 
 export const appleLogin = async (req, res) => {
   try {
     const { idToken } = req.body; // Apple sends this from frontend
 
     if (!idToken) {
-      return res.status(200).json({ message: "Missing ID token", status: 400, success: false });
+      return res
+        .status(200)
+        .json({ message: "Missing ID token", status: 400, success: false });
     }
 
     // Verify the Apple ID token
@@ -65,24 +73,24 @@ export const appleLogin = async (req, res) => {
     let name = req.body.name || ""; // Apple only gives name on first login, so pass it from frontend if available
 
     // Find user by email or Apple sub
-    let user = await UserModel.findOne({ email }).populate("pickupAddress").populate("payment");
+    let user = await UserModel.findOne({ email })
+      .populate("pickupAddress")
+      .populate("payment");
 
     if (!user) {
       user = new UserModel({
         name: name || "Apple User",
         email,
-        profile: "",       // Apple doesn’t always send profile picture
+        profile: "", // Apple doesn’t always send profile picture
         appleId: sub,
       });
       await user.save();
     }
 
     // Issue your own JWT
-    const token = jsonwebtoken.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+    const token = jsonwebtoken.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
 
     return res.status(200).json({
       message: "User login successful",
@@ -91,9 +99,10 @@ export const appleLogin = async (req, res) => {
       user,
       token,
     });
-
   } catch (error) {
     console.error("Apple login error:", error);
-    return res.status(500).json({ message: "Internal server error", success: false, status: 500 });
+    return res
+      .status(500)
+      .json({ message: "Internal server error", success: false, status: 500 });
   }
 };

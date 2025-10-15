@@ -2,6 +2,7 @@ import {
   LabelIssueEmail,
   ExtraChargeEmail,
 } from "../middlewares/Email/Email.js";
+
 import moment from "moment";
 import Stripe from "stripe";
 import mongoose from "mongoose";
@@ -124,6 +125,8 @@ export const createPickup = async (req, res) => {
     const user = await UserModel.findById(userId);
     const playerIds =
       user?.devices?.map((d) => d.playerId).filter(Boolean) || [];
+
+    // Pickup Scheduled - Confirmation message
 
     if (playerIds.length > 0) {
       await sendNotification(
@@ -356,7 +359,7 @@ export const getAllPickupsAdmin = async (req, res) => {
   }
 };
 
-export const getAllCompletedPickupsCount = async (req, res) => {
+export const getAllCompletedPickupsCount = async (_, res) => {
   try {
     const completedPickups = await pickupModel.countDocuments({
       status: "completed",
@@ -426,26 +429,36 @@ export const updatePickupStatus = async (req, res) => {
     await pickup.save();
 
     const user = await pickupModel.findById(id).populate("userId");
-console.log('user.userId?.devices', user.userId?.devices)
-    const playerIds = user.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
-    
+
+    const playerIds =
+      user.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
+
+    // Item Picked Up - Update
     if (status === "Picked Up") {
       await sendNotification(
         playerIds,
         "✅ Pickup complete",
-        `Your Pickup #${pickup.PickupName} has been collected. We’ll let you know once it’s dropped off.`
+        `Pickup #${pickup.PickupName} has been Pick up.
+We’ll let you know once it’s arrived at our warehouse.`
       );
     }
-    
-    if (status === "Completed") {
+    // Drop-off Complete - (In-Transit)
+    if (status === "In Transit") {
       await sendNotification(
         playerIds,
         "Good news!",
-        `Your return #${pickup.PickupName} has been dropped off at the carrier and is on its way.`,
-        { pickupId: pickup._id }
+        `Your return #${pickup.PickupName} has been dropped off at the carrier and is on its way.`
       );
     }
-    
+
+    // Arrived at Warehouse Update   (Inspected)
+    if (status === "Inspected") {
+      await sendNotification(
+        playerIds,
+        "Arrived at Warehouse",
+        `Your return #${pickup.PickupName} has arrived at our warehouse. It will be inspected and packed before being sent out to the carrier.`
+      );
+    }
 
     return res.status(200).json({
       success: true,
@@ -661,15 +674,16 @@ export const addLabelIssue = async (req, res) => {
 
     await pickup.save();
 
-    await LabelIssueEmail(pickup?.userId?.email, labelIssue);
+    await LabelIssueEmail(pickup?.userId?.email, labelIssue, pickup.PickupName);
 
     const playerIds =
       pickup?.userId?.devices?.map((d) => d.playerId).filter(Boolean) || [];
 
+    // Label problem - Label issue notification
     await sendNotification(
       playerIds,
       `⚠️ Label issue detected for #${pickup.PickupName}`,
-      "The return label is invalid or can’t be processed. Please update or re-upload your label to avoid delays."
+      "There’s a problem with your return label. Please contact us so we can help resolve it."
     );
     return res.status(200).json({
       success: true,

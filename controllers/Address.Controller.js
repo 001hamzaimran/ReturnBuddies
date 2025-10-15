@@ -1,5 +1,5 @@
-import addressSchema from "../models/Address.js";
 import UserModel from "../models/User.js";
+import addressSchema from "../models/Address.js";
 
 const ZipCodes = [
   11252, 11209, 11220, 10280, 10080, 10281, 10282, 10006, 10004, 11228,

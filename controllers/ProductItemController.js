@@ -1,7 +1,7 @@
+import path from "path";
+import cloudinary from "../utils/cloundinary.js";
 import ProductItem from "../models/ProductItem.js";
 import ReturnBundle from "../models/ReturnBundle.js";
-import cloudinary from "../utils/cloundinary.js";
-import path from "path";
 
 export const createProductItems = async (req, res) => {
   try {
@@ -9,7 +9,9 @@ export const createProductItems = async (req, res) => {
     const files = req.files;
 
     if (!Array.isArray(items) || items.length !== files.length) {
-      return res.status(400).json({ error: 'Mismatch between items and images.' });
+      return res
+        .status(400)
+        .json({ error: "Mismatch between items and images." });
     }
 
     const savedItems = [];
@@ -22,7 +24,7 @@ export const createProductItems = async (req, res) => {
         productName: detail,
         oversized: oversized || false,
         thumbnail: file.path, // multer stores file path
-        labelReceipt: 'pending'
+        labelReceipt: "pending",
       });
 
       const saved = await newProductItem.save();
@@ -48,9 +50,9 @@ export const getProductItems = async (req, res) => {
 };
 
 function parseCustomDate(input) {
-  if (!input || typeof input !== 'string') return null;
+  if (!input || typeof input !== "string") return null;
 
-  const parts = input.split('/');
+  const parts = input.split("/");
   if (parts.length !== 3) return null;
 
   const [month, day, year] = parts; // now interpreting first part as month
@@ -59,8 +61,6 @@ function parseCustomDate(input) {
 
   return isNaN(date.getTime()) ? null : date;
 }
-
-
 
 // export const uploadLabel = async (req, res) => {
 //   let populatedBundle;
@@ -243,7 +243,6 @@ function parseCustomDate(input) {
 //   }
 // };
 
-
 // export const editLabel = async (req, res) => {
 //   try {
 //     const userId = req.params.userid || req.headers['userid'];
@@ -367,27 +366,24 @@ function parseCustomDate(input) {
 //   }
 // };
 
-
 // Helper function to detect resource type
-
-
 
 // Helper function to detect resource type
 const detectResourceType = (file) => {
   const ext = path.extname(file.originalname).toLowerCase();
-  return ['.pdf', '.doc', '.docx', '.zip'].includes(ext) ? 'raw' : 'image';
+  return [".pdf", ".doc", ".docx", ".zip"].includes(ext) ? "raw" : "image";
 };
 
 export const uploadLabel = async (req, res) => {
   let populatedBundle;
   try {
-    const userId = req.params.userid || req.headers['userid'];
+    const userId = req.params.userid || req.headers["userid"];
     const { bundleId, date } = req.body;
 
     if (!userId || !bundleId) {
       return res.status(200).json({
         status: 400,
-        message: 'Missing userId or bundleId.'
+        message: "Missing userId or bundleId.",
       });
     }
 
@@ -395,74 +391,83 @@ export const uploadLabel = async (req, res) => {
     if (!parsedDate) {
       return res.status(200).json({
         status: 400,
-        message: 'Invalid date format. Please use MM/DD/YYYY.'
+        message: "Invalid date format. Please use MM/DD/YYYY.",
       });
     }
 
     // Parse productIDs
     let productIDs;
     try {
-      productIDs = typeof req.body.productIDs === 'string'
-        ? JSON.parse(req.body.productIDs)
-        : req.body.productIDs;
+      productIDs =
+        typeof req.body.productIDs === "string"
+          ? JSON.parse(req.body.productIDs)
+          : req.body.productIDs;
     } catch (err) {
       return res.status(200).json({
         status: 400,
-        message: 'Invalid format for productIDs.'
+        message: "Invalid format for productIDs.",
       });
     }
 
     if (!Array.isArray(productIDs) || productIDs.length === 0) {
       return res.status(200).json({
         status: 400,
-        message: 'productIDs must be a non-empty array.'
+        message: "productIDs must be a non-empty array.",
       });
     }
 
     // Ensure label file is provided
     if (!req.files || req.files.length === 0) {
-      return res.status(200).json({ status: 400, message: 'Label image is required.' });
+      return res
+        .status(200)
+        .json({ status: 400, message: "Label image is required." });
     }
-    
+
     console.log("Label file received:", req.files);
-    
+
     // Upload to Cloudinary
     const file = req.files[0];
     const resourceType = detectResourceType(file);
-    
+
     let uploadOptions = {
-      folder: 'return-bundles',
+      folder: "return-bundles",
       use_filename: true,
       unique_filename: false,
-      access_mode: 'public',
+      access_mode: "public",
     };
 
     let labelUrl;
-    
-    if (resourceType === 'raw') {
+
+    if (resourceType === "raw") {
       // For PDFs, upload as raw
-      uploadOptions.resource_type = 'raw';
-      
-      const uploadResult = await cloudinary.uploader.upload(file.path, uploadOptions);
-      
+      uploadOptions.resource_type = "raw";
+
+      const uploadResult = await cloudinary.uploader.upload(
+        file.path,
+        uploadOptions
+      );
+
       // Generate a download URL for PDFs
       const publicId = uploadResult.public_id;
-      const format = path.extname(file.originalname).replace('.', '');
-      
+      const format = path.extname(file.originalname).replace(".", "");
+
       labelUrl = cloudinary.url(publicId, {
-        resource_type: 'raw',
-        flags: 'attachment', // This forces download behavior
-        sign_url: true // Sign the URL for security
+        resource_type: "raw",
+        flags: "attachment", // This forces download behavior
+        sign_url: true, // Sign the URL for security
       });
-      
+
       console.log("PDF uploaded to Cloudinary with download URL:", labelUrl);
     } else {
       // For images, upload normally
-      uploadOptions.resource_type = 'image';
-      
-      const uploadResult = await cloudinary.uploader.upload(file.path, uploadOptions);
+      uploadOptions.resource_type = "image";
+
+      const uploadResult = await cloudinary.uploader.upload(
+        file.path,
+        uploadOptions
+      );
       labelUrl = uploadResult.secure_url;
-      
+
       console.log("Image uploaded to Cloudinary:", labelUrl);
     }
 
@@ -472,11 +477,11 @@ export const uploadLabel = async (req, res) => {
     if (!currentBundle) {
       return res.status(200).json({
         status: 404,
-        message: 'Original bundle not found.'
+        message: "Original bundle not found.",
       });
     }
 
-    const currentProductIds = currentBundle.products.map(id => id.toString());
+    const currentProductIds = currentBundle.products.map((id) => id.toString());
     const updatedProducts = [];
 
     for (const item of productIDs) {
@@ -492,8 +497,8 @@ export const uploadLabel = async (req, res) => {
         await ReturnBundle.findByIdAndUpdate(
           bundleId,
           {
-            status: 'processed',
-            pickupTime: parsedDate
+            status: "processed",
+            pickupTime: parsedDate,
           },
           { new: true }
         );
@@ -503,27 +508,31 @@ export const uploadLabel = async (req, res) => {
     if (updatedProducts.length === 0) {
       return res.status(200).json({
         status: 400,
-        message: 'No valid products provided to create a new bundle.'
+        message: "No valid products provided to create a new bundle.",
       });
     }
 
     // Check if all products in bundle were selected
-    const allSelected = currentProductIds.length === updatedProducts.length &&
-      currentProductIds.every(id => updatedProducts.includes(id));
+    const allSelected =
+      currentProductIds.length === updatedProducts.length &&
+      currentProductIds.every((id) => updatedProducts.includes(id));
 
     if (allSelected) {
       return res.status(200).json({
         status: 200,
-        message: 'All products in bundle updated with label. No new bundle created.',
+        message:
+          "All products in bundle updated with label. No new bundle created.",
         data: {
           bundle: bundleId,
-          date: parsedDate
-        }
+          date: parsedDate,
+        },
       });
     }
 
     // Generate next bundle name
-    const latestBundle = await ReturnBundle.findOne().sort({ createdAt: -1 }).select('BundleName');
+    const latestBundle = await ReturnBundle.findOne()
+      .sort({ createdAt: -1 })
+      .select("BundleName");
     let nextNumber = 1;
 
     if (latestBundle?.BundleName?.startsWith("Return #")) {
@@ -543,114 +552,122 @@ export const uploadLabel = async (req, res) => {
       pickupTime: parsedDate,
       pickupAddress: null,
       payment: null,
-      status: 'processed'
+      status: "processed",
     });
 
     await newBundle.save();
 
     // Remove products from old bundle
-    await ReturnBundle.findByIdAndUpdate(
-      bundleId,
-      { $pull: { products: { $in: updatedProducts } } }
-    );
+    await ReturnBundle.findByIdAndUpdate(bundleId, {
+      $pull: { products: { $in: updatedProducts } },
+    });
 
     const remainingBundle = await ReturnBundle.findById(bundleId).lean();
     if (remainingBundle?.products?.length > 0) {
-      await ReturnBundle.findByIdAndUpdate(bundleId, { status: 'pending' });
+      await ReturnBundle.findByIdAndUpdate(bundleId, { status: "pending" });
     }
 
-    populatedBundle = await ReturnBundle.findById(newBundle._id).populate('products');
+    populatedBundle = await ReturnBundle.findById(newBundle._id).populate(
+      "products"
+    );
 
     return res.status(200).json({
       status: 200,
-      message: 'Label uploaded to Cloudinary and new bundle created successfully.',
+      message:
+        "Label uploaded to Cloudinary and new bundle created successfully.",
       data: {
         bundle: populatedBundle,
         date: parsedDate,
-        labelUrl
-      }
+        labelUrl,
+      },
     });
-
   } catch (error) {
-    console.error('Error in uploadLabel:', error);
+    console.error("Error in uploadLabel:", error);
     return res.status(500).json({
       status: 500,
-      message: 'Internal server error',
-      error: error.message
+      message: "Internal server error",
+      error: error.message,
     });
   }
 };
 
 export const editLabel = async (req, res) => {
   try {
-    const userId = req.params.userid || req.headers['userid'];
+    const userId = req.params.userid || req.headers["userid"];
     const { bundleId, date } = req.body;
 
     if (!userId || !bundleId) {
       return res.status(400).json({
         status: 400,
-        message: 'Missing userId or bundleId.'
+        message: "Missing userId or bundleId.",
       });
     }
 
     // Parse productIDs
     let productIDs;
     try {
-      productIDs = typeof req.body.productIDs === 'string'
-        ? JSON.parse(req.body.productIDs)
-        : req.body.productIDs;
+      productIDs =
+        typeof req.body.productIDs === "string"
+          ? JSON.parse(req.body.productIDs)
+          : req.body.productIDs;
     } catch (err) {
       return res.status(400).json({
         status: 400,
-        message: 'Invalid format for productIDs.'
+        message: "Invalid format for productIDs.",
       });
     }
 
     if (!Array.isArray(productIDs) || productIDs.length === 0) {
       return res.status(400).json({
         status: 400,
-        message: 'productIDs must be a non-empty array.'
+        message: "productIDs must be a non-empty array.",
       });
     }
 
     let labelUrl;
-    
+
     // Only process file upload if a file was provided
     if (req.files && req.files.length > 0) {
       const file = req.files[0];
       const resourceType = detectResourceType(file);
-      
+
       let uploadOptions = {
-        folder: 'return-bundles',
+        folder: "return-bundles",
         use_filename: true,
         unique_filename: false,
-        access_mode: 'public',
+        access_mode: "public",
       };
 
-      if (resourceType === 'raw') {
+      if (resourceType === "raw") {
         // For PDFs, upload as raw
-        uploadOptions.resource_type = 'raw';
-        
-        const uploadResult = await cloudinary.uploader.upload(file.path, uploadOptions);
-        
+        uploadOptions.resource_type = "raw";
+
+        const uploadResult = await cloudinary.uploader.upload(
+          file.path,
+          uploadOptions
+        );
+
         // Generate a download URL for PDFs
         const publicId = uploadResult.public_id;
-        const format = path.extname(file.originalname).replace('.', '');
-        
+        const format = path.extname(file.originalname).replace(".", "");
+
         labelUrl = cloudinary.url(publicId, {
-          resource_type: 'raw',
-          flags: 'attachment', // This forces download behavior
-          sign_url: true // Sign the URL for security
+          resource_type: "raw",
+          flags: "attachment", // This forces download behavior
+          sign_url: true, // Sign the URL for security
         });
-        
+
         console.log("PDF uploaded to Cloudinary with download URL:", labelUrl);
       } else {
         // For images, upload normally
-        uploadOptions.resource_type = 'image';
-        
-        const uploadResult = await cloudinary.uploader.upload(file.path, uploadOptions);
+        uploadOptions.resource_type = "image";
+
+        const uploadResult = await cloudinary.uploader.upload(
+          file.path,
+          uploadOptions
+        );
         labelUrl = uploadResult.secure_url;
-        
+
         console.log("Image uploaded to Cloudinary:", labelUrl);
       }
     }
@@ -660,18 +677,18 @@ export const editLabel = async (req, res) => {
     if (!currentBundle) {
       return res.status(404).json({
         status: 404,
-        message: 'Bundle not found.'
+        message: "Bundle not found.",
       });
     }
 
-    const currentProductIds = currentBundle.products.map(id => id.toString());
+    const currentProductIds = currentBundle.products.map((id) => id.toString());
     const updatedProducts = [];
 
     for (const item of productIDs) {
       const updateData = {
-        date: new Date(date)
+        date: new Date(date),
       };
-      
+
       // Only add labelUrl to update if it was provided (new file uploaded)
       if (labelUrl) {
         updateData.labelReceipt = labelUrl;
@@ -691,38 +708,40 @@ export const editLabel = async (req, res) => {
     if (updatedProducts.length === 0) {
       return res.status(400).json({
         status: 400,
-        message: 'No products were updated.'
+        message: "No products were updated.",
       });
     }
 
     // Mark bundle processed if all products updated
-    const allSelected = currentProductIds.length === updatedProducts.length &&
-      currentProductIds.every(id => updatedProducts.includes(id));
+    const allSelected =
+      currentProductIds.length === updatedProducts.length &&
+      currentProductIds.every((id) => updatedProducts.includes(id));
 
     if (allSelected) {
-      await ReturnBundle.findByIdAndUpdate(bundleId, { status: 'processed' });
+      await ReturnBundle.findByIdAndUpdate(bundleId, { status: "processed" });
     }
 
-    const updatedBundle = await ReturnBundle.findById(bundleId).populate('products');
+    const updatedBundle = await ReturnBundle.findById(bundleId).populate(
+      "products"
+    );
 
     return res.status(200).json({
       status: 200,
       message: labelUrl
-        ? 'Label uploaded to Cloudinary and updated successfully.'
-        : 'Date updated successfully (label unchanged).',
+        ? "Label uploaded to Cloudinary and updated successfully."
+        : "Date updated successfully (label unchanged).",
       data: {
         bundle: updatedBundle,
         updatedProducts,
-        labelUrl: labelUrl || null
-      }
+        labelUrl: labelUrl || null,
+      },
     });
-
   } catch (error) {
-    console.error('Error in editLabel:', error);
+    console.error("Error in editLabel:", error);
     return res.status(500).json({
       status: 500,
-      message: 'Internal server error',
-      error: error.message
+      message: "Internal server error",
+      error: error.message,
     });
   }
 };

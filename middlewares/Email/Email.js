@@ -150,7 +150,7 @@ const sendVerificationEmail = async (to, verificationCode) => {
 
 export default sendVerificationEmail;
 
-const LabelIssueEmail = async (to, labelIssue) => {
+const LabelIssueEmail = async (to, labelIssue, PickupName) => {
   try {
     await sendMail({
       to,
@@ -168,7 +168,8 @@ const LabelIssueEmail = async (to, labelIssue) => {
     <!-- Body Content -->
     <div style="padding: 32px;">
       <div style="text-align: center; margin-bottom: 24px;">
-        <h2 style="font-size: 20px; font-weight: 600; color: #7e3ff2; margin: 0 0 8px 0; font-family: 'Poppins', sans-serif;">Label Issue Detected</h2>
+        <h2 style="font-size: 20px; font-weight: 600; color: #7e3ff2; margin: 0 0 8px 0; font-family: 'Poppins', sans-serif;">Label Issue Detected </h2>
+        <h2 style="font-size: 20px; font-weight: 600; color: #7e3ff2; margin: 0 0 8px 0; font-family: 'Poppins', sans-serif;">at ${PickupName}</h2>
       </div>
       
       <p style="color: #374151; text-align: center; margin-bottom: 16px; font-family: 'Poppins', sans-serif;">

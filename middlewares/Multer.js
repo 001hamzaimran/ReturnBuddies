@@ -1,9 +1,9 @@
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import fs from "fs";
+import path from "path";
+import multer from "multer";
 
 // Make sure directory exists or create it
-const dir = 'public/images';
+const dir = "public/images";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
     cb(null, dir);
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + path.extname(file.originalname));
+    cb(null, Date.now() + "-" + path.extname(file.originalname));
   },
 });
 

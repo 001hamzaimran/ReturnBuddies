@@ -9,14 +9,16 @@ const api = axios.create({
   baseURL: BASE_URL,
   headers: {
     Authorization: `Bearer ${ROUTIFIC_TOKEN}`, // ✅ fixed backticks
-    "Content-Type": "application/json"
-  }
+    "Content-Type": "application/json",
+  },
 });
 
 export const getRoutificOrders = async (workspaceId, date) => {
   try {
     // 1️⃣ Fetch all routes for workspace & date
-    const routeRes = await api.get(`/routes?workspaceId=${workspaceId}&date=${date}`);
+    const routeRes = await api.get(
+      `/routes?workspaceId=${workspaceId}&date=${date}`
+    );
     const routes = routeRes.data.data;
     if (!routes?.length) return [];
 
@@ -40,7 +42,7 @@ export const getRoutificOrders = async (workspaceId, date) => {
             if (orderData.status?.toLowerCase() === "delivered") {
               allOrders.push({
                 customerOrderNumber: orderData.customerOrderNumber,
-                status: orderData.status
+                status: orderData.status,
               });
             }
           }
@@ -49,11 +51,13 @@ export const getRoutificOrders = async (workspaceId, date) => {
     }
 
     // extract customerOrderNumbers of delivered orders
-    const deliveredOrderNumbers = allOrders.map(order => order.customerOrderNumber);
+    const deliveredOrderNumbers = allOrders.map(
+      (order) => order.customerOrderNumber
+    );
 
     // ✅ fetch pickups whose PickupName is in deliveredOrderNumbers
     const pickups = await pickupModel.find({
-      PickupName: { $in: deliveredOrderNumbers }
+      PickupName: { $in: deliveredOrderNumbers },
     });
 
     console.log(`Fetched ${pickups.length} delivered pickups from Routific.`);
@@ -68,7 +72,7 @@ export const getRoutificOrders = async (workspaceId, date) => {
         pickup.statusHistory.push({
           type: "status",
           status: "Picked Up",
-          updatedAt: new Date()
+          updatedAt: new Date(),
         });
 
         await pickup.save();
@@ -78,7 +82,10 @@ export const getRoutificOrders = async (workspaceId, date) => {
 
     return pickups;
   } catch (error) {
-    console.error("Error fetching Routific orders:", error.response?.data || error.message);
+    console.error(
+      "Error fetching Routific orders:",
+      error.response?.data || error.message
+    );
     return [];
   }
 };

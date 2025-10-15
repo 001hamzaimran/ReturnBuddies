@@ -1,18 +1,16 @@
-import PromoCodeModal from "../models/promoCode.Model.js";
 import UserModel from "../models/User.js";
+import PromoCodeModal from "../models/promoCode.Model.js";
 
 const addPromo = async (req, res) => {
   try {
     const userid = req.user.id;
 
     if (!userid)
-      return res
-        .status(200)
-        .json({
-          message: "User ID is required in headers",
-          success: false,
-          status: 400,
-        });
+      return res.status(200).json({
+        message: "User ID is required in headers",
+        success: false,
+        status: 400,
+      });
 
     const user = await UserModel.findOne({ _id: userid });
     if (!user)
@@ -22,13 +20,11 @@ const addPromo = async (req, res) => {
 
     const { userId, Name, PromoCode, Discount, status } = req.body;
     if (!Name || !PromoCode || !Discount || !status)
-      return res
-        .status(200)
-        .json({
-          message: "All fields are required",
-          success: false,
-          status: 400,
-        });
+      return res.status(200).json({
+        message: "All fields are required",
+        success: false,
+        status: 400,
+      });
 
     const newPromo = await PromoCodeModal.create({
       userId,
@@ -37,23 +33,19 @@ const addPromo = async (req, res) => {
       Discount,
       status,
     });
-    return res
-      .status(200)
-      .json({
-        message: "Promo Code Added Successfully",
-        success: true,
-        status: 200,
-        newPromo,
-      });
+    return res.status(200).json({
+      message: "Promo Code Added Successfully",
+      success: true,
+      status: 200,
+      newPromo,
+    });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: "Internal Server Error",
-        success: false,
-        status: 500,
-        error: error.message,
-      });
+    return res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+      status: 500,
+      error: error.message,
+    });
   }
 };
 
@@ -63,23 +55,19 @@ const getPromo = async (req, res) => {
     const discountCode = req.query.code || req.params.code;
 
     if (!userid) {
-      return res
-        .status(200)
-        .json({
-          message: "User ID is required in headers",
-          success: false,
-          status: 400,
-        });
+      return res.status(200).json({
+        message: "User ID is required in headers",
+        success: false,
+        status: 400,
+      });
     }
 
     if (!discountCode) {
-      return res
-        .status(200)
-        .json({
-          message: "Promo code is required in query or param",
-          success: false,
-          status: 400,
-        });
+      return res.status(200).json({
+        message: "Promo code is required in query or param",
+        success: false,
+        status: 400,
+      });
     }
 
     const user = await UserModel.findById(userid);
@@ -96,23 +84,19 @@ const getPromo = async (req, res) => {
     });
 
     if (!promo) {
-      return res
-        .status(200)
-        .json({
-          status: 201,
-          message: "Promo code not found or not available for this user",
-          success: false,
-        });
+      return res.status(200).json({
+        status: 201,
+        message: "Promo code not found or not available for this user",
+        success: false,
+      });
     }
 
-    return res
-      .status(200)
-      .json({
-        status: 200,
-        message: `You get ${promo.Discount}% discount`,
-        success: true,
-        promo,
-      });
+    return res.status(200).json({
+      status: 200,
+      message: `You get ${promo.Discount}% discount`,
+      success: true,
+      promo,
+    });
   } catch (error) {
     console.error("getPromo error:", error);
     return res
@@ -141,22 +125,18 @@ const deletePromos = async (req, res) => {
         .status(200)
         .json({ message: "Promo code not found", success: false, status: 404 });
     }
-    return res
-      .status(200)
-      .json({
-        message: "Promo code deleted successfully",
-        success: true,
-        status: 200,
-      });
+    return res.status(200).json({
+      message: "Promo code deleted successfully",
+      success: true,
+      status: 200,
+    });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        message: "Internal Server Error",
-        success: false,
-        status: 500,
-        error: error.message,
-      });
+    return res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+      status: 500,
+      error: error.message,
+    });
   }
 };
 

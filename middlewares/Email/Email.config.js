@@ -1,6 +1,6 @@
+import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import sgMail from "../../utils/mailer.js";
-import dotenv from "dotenv";
 
 dotenv.config();
 

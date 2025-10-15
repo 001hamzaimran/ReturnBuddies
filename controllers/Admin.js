@@ -1,8 +1,8 @@
-import pickupModel from "../models/pickup.model.js";
 import UserModel from "../models/User.js";
+import pickupModel from "../models/pickup.model.js";
 
 // get all users with roles user
-const getUsers = async (req, res) => {
+const getUsers = async (_, res) => {
   try {
     // fetch all users
     const users = await UserModel.find({ role: "user" })

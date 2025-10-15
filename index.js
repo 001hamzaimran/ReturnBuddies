@@ -22,7 +22,10 @@ import notificationRoutes from "./routes/notification.route.js";
 import NotificationRouter from "./routes/Notification.routes.js";
 import { disabledSlotRouter } from "./routes/DisabledSlot.routes.js";
 import { getRoutificOrders } from "./controllers/Routific.Controller.js";
-import { oneDayBeforePickup ,morningOfPickup} from "./controllers/push.notification.js";
+import {
+  oneDayBeforePickup,
+  morningOfPickup,
+} from "./controllers/push.notification.js";
 
 dotenv.config();
 
@@ -70,30 +73,20 @@ const cronJob = async () => {
   cron.schedule("0 * * * *", async () => {
     const workspaceId = 759727;
     const date = getTodayDate(); // today's date in YYYY-MM-DD
-
-    console.log(
-      `Running cron job at ${new Date().toLocaleTimeString()} for date: ${date}`
-    );
-
-    try {
-      const orders = await getRoutificOrders(workspaceId, date);
-      console.log("Delivered orders:", orders);
-    } catch (error) {
-      console.error("Error in cron job:", error);
-    }
+    await getRoutificOrders(workspaceId, date);
   });
-}
+};
 
 const oneDayBeforePickupCronJob = async () => {
   cron.schedule("0 19 * * *", async () => {
-    console.log("Running one day before pickup job at 7 PM");
+    console.log("one Day Before Pickup Cron Job")
     await oneDayBeforePickup();
   });
 };
-  
+
 const morningOfPickupCronJob = async () => {
   cron.schedule("0 7 * * *", async () => {
-    console.log("Running morning of pickup job at 7 AM");
+    console.log("morning Of Pickup Cron Job")
     await morningOfPickup();
   });
 };

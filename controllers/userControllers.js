@@ -1,11 +1,10 @@
-import UserModel from "../models/User.js";
-import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import sendVerificationEmail from "../middlewares/Email/Email.js";
-
+import bcrypt from "bcryptjs";
 import jsonwebtoken from "jsonwebtoken";
+import UserModel from "../models/User.js";
 import ForgotModal from "../models/ForgotPassword.js";
 import { sendSms } from "../middlewares/Phone/Phone.js";
+import sendVerificationEmail from "../middlewares/Email/Email.js";
 
 export const registerDevice = async (req, res) => {
   try {
@@ -19,7 +18,10 @@ export const registerDevice = async (req, res) => {
     }
 
     const user = await UserModel.findById(userId);
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
 
     if (!user.devices) user.devices = [];
 
@@ -39,7 +41,6 @@ export const registerDevice = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
 
 // Register
 const Register = async (req, res) => {
