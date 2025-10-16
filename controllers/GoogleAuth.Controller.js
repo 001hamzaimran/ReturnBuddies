@@ -1,7 +1,7 @@
-import axios from "axios";
 import UserModel from "../models/User.js";
 import appleSignin from "apple-signin-auth";
 import oauth2client from "../utils/googleConfig.js";
+import jsonwebtoken from "jsonwebtoken"
 
 export const googleLogin = async (req, res) => {
   try {
@@ -29,8 +29,8 @@ export const googleLogin = async (req, res) => {
       user = new UserModel({
         name,
         email,
-        profile: picture,
         googleId: sub,
+        profile: picture,
       });
       await user.save();
     }
