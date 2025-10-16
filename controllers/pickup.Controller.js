@@ -438,7 +438,7 @@ export const updatePickupStatus = async (req, res) => {
       await sendNotification(
         playerIds,
         "✅ Pickup complete",
-        `Pickup #${pickup.PickupName} has been Pick up.
+        `Pickup #${pickup.PickupName} has been picked up.
 We’ll let you know once it’s arrived at our warehouse.`
       );
     }
