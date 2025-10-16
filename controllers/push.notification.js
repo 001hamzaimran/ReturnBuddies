@@ -1,4 +1,3 @@
-import moment from "moment";
 import UserModel from "../models/User.js";
 import { sendNotification } from "../utils/sendNotification.js";
 import pickupModel from "../models/pickup.model.js";

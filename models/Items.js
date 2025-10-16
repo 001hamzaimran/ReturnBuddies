@@ -1,25 +1,24 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 
-const ItemsSchema=new mongoose.Schema({
-    itemDetails:{
-        type:String,
+const ItemsSchema = new Schema(
+  {
+    itemDetails: {
+      type: String,
     },
-    itemPhoto:{
-        type:String
-    },
-   
-    ReturnDate:{
-        type:String
-
-    },
-     ReturnShippingLabel:{
-        type:String
-
+    itemPhoto: {
+      type: String,
     },
 
-},
-{timestamps:true})
+    ReturnDate: {
+      type: String,
+    },
+    ReturnShippingLabel: {
+      type: String,
+    },
+  },
+  { timestamps: true }
+);
 
-const ItemModal= mongoose.model("Items",ItemsSchema)
+const ItemModal = model("Items", ItemsSchema);
 
-export default ItemModal
+export default ItemModal;

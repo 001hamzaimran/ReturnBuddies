@@ -1,44 +1,46 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 
-const productItemSchema = new mongoose.Schema({
+const productItemSchema = new Schema(
+  {
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     productName: {
-        type: String,
-        required: true,
-        trim: true
+      type: String,
+      required: true,
+      trim: true,
     },
 
     thumbnail: {
-        type: String,
-        required: true,
-        trim: true
+      type: String,
+      required: true,
+      trim: true,
     },
 
     labelReceipt: {
-        type: String,
-        required: true,
-        trim: true
+      type: String,
+      required: true,
+      trim: true,
     },
     oversized: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
     labelName: {
-        type: String,
-        trim: true
+      type: String,
+      trim: true,
     },
     date: {
-        type: Date,
-        default: Date.now
+      type: Date,
+      default: Date.now,
     },
-},
-    {
-        _id: true,
-        timestamps: true
-    });
+  },
+  {
+    _id: true,
+    timestamps: true,
+  }
+);
 
-export default mongoose.model('ProductItem', productItemSchema);
+export default model("ProductItem", productItemSchema);

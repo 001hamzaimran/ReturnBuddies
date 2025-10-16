@@ -1,117 +1,137 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 
-const pickupSchema = new mongoose.Schema({
+const pickupSchema = new Schema(
+  {
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     PickupName: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
-    bundleId: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ReturnBundle',
-        required: true
-    }],
+    bundleId: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "ReturnBundle",
+        required: true,
+      },
+    ],
     Carrier: {
-        type: String,
+      type: String,
     },
     TrackingNumber: {
-        type: String,
+      type: String,
     },
     status: {
-        type: String,
-        enum: ['Pickup Requested', 'Picked Up', 'Inspected', 'Completed', 'Pickup Cancelled', 'In Transit', 'Delivered'],
-        default: 'Pickup Requested',
+      type: String,
+      enum: [
+        "Pickup Requested",
+        "Picked Up",
+        "Inspected",
+        "Completed",
+        "Pickup Cancelled",
+        "In Transit",
+        "Delivered",
+      ],
+      default: "Pickup Requested",
     },
     pickupAddress: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Address'
+      type: Schema.Types.ObjectId,
+      ref: "Address",
     },
     // 🟢 New field to track status changes
     statusHistory: [
-        {
-            type: {
-                type: String,
-                enum: ["status", "extraCharge", "Issue"], // differentiate
-                default: "status",
-            },
-            status: {
-                type: String,
-                enum: ['Pickup Requested', 'Picked Up', 'Inspected', 'Completed', 'Pickup Cancelled', 'In Transit', 'Delivered']
-            },
-            extraCharge: Number,
-            chargeDetail: String,
-            labelIssue: String,
-            updatedAt: {
-                type: Date,
-                default: Date.now
-            }
-        }
+      {
+        type: {
+          type: String,
+          enum: ["status", "extraCharge", "Issue"], // differentiate
+          default: "status",
+        },
+        status: {
+          type: String,
+          enum: [
+            "Pickup Requested",
+            "Picked Up",
+            "Inspected",
+            "Completed",
+            "Pickup Cancelled",
+            "In Transit",
+            "Delivered",
+          ],
+        },
+        extraCharge: Number,
+        chargeDetail: String,
+        labelIssue: String,
+        updatedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
     ],
 
     note: {
-        type: String,
-        trim: true
+      type: String,
+      trim: true,
     },
 
     pickupDate: {
-        type: Date,
-        required: true
+      type: Date,
+      required: true,
     },
 
     pickupTime: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
 
     pickupType: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
 
     deliveryDate: {
-        type: Date
+      type: Date,
     },
 
     Payment: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Payment'
+      type: Schema.Types.ObjectId,
+      ref: "Payment",
     },
 
     isOversize: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
 
     totalPrice: {
-        type: Number,
-        required: true
+      type: Number,
+      required: true,
     },
 
     phone: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
 
     extraCharge: {
-        type: Number,
-        default: 0
+      type: Number,
+      default: 0,
     },
     chargeDetail: {
-        type: String,
-        default: ''
+      type: String,
+      default: "",
     },
     labelIssue: {
-        type: String,
-        default: ''
+      type: String,
+      default: "",
     },
     isRead: { type: Boolean, default: false },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-}, {
-    timestamps: true
-});
-
-export default mongoose.model('Pickup', pickupSchema);
+export default model("Pickup", pickupSchema);

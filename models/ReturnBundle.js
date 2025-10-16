@@ -1,56 +1,59 @@
-import mongoose from 'mongoose';
+import { Schema, model } from "mongoose";
 
+const returnBundleSchema = new Schema({
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  BundleName: {
+    type: String,
+    required: true,
+  },
+  products: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "ProductItem",
+      required: true,
+    },
+  ],
+  history: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "History",
+      },
+    ],
+  },
 
-const returnBundleSchema = new mongoose.Schema({
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    BundleName: {
-        type: String,
-        required: true
-    },
-    products: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ProductItem',
-        required: true
-    }],
-    history: {
-        type: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'History',
-        }]
-    },
+  pickupAddress: {
+    type: Schema.Types.ObjectId,
+    ref: "Address",
+  },
 
-    pickupAddress: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Address'
-    },
+  payment: {
+    type: Schema.Types.ObjectId,
+    ref: "Payment",
+  },
 
-    payment: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Payment',
-    },
+  pickupTime: {
+    type: Date,
+  },
 
-    pickupTime: {
-        type: Date
-    },
+  status: {
+    type: String,
+    enum: ["pending", "processed", "completed"],
+    default: "pending",
+  },
 
-    status: {
-        type: String,
-        enum: ['pending', 'processed', 'completed'],
-        default: 'pending'
-    },
-
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 function arrayNotEmpty(val) {
-    return Array.isArray(val) && val.length > 0;
+  return Array.isArray(val) && val.length > 0;
 }
 
-export default mongoose.model('ReturnBundle', returnBundleSchema);
+export default model("ReturnBundle", returnBundleSchema);

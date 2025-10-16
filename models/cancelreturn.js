@@ -1,13 +1,13 @@
-import mongoose from "mongoose";
+import {Schema} from "mongoose";
 
-const cancelreturnSchema = new mongoose.Schema({
+const cancelreturnSchema = new Schema({
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
     bundleId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'ReturnBundle',
         required: true
     },

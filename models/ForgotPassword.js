@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
+import { Schema, model } from "mongoose";
 
-const ForgotSchema = new mongoose.Schema({
+const ForgotSchema = new Schema({
   email: { type: String, required: true },
-  otp: { type: String, },
-  expiresAt: { type: Date,  },
+  otp: { type: String },
+  expiresAt: { type: Date },
   verified: { type: Boolean, default: false },
 });
 
-const ForgotModal = mongoose.model("ForgotPassword", ForgotSchema);
+const ForgotModal = model("ForgotPassword", ForgotSchema);
 export default ForgotModal;

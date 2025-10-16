@@ -1,8 +1,8 @@
 // models/Address.js
-import mongoose from 'mongoose';
+import {Schema,model} from 'mongoose';
 
-const addressSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+const addressSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   street: { type: String, required: true, trim: true },
   city: { type: String, required: true, trim: true },
   state: { type: String, required: true, trim: true },
@@ -12,4 +12,4 @@ const addressSchema = new mongoose.Schema({
 });
 
 // Export as a Mongoose model
-export default mongoose.model('Address', addressSchema);
+export default model('Address', addressSchema);

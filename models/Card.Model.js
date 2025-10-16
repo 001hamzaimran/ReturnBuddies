@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
+import {Schema,model} from "mongoose";
 
-const CardSchema = new mongoose.Schema({
+const CardSchema = new Schema({
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
@@ -31,4 +31,4 @@ const CardSchema = new mongoose.Schema({
         default: 0
     }
 });
-export default mongoose.model("Card", CardSchema);
+export default model("Card", CardSchema);

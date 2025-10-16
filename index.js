@@ -79,20 +79,24 @@ const cronJob = async () => {
 
 const oneDayBeforePickupCronJob = async () => {
   cron.schedule("0 19 * * *", async () => {
-    console.log("one Day Before Pickup Cron Job")
+    console.log("one Day Before Pickup Cron Job");
     await oneDayBeforePickup();
   });
 };
 
 const morningOfPickupCronJob = async () => {
   cron.schedule("0 7 * * *", async () => {
-    console.log("morning Of Pickup Cron Job")
+    console.log("morning Of Pickup Cron Job");
     await morningOfPickup();
   });
 };
 
-app.get("/privacy-policy", (req, res) => {
+app.get("/privacy-policy", (_, res) => {
   res.sendFile(path.resolve("public/privacy-policy.html"));
+});
+
+app.get("/term-and-condition", (_, res) => {
+  res.sendFile(path.resolve("public/term-and-condition.html"));
 });
 routes.map((route) => app.use("/api", route));
 
