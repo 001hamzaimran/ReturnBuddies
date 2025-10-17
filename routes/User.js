@@ -35,7 +35,7 @@ import {
 
 const AuthRoutes = express.Router();
 
-AuthRoutes.post("/register-device", registerDevice);
+AuthRoutes.post("/register-device", isLogin,registerDevice);
 AuthRoutes.post("/register", upload.none(), validate(authSchema), Register);
 AuthRoutes.post("/verifyemail", validate(EmailSchema_validation), VerifyEmail);
 AuthRoutes.post("/login", upload.none(), validate(loginSchema), Login);
