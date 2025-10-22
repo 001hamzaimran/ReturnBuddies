@@ -33,7 +33,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "stripe": "^18.5.0",
-    "twilio": "^5.7.2",
+    "telnyx": "^3.9.0",
     "zod": "^3.24.4"
   }
 }

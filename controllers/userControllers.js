@@ -215,9 +215,8 @@ const phoneVerfication = async (req, res) => {
     }
     // Generate OTP token
     const otp = crypto.randomInt(10000, 99999).toString();
-    const message = `Your OTP is ${otp}`;
 
-    await sendSms(phone, message);
+    await sendSms(phone, `Your ReturnBuddies one-time code is: ${otp}.`);
 
     // Send OTP to user's phone number
     user.phoneOtp = otp;
@@ -617,19 +616,11 @@ const updateNameandPhone = async (req, res) => {
 
     const users = await UserModel.findById(user._id);
 
-    // const currentUser = await UserModel.findByIdAndUpdate(
-    //   user._id,
-    //   { name, phone },
-    //   { new: true, runValidators: true }
-    // )
-    // if (!currentUser) {
-    //   return res.status(200).json({
-    //     success: false,
-    //     status: 404,
-    //     message: "User not found",
-    //   });
-    // }
-    await sendSms(phone, `Your OTP is: ${otp}`);
+    await sendSms(
+      phone,
+      `Your ReturnBuddies one-time code is: ${otp}.`
+    );
+    
 
     return res.status(200).json({
       success: true,

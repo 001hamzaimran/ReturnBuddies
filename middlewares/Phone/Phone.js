@@ -1,20 +1,18 @@
-import twilio from "twilio";
-import dotenv from "dotenv";
+import Telnyx from "telnyx";
+import { config } from "dotenv";
 
-dotenv.config();
+config();
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = twilio(accountSid, authToken);
+const from = process.env["TELNYX_PHONE_NUMBER"];
+const apiKey = process.env["TELNYX_AUTH_TOKEN"];
 
-export const sendSms = async (phone, message) => {
+const telnyx = new Telnyx({ apiKey });
+
+export const sendSms = async (to, text) => {
   try {
-    const result = await client.messages.create({
-      body: message,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: phone,
-    });
-    console.log("SMS sent successfully:", result.sid);
+    const response = await telnyx.messages.send({ to, from, text });
+
+    console.log("Message sent:", response.data);
   } catch (error) {
     console.error("Error sending SMS:", error);
   }
