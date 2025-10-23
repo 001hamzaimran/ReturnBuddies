@@ -13,8 +13,8 @@ const UserSchema = new Schema(
     devices: [
       {
         os: String, 
-        playerId: String,
         lastActive: { type: Date, default: Date.now },
+        playerId: { type: String, index: true, sparse: true },
         
       },
     ],
@@ -78,6 +78,8 @@ const UserSchema = new Schema(
   },
   { timestamps: true }
 );
+
+
 
 const UserModel = model("User", UserSchema);
 export default UserModel;
