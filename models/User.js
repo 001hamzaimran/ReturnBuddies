@@ -1,6 +1,7 @@
 import { Schema, model } from "mongoose";
 
 const UserSchema = new Schema(
+  
   {
     name: {
       type: String,
@@ -12,10 +13,9 @@ const UserSchema = new Schema(
     },
     devices: [
       {
-        os: String, 
+        playerId: String,
+        os: String, // "android" or "ios"
         lastActive: { type: Date, default: Date.now },
-        playerId: { type: String, index: true, sparse: true },
-        
       },
     ],
     profile: {
@@ -79,7 +79,9 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
-
-
+UserSchema.index({ 'devices.playerId': 1 }, { 
+  unique: true, 
+  sparse: true 
+});await UserModel.collection.dropIndex('devices.playerId_1');
 const UserModel = model("User", UserSchema);
 export default UserModel;
