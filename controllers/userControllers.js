@@ -21,7 +21,7 @@ export const registerDevice = async (req, res) => {
     if (!user)
       return res
         .status(404)
-        .json({ success: false, status: 400, message: "User not found" });
+        .json({ success: false, message: "User not found" });
 
     if (!user.devices) user.devices = [];
 
@@ -30,8 +30,8 @@ export const registerDevice = async (req, res) => {
     if (!existing) {
       user.devices.push({ playerId, os, lastActive: new Date() });
     } else {
-      existing.os = os;
       existing.lastActive = new Date();
+      existing.os = os;
     }
 
     await user.save();
