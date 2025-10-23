@@ -12,9 +12,9 @@ const UserSchema = new Schema(
     },
     devices: [
       {
-        os: String, 
-        playerId: String,
+        os: String,
         lastActive: { type: Date, default: Date.now },
+        playerId: { type: String, required: true, unique: true },
       },
     ],
     profile: {

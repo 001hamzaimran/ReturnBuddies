@@ -25,10 +25,7 @@ export const registerDevice = async (req, res) => {
 
     if (!user.devices) user.devices = [];
 
-    // More robust comparison - trim and case insensitive
-    const existing = user.devices.find((d) => 
-      d.playerId.toString().trim().toLowerCase() === playerId.toString().trim().toLowerCase()
-    );
+    const existing = user.devices.find((d) => d.playerId === playerId);
 
     if (!existing) {
       user.devices.push({ playerId, os, lastActive: new Date() });
@@ -44,6 +41,7 @@ export const registerDevice = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
 // Register
 const Register = async (req, res) => {
   const { name, email, password } = req.body;
