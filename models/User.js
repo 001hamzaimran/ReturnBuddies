@@ -82,6 +82,6 @@ const UserSchema = new Schema(
 UserSchema.index({ 'devices.playerId': 1 }, { 
   unique: true, 
   sparse: true 
-});await UserModel.collection.dropIndex('devices.playerId_1');
+});
 const UserModel = model("User", UserSchema);
 export default UserModel;
