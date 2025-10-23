@@ -12,9 +12,10 @@ const UserSchema = new Schema(
     },
     devices: [
       {
-        os: { type: String, required: true },
+        os: String, 
+        playerId: String,
         lastActive: { type: Date, default: Date.now },
-        playerId: { type: String, required: true },
+        
       },
     ],
     profile: {
@@ -78,6 +79,5 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
-UserSchema.index({ "devices.playerId": 1 }, { unique: true, sparse: true });
 const UserModel = model("User", UserSchema);
 export default UserModel;
