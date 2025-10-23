@@ -21,17 +21,20 @@ export const registerDevice = async (req, res) => {
     if (!user)
       return res
         .status(404)
-        .json({ success: false, message: "User not found" });
+        .json({ success: false, status: 400, message: "User not found" });
 
     if (!user.devices) user.devices = [];
 
-    const existing = user.devices.find((d) => d.playerId === playerId);
+    // More robust comparison - trim and case insensitive
+    const existing = user.devices.find((d) => 
+      d.playerId.toString().trim().toLowerCase() === playerId.toString().trim().toLowerCase()
+    );
 
     if (!existing) {
       user.devices.push({ playerId, os, lastActive: new Date() });
     } else {
-      existing.lastActive = new Date();
       existing.os = os;
+      existing.lastActive = new Date();
     }
 
     await user.save();
@@ -41,7 +44,6 @@ export const registerDevice = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
 // Register
 const Register = async (req, res) => {
   const { name, email, password } = req.body;

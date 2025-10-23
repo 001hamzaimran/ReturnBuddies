@@ -12,8 +12,8 @@ const UserSchema = new Schema(
     },
     devices: [
       {
+        os: String, 
         playerId: String,
-        os: String, // "android" or "ios"
         lastActive: { type: Date, default: Date.now },
       },
     ],
