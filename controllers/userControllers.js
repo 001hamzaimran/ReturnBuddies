@@ -633,7 +633,7 @@ const updateNameandPhone = async (req, res) => {
     }
     const users = await UserModel.findById(user._id);
     await sendSms(
-      phone,
+      updatedPhone,
       `Your ReturnBuddies one-time code is: ${otp}.`
     );
     
