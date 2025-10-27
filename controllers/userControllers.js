@@ -212,7 +212,7 @@ const phoneVerfication = async (req, res) => {
     const user = await UserModel.findById(userId)
     .populate("pickupAddress")
     .populate("payment");
-    
+
     if (!user) {
       return res.status(200).json({ message: "User not found", status: 404 });
     }
@@ -630,33 +630,49 @@ const updateNameandPhone = async (req, res) => {
       });
     }
 
-    const otp = crypto.randomInt(10000, 99999).toString();
-    // Upsert OTP record in ForgotModal
-    const expiresAt = new Date(Date.now() + 5 * 60 * 60 * 1000);
+    // ✅ Normalize phone (ensure it starts with +1)
+    const updatedPhone = phone.startsWith("+1") ? phone : `+1${phone}`;
 
-    let updatedPhone = "";
-    if (!phone.startsWith("+1")) {
-      const newPhone = "+1" + phone;
-      updatedPhone = newPhone;
-    } else {
-      updatedPhone = phone;
+    // ✅ Check if phone number already exists (excluding current user)
+    const phoneTaken = await UserModel.findOne({
+      phone: updatedPhone,
+      _id: { $ne: user._id },
+    });
+
+    if (phoneTaken) {
+      return res.status(200).json({
+        success: false,
+        status: 409,
+        message: "Phone number already in use",
+      });
     }
-    const users = await UserModel.findById(user._id);
+
+    // ✅ Generate OTP and expiration
+    const otp = crypto.randomInt(10000, 99999).toString();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes (corrected from 5 hours)
+
+    // ✅ Send SMS
     await sendSms(
       updatedPhone,
       `Your ReturnBuddies one-time code is: ${otp}.`
     );
-    
+
+    // ✅ Optionally store OTP (if you handle OTP verification later)
+    const users = await UserModel.findById(user._id);
+    users.phoneOtp = otp;
+    users.otpExpiresAt = expiresAt;
+    await users.save();
 
     return res.status(200).json({
       success: true,
       status: 200,
-      message: "OTP send successfully",
-      expiresAt: expiresAt,
-      users: users,
-      OTP: otp,
+      message: "OTP sent successfully",
+      expiresAt,
+      users,
+      OTP: otp, // ⚠️ Remove this in production for security!
     });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       success: false,
       status: 500,
@@ -664,6 +680,7 @@ const updateNameandPhone = async (req, res) => {
     });
   }
 };
+
 
 const updateNameandPhoneVerification = async (req, res) => {
   try {
