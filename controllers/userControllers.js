@@ -208,18 +208,28 @@ const phoneVerfication = async (req, res) => {
   const userId = req.headers["userid"];
 
   try {
+
     const user = await UserModel.findById(userId)
-      .populate("pickupAddress")
-      .populate("payment");
+    .populate("pickupAddress")
+    .populate("payment");
+    
     if (!user) {
       return res.status(200).json({ message: "User not found", status: 404 });
     }
-    let updatedPhone = "";
-    if (!phone.startsWith("+1")) {
-      const newPhone = "+1" + phone;
-      updatedPhone = newPhone;
-    } else {
-      updatedPhone = phone;
+  
+    // ✅ Normalize phone (always store with +1)
+    let updatedPhone = phone.startsWith("+1") ? phone : "+1" + phone;
+  
+    // ✅ Check if phone number is already taken by another user
+    const phoneNumberTaken = await UserModel.findOne({
+      phone: updatedPhone,
+      _id: { $ne: userId }, // exclude current user
+    });
+  
+    if (phoneNumberTaken) {
+      return res
+        .status(200)
+        .json({ message: "Phone number already in use", status: 409 });
     }
     // Generate OTP token
     const otp = crypto.randomInt(10000, 99999).toString();
