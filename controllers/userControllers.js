@@ -202,6 +202,7 @@ const Login = async (req, res) => {
   }
 };
 
+// editint phone +1
 const phoneVerfication = async (req, res) => {
   const { phone } = req.body;
   const userId = req.headers["userid"];
@@ -213,10 +214,17 @@ const phoneVerfication = async (req, res) => {
     if (!user) {
       return res.status(200).json({ message: "User not found", status: 404 });
     }
+    let updatedPhone = "";
+    if (!phone.startsWith("+1")) {
+      const newPhone = "+1" + phone;
+      updatedPhone = newPhone;
+    } else {
+      updatedPhone = phone;
+    }
     // Generate OTP token
     const otp = crypto.randomInt(10000, 99999).toString();
 
-    await sendSms(phone, `Your ReturnBuddies one-time code is: ${otp}.`);
+    await sendSms(updatedPhone, `Your ReturnBuddies one-time code is: ${otp}.`);
 
     // Send OTP to user's phone number
     user.phoneOtp = otp;
@@ -589,6 +597,8 @@ const changePassword = async (req, res) => {
   }
 };
 
+// editint phone +1
+
 const updateNameandPhone = async (req, res) => {
   try {
     const { phone } = req.body;
@@ -614,8 +624,14 @@ const updateNameandPhone = async (req, res) => {
     // Upsert OTP record in ForgotModal
     const expiresAt = new Date(Date.now() + 5 * 60 * 60 * 1000);
 
+    let updatedPhone = "";
+    if (!phone.startsWith("+1")) {
+      const newPhone = "+1" + phone;
+      updatedPhone = newPhone;
+    } else {
+      updatedPhone = phone;
+    }
     const users = await UserModel.findById(user._id);
-
     await sendSms(
       phone,
       `Your ReturnBuddies one-time code is: ${otp}.`
