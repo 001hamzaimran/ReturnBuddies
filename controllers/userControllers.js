@@ -229,7 +229,7 @@ const phoneVerfication = async (req, res) => {
     if (phoneNumberTaken) {
       return res
         .status(200)
-        .json({ message: "Phone number already in use", status: 409 });
+        .json({ message: "This phone number is already verified on another account.", status: 409 });
     }
     // Generate OTP token
     const otp = crypto.randomInt(10000, 99999).toString();
@@ -641,9 +641,9 @@ const updateNameandPhone = async (req, res) => {
 
     if (phoneTaken) {
       return res.status(200).json({
-        success: false,
         status: 409,
-        message: "Phone number already in use",
+        success: false,
+        message: "This phone number is already verified on another account.",
       });
     }
 
