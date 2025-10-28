@@ -62,7 +62,7 @@ export const createPickup = async (req, res) => {
       });
     }
 
-    if (typeof phone !== "string" || !/^\d{10}$/.test(phone)) {
+    if (typeof phone !== "string" || /^(\+?\d{1,3})?\d{10}$/.test(phone)) {
       return res.status(200).json({
         status: 400,
         success: false,
