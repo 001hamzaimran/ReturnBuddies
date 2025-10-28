@@ -3,7 +3,7 @@ import CardModel from "../models/Card.Model.js";
 
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_PUBLISHABLE_KEY);
 
 export const addPaymentCard = async (req, res) => {
   try {
