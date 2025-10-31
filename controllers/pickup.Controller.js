@@ -148,6 +148,7 @@ Pickup Window: ${pickup.pickupTime}`
   } catch (error) {
     console.error("❌ Error creating pickup:", error);
     res.status(500).json({
+      status: 500,
       success: false,
       message: "Server error while creating pickup",
     });
