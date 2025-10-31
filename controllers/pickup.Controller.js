@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 import UserModel from "../models/User.js";
 import CardModel from "../models/Card.Model.js";
 import pickupModel from "../models/pickup.model.js";
-const stripe = new Stripe(process.env.STRIPE_PUBLISHABLE_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 import { sendNotification } from "../utils/sendNotification.js";
 
 export const createPickup = async (req, res) => {
