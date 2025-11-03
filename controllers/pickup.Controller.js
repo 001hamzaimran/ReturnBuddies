@@ -8,8 +8,9 @@ import Stripe from "stripe";
 import mongoose from "mongoose";
 import UserModel from "../models/User.js";
 import pickupModel from "../models/pickup.model.js";
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 import { sendNotification } from "../utils/sendNotification.js";
+
+const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const createPickup = async (req, res) => {
   try {
@@ -20,57 +21,84 @@ export const createPickup = async (req, res) => {
       pickupTime,
       bundleId,
       note,
+      finalPayment, // <-- frontend sends this instead of Payment now
       phone,
       total,
       isOversize,
-      card, // <-- card info from frontend
     } = req.body;
 
+    // --- Extract user ID ---
     const userId = req.user?._id || req.headers["x-user-id"];
     const PickupName = "RB-" + Math.floor(100 + Math.random() * 900);
 
-    if (!card || !card.number || !card.exp_month || !card.exp_year || !card.cvc) {
-      return res.status(400).json({
+    // --- Basic Validation ---
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(200).json({
+        status: 400,
         success: false,
-        message: "Invalid card details",
+        message: "Invalid or missing user ID",
       });
     }
 
-    // ✅ Step 1: Create Stripe PaymentMethod
-    const paymentMethod = await stripe.paymentMethods.create({
-      type: "card",
-      card: {
-        number: card.number,
-        exp_month: card.exp_month,
-        exp_year: card.exp_year,
-        cvc: card.cvc,
-      },
-      billing_details: { name: card.name || "Customer" },
-    });
+    if (!Array.isArray(bundleId) || bundleId.length === 0) {
+      return res.status(200).json({
+        status: 400,
+        success: false,
+        message: "bundleId must be a non-empty array",
+      });
+    }
 
-    // ✅ Step 2: Create and confirm PaymentIntent
-    const paymentIntent = await stripe.paymentIntents.create({
+    if (
+      !pickupType ||
+      !pickupDate ||
+      !pickupTime ||
+      !pickupAddress ||
+      !phone ||
+      total === undefined
+    ) {
+      return res.status(200).json({
+        status: 400,
+        success: false,
+        message: `${pickupType}, ${pickupDate}, ${pickupTime}, ${pickupAddress}, ${phone}, ${total} are missing`,
+      });
+    }
+
+    // --- Validate payment data ---
+    if (!finalPayment || !finalPayment.stripePaymentMethodId) {
+      return res.status(200).json({
+        status: 400,
+        success: false,
+        message: "Payment method not provided",
+      });
+    }
+
+    // --- Create and confirm payment intent with Stripe ---
+    const paymentIntent = await stripeClient.paymentIntents.create({
       amount: Math.round(total * 100),
       currency: "usd",
-      payment_method: paymentMethod.id,
+      payment_method: finalPayment.stripePaymentMethodId,
       confirm: true,
       description: `Pickup Payment for ${PickupName}`,
       metadata: {
-        pickupId: PickupName,
+        pickupId: String(PickupName),
         userId: String(userId),
+        pickupType: String(pickupType),
+        pickupDate: new Date(pickupDate).toISOString(),
+        pickupTime: String(pickupTime),
       },
     });
 
     if (paymentIntent.status !== "succeeded") {
-      return res.status(400).json({
+      return res.status(200).json({
+        status: 400,
         success: false,
         message: "Payment failed",
-        stripeStatus: paymentIntent.status,
+        paymentIntent,
       });
     }
 
-    // ✅ Step 3: Save pickup in DB
-    const pickup = new pickupModel({
+    // --- Create Pickup record in DB ---
+    const pickup = await pickupModel.create({
       userId,
       pickupAddress,
       PickupName,
@@ -79,29 +107,51 @@ export const createPickup = async (req, res) => {
       pickupTime,
       bundleId,
       note,
+      Payment: {
+        paymentMethodId: finalPayment.stripePaymentMethodId,
+        brand: finalPayment.brand,
+        last4: finalPayment.last4,
+        exp_month: finalPayment.exp_month,
+        exp_year: finalPayment.exp_year,
+        cardHolderName: finalPayment.cardHolderName,
+      },
       phone,
       totalPrice: total,
       isOversize: !!isOversize,
-      stripePaymentMethodId: paymentMethod.id,
-      stripePaymentIntentId: paymentIntent.id,
       statusHistory: [{ status: "Pickup Requested", updatedAt: new Date() }],
+      paymentIntentId: paymentIntent.id,
     });
 
-    await pickup.save();
+    // --- Send notification to user ---
+    const user = await UserModel.findById(userId);
+    const playerIds = user?.devices?.map((d) => d.playerId).filter(Boolean) || [];
 
-    res.status(200).json({
+    if (playerIds.length > 0) {
+      await sendNotification(
+        playerIds,
+        "📦 Your return is confirmed!",
+        `Pickup #${pickup.PickupName}
+Pickup Date: ${moment(pickup.pickupDate).format("dddd, MMM D")}
+Pickup Window: ${pickup.pickupTime}`
+      );
+    }
+
+    return res.status(200).json({
       success: true,
-      message: "Pickup created and payment successful",
+      status: 200,
+      message: "Pickup created successfully",
       data: pickup,
     });
   } catch (error) {
-    console.error("❌ Stripe or server error:", error);
-    res.status(500).json({
+    console.error("❌ Error creating pickup:", error);
+    return res.status(500).json({
+      status: 500,
       success: false,
-      message: error.message || "Server error",
+      message: error.message || "Server error while creating pickup",
     });
   }
 };
+
 
 export const getAllPickups = async (req, res) => {
   try {
