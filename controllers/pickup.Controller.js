@@ -31,6 +31,8 @@ export const createPickup = async (req, res) => {
     const userId = req.user?._id || req.headers["x-user-id"];
     const PickupName = "RB-" + Math.floor(100 + Math.random() * 900);
 
+    console.log('payment', payment)
+
     // --- Basic Validation ---
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(200).json({
@@ -72,12 +74,11 @@ export const createPickup = async (req, res) => {
       });
     }
 
-    console.log('payment', payment)
     // --- Create and confirm payment intent with Stripe ---
     const paymentIntent = await stripeClient.paymentIntents.create({
       amount: Math.round(total * 100),
       currency: "usd",
-      payment_method: payment.stripePaymentMethodId,
+      payment_method: payment,
       confirm: true,
       description: `Pickup Payment for ${PickupName}`,
       metadata: {
