@@ -31,7 +31,7 @@ export const createPickup = async (req, res) => {
     const userId = req.user?._id || req.headers["x-user-id"];
     const PickupName = "RB-" + Math.floor(100 + Math.random() * 900);
 
-    console.log('payment', payment)
+    console.log("payment", payment);
 
     // --- Basic Validation ---
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
@@ -66,7 +66,7 @@ export const createPickup = async (req, res) => {
     }
 
     // --- Validate payment data ---
-    if (!payment || !payment.stripePaymentMethodId) {
+    if (!payment) {
       return res.status(200).json({
         status: 400,
         success: false,
@@ -101,31 +101,32 @@ export const createPickup = async (req, res) => {
 
     // --- Create Pickup record in DB ---
     const pickup = await pickupModel.create({
+      note,
+      phone,
       userId,
-      pickupAddress,
+      bundleId,
       PickupName,
       pickupType,
-      pickupDate: new Date(pickupDate),
       pickupTime,
-      bundleId,
-      note,
-      Payment: {
-        amount: payment.amount,
-        paymentMethod: payment.paymentMethod,
-        paymentStatus: payment.paymentStatus,
-        transactionId: payment.transactionId,
-        paidAt: payment.paidAt,
-      },
-      phone,
+      pickupAddress,
       totalPrice: total,
       isOversize: !!isOversize,
-      statusHistory: [{ status: "Pickup Requested", updatedAt: new Date() }],
+      pickupDate: new Date(pickupDate),
       paymentIntentId: paymentIntent.id,
+      statusHistory: [{ status: "Pickup Requested", updatedAt: new Date() }],
+      Payment: {
+        amount: total,
+        paymentMethod: "credit_card",
+        paymentStatus: "completed",
+        transactionId: paymentIntent.id,
+        paidAt: new Date(),
+      },
     });
 
     // --- Send notification to user ---
     const user = await UserModel.findById(userId);
-    const playerIds = user?.devices?.map((d) => d.playerId).filter(Boolean) || [];
+    const playerIds =
+      user?.devices?.map((d) => d.playerId).filter(Boolean) || [];
 
     if (playerIds.length > 0) {
       await sendNotification(
@@ -138,10 +139,10 @@ Pickup Window: ${pickup.pickupTime}`
     }
 
     return res.status(200).json({
-      success: true,
       status: 200,
-      message: "Pickup created successfully",
       data: pickup,
+      success: true,
+      message: "Pickup created successfully",
     });
   } catch (error) {
     console.error("❌ Error creating pickup:", error);
@@ -152,7 +153,6 @@ Pickup Window: ${pickup.pickupTime}`
     });
   }
 };
-
 
 export const getAllPickups = async (req, res) => {
   try {
