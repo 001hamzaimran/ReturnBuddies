@@ -21,7 +21,7 @@ export const createPickup = async (req, res) => {
       pickupTime,
       bundleId,
       note,
-      finalPayment, // <-- frontend sends this instead of Payment now
+      payment,
       phone,
       total,
       isOversize,
@@ -64,7 +64,7 @@ export const createPickup = async (req, res) => {
     }
 
     // --- Validate payment data ---
-    if (!finalPayment || !finalPayment.stripePaymentMethodId) {
+    if (!payment || !payment.stripePaymentMethodId) {
       return res.status(200).json({
         status: 400,
         success: false,
@@ -76,7 +76,7 @@ export const createPickup = async (req, res) => {
     const paymentIntent = await stripeClient.paymentIntents.create({
       amount: Math.round(total * 100),
       currency: "usd",
-      payment_method: finalPayment.stripePaymentMethodId,
+      payment_method: payment.stripePaymentMethodId,
       confirm: true,
       description: `Pickup Payment for ${PickupName}`,
       metadata: {
@@ -108,12 +108,11 @@ export const createPickup = async (req, res) => {
       bundleId,
       note,
       Payment: {
-        paymentMethodId: finalPayment.stripePaymentMethodId,
-        brand: finalPayment.brand,
-        last4: finalPayment.last4,
-        exp_month: finalPayment.exp_month,
-        exp_year: finalPayment.exp_year,
-        cardHolderName: finalPayment.cardHolderName,
+        amount: payment.amount,
+        paymentMethod: payment.paymentMethod,
+        paymentStatus: payment.paymentStatus,
+        transactionId: payment.transactionId,
+        paidAt: payment.paidAt,
       },
       phone,
       totalPrice: total,
