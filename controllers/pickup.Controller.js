@@ -72,6 +72,7 @@ export const createPickup = async (req, res) => {
       });
     }
 
+    console.log('payment', payment)
     // --- Create and confirm payment intent with Stripe ---
     const paymentIntent = await stripeClient.paymentIntents.create({
       amount: Math.round(total * 100),
