@@ -8,22 +8,22 @@ const stripe = new Stripe(process.env.STRIPE_PUBLISHABLE_KEY);
 export const addPaymentCard = async (req, res) => {
   try {
     const {
-      cvv,
-      cardType,
-      isDefault,
-      cardNumber,
+      stripePaymentMethodId,
+      brand,
+      last4,
+      exp_month,
+      exp_year,
       cardHolderName,
-      expirationDate,
+      isDefault,
     } = req.body;
 
     const userId = req.params.userid || req.headers["userid"];
 
-    // Check for required fields
-    if (!userId || !cardNumber || !cardHolderName || !expirationDate || !cvv) {
+    if (!userId || !stripePaymentMethodId || !cardHolderName || !brand || !last4) {
       return res.status(200).json({
         status: 400,
         success: false,
-        message: "All fields are required",
+        message: "Missing required card fields",
       });
     }
 
@@ -36,31 +36,27 @@ export const addPaymentCard = async (req, res) => {
       });
     }
 
-    // If isDefault is true, unset other default cards for the user
+    // Make other cards non-default if this one is default
     if (isDefault === 1 || isDefault === true) {
       await CardModel.updateMany({ userId }, { $set: { isDefault: 0 } });
     }
 
-    // Create and save the card
+    // Save card info
     const newCard = await CardModel.create({
       userId,
-      cardNumber,
+      stripePaymentMethodId,
+      brand,
+      last4,
+      exp_month,
+      exp_year,
       cardHolderName,
-      expirationDate,
-      cvv,
-      cardType,
-      isDefault: isDefault === 1 || isDefault === true ? 1 : 0,
+      isDefault: isDefault ? 1 : 0,
     });
 
-    if (isDefault === 1) {
+    // Optionally set this as user's default payment card
+    if (isDefault) {
       user.payment = newCard._id;
       await user.save();
-      return res.status(200).json({
-        success: true,
-        status: 200,
-        message: "Card added successfully",
-        card: newCard,
-      });
     }
 
     return res.status(200).json({
@@ -78,26 +74,6 @@ export const addPaymentCard = async (req, res) => {
   }
 };
 
-export const getUserCards = async (req, res) => {
-  try {
-    const userId = req.params.userid || req.headers["userid"];
-
-    const cards = await CardModel.find({ userId });
-
-    return res.status(200).json({
-      success: true,
-      status: 200,
-      message: "Cards retrieved successfully",
-      cards,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      status: 500,
-      success: false,
-      message: error.message,
-    });
-  }
-};
 
 export const editCard = async (req, res) => {
   try {
@@ -150,6 +126,27 @@ export const editCard = async (req, res) => {
     return res
       .status(500)
       .json({ status: 500, success: false, message: error.message });
+  }
+};
+
+export const getUserCards = async (req, res) => {
+  try {
+    const userId = req.params.userid || req.headers["userid"];
+
+    const cards = await CardModel.find({ userId });
+
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      message: "Cards retrieved successfully",
+      cards,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      success: false,
+      message: error.message,
+    });
   }
 };
 
