@@ -81,6 +81,7 @@ export const createPickup = async (req, res) => {
       payment_method: payment,
       confirm: true,
       description: `Pickup Payment for ${PickupName}`,
+      return_url: "retrunbuddies://payment-return",
       metadata: {
         pickupId: String(PickupName),
         userId: String(userId),
