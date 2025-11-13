@@ -10,6 +10,10 @@ const CardSchema = new Schema({
     type: String,
     required: true,
   },
+  stripeCustomerId: {
+    type: String,
+    required: true,
+  },
   brand: {
     type: String,
   },

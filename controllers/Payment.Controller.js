@@ -3,7 +3,7 @@ import CardModel from "../models/Card.Model.js";
 
 import Stripe from "stripe";
 
-const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const addPaymentCard = async (req, res) => {
   try {
@@ -25,7 +25,7 @@ export const addPaymentCard = async (req, res) => {
         success: false,
         message: "Missing required card fields",
       });
-    } 
+    }
 
     const user = await UserModel.findById(userId);
     if (!user) {
@@ -36,19 +36,33 @@ export const addPaymentCard = async (req, res) => {
       });
     }
 
-    let customerId = user?.stripeCustomerId;
+    // Create Stripe customer if not exists
+    let customerId = user.stripeCustomerId;
     if (!customerId) {
-      customerId = await createOrGetCustomer(user);
-      console.log("customerId", customerId);
+      const customer = await stripe.customers.create({
+        name: user.name,
+        email: user.email,
+      });
+      customerId = customer.id;
+
       user.stripeCustomerId = customerId;
       await user.save();
     }
-    // Make other cards non-default if this one is default
+
+    // Attach the payment method to customer in Stripe
+    await stripe.paymentMethods.attach(stripePaymentMethodId, {
+      customer: customerId,
+    });
+
+    // Optionally set as default payment method for the customer
     if (isDefault === 1 || isDefault === true) {
+      await stripe.customers.update(customerId, {
+        invoice_settings: { default_payment_method: stripePaymentMethodId },
+      });
       await CardModel.updateMany({ userId }, { $set: { isDefault: 0 } });
     }
 
-    // Save card info
+    // Save card info in DB
     const newCard = await CardModel.create({
       userId,
       stripePaymentMethodId,
@@ -57,11 +71,11 @@ export const addPaymentCard = async (req, res) => {
       exp_month,
       exp_year,
       cardHolderName,
+      customerId, // ✅ Save Stripe Customer ID here
       isDefault: isDefault ? 1 : 0,
-      stripeCustomerId: customerId,
     });
 
-    // Optionally set this as user's default payment card
+    // Link to user as default if needed
     if (isDefault) {
       user.payment = newCard._id;
       await user.save();
@@ -81,6 +95,7 @@ export const addPaymentCard = async (req, res) => {
     });
   }
 };
+
 
 export const editCard = async (req, res) => {
   try {
@@ -196,7 +211,7 @@ export const getAllPayments = async (_, res) => {
     let allPayments = [];
 
     while (hasMore) {
-      const response = await stripeClient.paymentIntents.list({
+      const response = await stripe.paymentIntents.list({
         limit: 100,
         starting_after: lastId || undefined,
       });
@@ -240,27 +255,5 @@ export const getAllPayments = async (_, res) => {
       message: "Server error while fetching payments",
       error: error.message,
     });
-  }
-};
-
-export const createOrGetCustomer = async (req, res) => {
-  try {
-    const { email, name } = req.body;
-    let user = await UserModel.findOne({ email });
-
-    let customerId = user?.stripeCustomerId;
-
-    if (!customerId) {
-      const customer = await stripeClient.customers.create({
-        email,
-        name,
-      });
-      customerId = customer.id;
-      await UserModel.updateOne({ email }, { stripeCustomerId: customerId,name });
-    }
-
-    return customerId;
-  } catch (err) {
-    return res.status(500).json({ error: err.message,status:500,success:false });
   }
 };
