@@ -21,7 +21,8 @@ export const createPickup = async (req, res) => {
       pickupTime,
       bundleId,
       note,
-      payment,
+      paymentMethodId,
+      customerId,
       phone,
       total,
       isOversize,
@@ -31,7 +32,8 @@ export const createPickup = async (req, res) => {
     const userId = req.user?._id || req.headers["x-user-id"];
     const PickupName = "RB-" + Math.floor(100 + Math.random() * 900);
 
-    console.log("payment", payment);
+    console.log("paymentMethodId", paymentMethodId);
+    console.log("customerId", customerId);
 
     // --- Basic Validation ---
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
@@ -66,11 +68,11 @@ export const createPickup = async (req, res) => {
     }
 
     // --- Validate payment data ---
-    if (!payment) {
+    if (!paymentMethodId || !customerId) {
       return res.status(200).json({
         status: 400,
         success: false,
-        message: "Payment method not provided",
+        message: "Payment method ID and customer ID are required",
       });
     }
 
@@ -78,7 +80,9 @@ export const createPickup = async (req, res) => {
     const paymentIntent = await stripeClient.paymentIntents.create({
       amount: Math.round(total * 100),
       currency: "usd",
-      payment_method: payment,
+      payment_method_types: ["card"],
+      customer: customerId,
+      payment_method: paymentMethodId,
       confirm: true,
       description: `Pickup Payment for ${PickupName}`,
       return_url: "retrunbuddies://payment-return",
@@ -117,7 +121,7 @@ export const createPickup = async (req, res) => {
       statusHistory: [{ status: "Pickup Requested", updatedAt: new Date() }],
       Payment: {
         amount: total,
-        paymentMethod: "credit_card",
+        paymentMethod: "stripe",
         paymentStatus: "completed",
         transactionId: paymentIntent.id,
         paidAt: new Date(),
