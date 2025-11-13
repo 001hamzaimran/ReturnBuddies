@@ -5,8 +5,6 @@ import Stripe from "stripe";
 
 const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
 export const addPaymentCard = async (req, res) => {
   try {
     const {
@@ -17,27 +15,17 @@ export const addPaymentCard = async (req, res) => {
       exp_year,
       cardHolderName,
       isDefault,
-      name,
-      email,
     } = req.body;
 
     const userId = req.params.userid || req.headers["userid"];
 
-    if (
-      !userId ||
-      !stripePaymentMethodId ||
-      !cardHolderName ||
-      !brand ||
-      !last4 ||
-      !name ||
-      !email
-    ) {
+    if (!userId || !stripePaymentMethodId || !cardHolderName || !brand || !last4) {
       return res.status(200).json({
         status: 400,
         success: false,
         message: "Missing required card fields",
       });
-    }
+    } 
 
     const user = await UserModel.findById(userId);
     if (!user) {
@@ -48,52 +36,32 @@ export const addPaymentCard = async (req, res) => {
       });
     }
 
-    // 🟢 Step 1: Create or get Stripe customer
-    let customerId = user.stripeCustomerId;
+    let customerId = user?.stripeCustomerId;
     if (!customerId) {
-      const customer = await stripe.customers.create({
-        name,
-        email,
-      });
-      customerId = customer.id;
-
-      // Save Stripe customerId to user
+      customerId = await createOrGetCustomer(user);
+      console.log("customerId", customerId);
       user.stripeCustomerId = customerId;
       await user.save();
     }
-
-    // 🟢 Step 2: Attach payment method to customer (if not already)
-    await stripe.paymentMethods.attach(stripePaymentMethodId, {
-      customer: customerId,
-    });
-
-    // Optionally set as default payment method on Stripe side
-    if (isDefault) {
-      await stripe.customers.update(customerId, {
-        invoice_settings: { default_payment_method: stripePaymentMethodId },
-      });
-    }
-
-    // 🟢 Step 3: Update other cards if this one is default
+    // Make other cards non-default if this one is default
     if (isDefault === 1 || isDefault === true) {
       await CardModel.updateMany({ userId }, { $set: { isDefault: 0 } });
     }
 
-    console.log("customerId", customerId);
-    // 🟢 Step 4: Save card info in DB
+    // Save card info
     const newCard = await CardModel.create({
       userId,
       stripePaymentMethodId,
-      stripeCustomerId: customerId, // <-- now stored properly
       brand,
       last4,
       exp_month,
       exp_year,
       cardHolderName,
       isDefault: isDefault ? 1 : 0,
+      stripeCustomerId: customerId,
     });
 
-    // 🟢 Step 5: Save default card in user
+    // Optionally set this as user's default payment card
     if (isDefault) {
       user.payment = newCard._id;
       await user.save();
@@ -104,7 +72,6 @@ export const addPaymentCard = async (req, res) => {
       status: 200,
       message: "Card added successfully",
       card: newCard,
-      stripeCustomerId: customerId,
     });
   } catch (error) {
     console.error("Error adding card:", error);
@@ -114,28 +81,6 @@ export const addPaymentCard = async (req, res) => {
     });
   }
 };
-
-// export const createOrGetCustomer = async (req, res) => {
-//   try {
-//     const { email, name } = req.body;
-//     let user = await UserModel.findOne({ email });
-
-
-
-//     if (!customerId) {
-//       const customer = await stripeClient.customers.create({
-//         email,
-//         name,
-//       });
-      
-//       await UserModel.updateOne({ email }, { stripeCustomerId: customerId,name });
-//     }
-
-//     return res.status(200).json({ customerId,status:200,success:true });
-//   } catch (err) {
-//     return res.status(500).json({ error: err.message,status:500,success:false });
-//   }
-// };
 
 export const editCard = async (req, res) => {
   try {
@@ -298,3 +243,24 @@ export const getAllPayments = async (_, res) => {
   }
 };
 
+export const createOrGetCustomer = async (req, res) => {
+  try {
+    const { email, name } = req.body;
+    let user = await UserModel.findOne({ email });
+
+    let customerId = user?.stripeCustomerId;
+
+    if (!customerId) {
+      const customer = await stripeClient.customers.create({
+        email,
+        name,
+      });
+      customerId = customer.id;
+      await UserModel.updateOne({ email }, { stripeCustomerId: customerId,name });
+    }
+
+    return customerId;
+  } catch (err) {
+    return res.status(500).json({ error: err.message,status:500,success:false });
+  }
+};
