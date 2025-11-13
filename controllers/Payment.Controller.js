@@ -79,6 +79,7 @@ export const addPaymentCard = async (req, res) => {
       await CardModel.updateMany({ userId }, { $set: { isDefault: 0 } });
     }
 
+    console.log("customerId", customerId);
     // 🟢 Step 4: Save card info in DB
     const newCard = await CardModel.create({
       userId,
