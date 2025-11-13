@@ -251,8 +251,8 @@ export const createOrGetCustomer = async (req, res) => {
       await UserModel.updateOne({ email }, { stripeCustomerId: customerId,name });
     }
 
-    return res.status(200).json({ customerId });
+    return res.status(200).json({ customerId,status:200,success:true });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message,status:500,success:false });
   }
 };
