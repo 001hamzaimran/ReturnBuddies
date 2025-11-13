@@ -3,7 +3,7 @@ import CardModel from "../models/Card.Model.js";
 
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_PUBLISHABLE_KEY);
+const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const addPaymentCard = async (req, res) => {
   try {
@@ -25,7 +25,7 @@ export const addPaymentCard = async (req, res) => {
         success: false,
         message: "Missing required card fields",
       });
-    }
+    } 
 
     const user = await UserModel.findById(userId);
     if (!user) {
@@ -73,7 +73,6 @@ export const addPaymentCard = async (req, res) => {
     });
   }
 };
-
 
 export const editCard = async (req, res) => {
   try {
@@ -189,7 +188,7 @@ export const getAllPayments = async (_, res) => {
     let allPayments = [];
 
     while (hasMore) {
-      const response = await stripe.paymentIntents.list({
+      const response = await stripeClient.paymentIntents.list({
         limit: 100,
         starting_after: lastId || undefined,
       });
@@ -233,5 +232,27 @@ export const getAllPayments = async (_, res) => {
       message: "Server error while fetching payments",
       error: error.message,
     });
+  }
+};
+
+export const createOrGetCustomer = async (req, res) => {
+  try {
+    const { email, name } = req.body;
+    let user = await UserModel.findOne({ email });
+
+    let customerId = user?.stripeCustomerId;
+
+    if (!customerId) {
+      const customer = await stripeClient.customers.create({
+        email,
+        name,
+      });
+      customerId = customer.id;
+      await UserModel.updateOne({ email }, { stripeCustomerId: customerId,name });
+    }
+
+    return res.status(200).json({ customerId });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 };
