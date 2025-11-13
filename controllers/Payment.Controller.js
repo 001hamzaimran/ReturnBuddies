@@ -66,17 +66,17 @@ export const addPaymentCard = async (req, res) => {
     const newCard = await CardModel.create({
       userId,
       stripePaymentMethodId,
+      stripeCustomerId: customerId,
       brand,
       last4,
       exp_month,
       exp_year,
       cardHolderName,
-      customerId, // ✅ Save Stripe Customer ID here
-      isDefault: isDefault ? 1 : 0,
+      isDefault: isDefault === 1 || isDefault === true ? 1 : 0,
     });
 
     // Link to user as default if needed
-    if (isDefault) {
+    if (isDefault === 1 || isDefault === true) {
       user.payment = newCard._id;
       await user.save();
     }
