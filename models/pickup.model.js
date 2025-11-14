@@ -96,8 +96,11 @@ const pickupSchema = new Schema(
     },
 
     Payment: {
-      type: Schema.Types.ObjectId,
-      ref: "Payment",
+      amount: Number,
+      paymentMethod: String,
+      paymentStatus: String,
+      transactionId: String,
+      paidAt: Date
     },
 
     isOversize: {
