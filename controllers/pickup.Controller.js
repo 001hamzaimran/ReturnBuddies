@@ -32,9 +32,6 @@ export const createPickup = async (req, res) => {
     const userId = req.user?._id || req.headers["x-user-id"];
     const PickupName = "RB-" + Math.floor(100 + Math.random() * 900);
 
-    console.log("paymentMethodId", paymentMethodId);
-    console.log("customerId", customerId);
-
     // --- Basic Validation ---
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(200).json({
@@ -43,6 +40,9 @@ export const createPickup = async (req, res) => {
         message: "Invalid or missing user ID",
       });
     }
+
+    const user = await UserModel.findById(userId);
+
 
     if (!Array.isArray(bundleId) || bundleId.length === 0) {
       return res.status(200).json({
@@ -133,7 +133,6 @@ export const createPickup = async (req, res) => {
     });
 
     // --- Send notification to user ---
-    const user = await UserModel.findById(userId);
     const playerIds =
       user?.devices?.map((d) => d.playerId).filter(Boolean) || [];
 
