@@ -1,12 +1,12 @@
 import cors from "cors";
 import path from "path";
-import dotenv from "dotenv";
 import cron from "node-cron";
+import {config} from "dotenv";
 import express from "express";
 import passport from "passport";
 import DbCon from "./utils/db.js";
 import session from "express-session";
-
+import MongoStore from 'connect-mongo';
 import "./middlewares/passport/googleStrategy.js";
 
 import router from "./routes/index.js";
@@ -27,7 +27,7 @@ import {
   morningOfPickup,
 } from "./controllers/push.notification.js";
 
-dotenv.config();
+config();
 
 // db connection
 
@@ -38,14 +38,23 @@ app.use("/public", express.static("public"));
 
 app.use(cors());
 
-// google login setup
-app.use(
-  session({
-    secret: "some-secret",
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+app.use(session({
+  secret: "process.env.SESSION_SECRET",
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.Db_Url,
+    collectionName: 'sessions',
+    ttl: 14 * 24 * 60 * 60, // 14 days
+    autoRemove: 'native'
+  }),
+  cookie: {
+    maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
+    secure: true,
+    httpOnly: true,
+    sameSite: 'lax'
+  }
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 
