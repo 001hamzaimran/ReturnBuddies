@@ -1,12 +1,12 @@
 import cors from "cors";
 import path from "path";
 import cron from "node-cron";
-import {config} from "dotenv";
+import { config } from "dotenv";
 import express from "express";
 import passport from "passport";
 import DbCon from "./utils/db.js";
 import session from "express-session";
-import MongoStore from 'connect-mongo';
+import MongoStore from "connect-mongo";
 import "./middlewares/passport/googleStrategy.js";
 
 import router from "./routes/index.js";
@@ -23,13 +23,11 @@ import NotificationRouter from "./routes/Notification.routes.js";
 import { disabledSlotRouter } from "./routes/DisabledSlot.routes.js";
 import { getRoutificOrders } from "./controllers/Routific.Controller.js";
 import {
-  oneDayBeforePickup,
   morningOfPickup,
+  oneDayBeforePickup,
 } from "./controllers/push.notification.js";
 
 config();
-
-// db connection
 
 const PORT = process.env.PORT;
 const app = express();
@@ -38,23 +36,25 @@ app.use("/public", express.static("public"));
 
 app.use(cors());
 
-app.use(session({
-  secret: "process.env.SESSION_SECRET",
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.Db_Url,
-    collectionName: 'sessions',
-    ttl: 14 * 24 * 60 * 60, // 14 days
-    autoRemove: 'native'
-  }),
-  cookie: {
-    maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
-    secure: true,
-    httpOnly: true,
-    sameSite: 'lax'
-  }
-}));
+app.use(
+  session({
+    secret: "process.env.SESSION_SECRET",
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.Db_Url,
+      collectionName: "sessions",
+      ttl: 14 * 24 * 60 * 60, // 14 days
+      autoRemove: "native",
+    }),
+    cookie: {
+      maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
+      secure: true,
+      httpOnly: true,
+      sameSite: "lax",
+    },
+  })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -74,29 +74,28 @@ const routes = [
 ];
 
 const getTodayDate = () => {
-  return new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+  return new Date().toISOString().split("T")[0];
 };
 
 const cronJob = async () => {
-  // Run at minute 0 of every hour → once per hour
-  cron.schedule("0 * * * *", async () => {
-    const workspaceId = 759727;
-    const date = getTodayDate(); // today's date in YYYY-MM-DD
-    await getRoutificOrders(workspaceId, date);
-  });
+  cron.schedule(
+    "0 8 * * *",
+    async () => await getRoutificOrders(759727, getTodayDate()),
+    {
+      timezone: "America/New_York",
+    }
+  );
 };
 
 const oneDayBeforePickupCronJob = async () => {
-  cron.schedule("0 19 * * *", async () => {
-    console.log("one Day Before Pickup Cron Job");
-    await oneDayBeforePickup();
+  cron.schedule("0 19 * * *", async () => await oneDayBeforePickup(), {
+    timezone: "America/New_York",
   });
 };
 
 const morningOfPickupCronJob = async () => {
-  cron.schedule("0 7 * * *", async () => {
-    console.log("morning Of Pickup Cron Job");
-    await morningOfPickup();
+  cron.schedule("0 8 * * *", async () => await morningOfPickup(), {
+    timezone: "America/New_York",
   });
 };
 
@@ -117,13 +116,13 @@ oneDayBeforePickupCronJob();
 
 const startServer = async () => {
   try {
-    await DbCon(); // Ensure DB is connected before server starts
+    await DbCon();
     app.listen(PORT, () => {
       console.log(`✅ Server is running on PORT ${PORT}`);
     });
   } catch (error) {
     console.error("❌ Failed to connect to DB:", error.message);
-    process.exit(1); // Exit the process if DB fails
+    process.exit(1);
   }
 };
 
