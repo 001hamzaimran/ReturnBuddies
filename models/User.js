@@ -22,6 +22,10 @@ const UserSchema = new Schema(
       type: String,
       default: null,
     },
+    paymentMethodId: {
+      type: String,
+      default: null,
+    },
     profile: {
       type: String,
       default:

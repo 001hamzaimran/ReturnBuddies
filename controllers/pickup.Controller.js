@@ -68,16 +68,17 @@ export const createPickup = async (req, res) => {
     }
 
     // --- Validate payment data ---
-    if (!customerId) {
+    if (!customerId || !paymentMethodId) {
       return res.status(200).json({
         status: 400,
         success: false,
-        message: "Stripe customer ID is required",
+        message: "Stripe customer ID and payment method ID are required",
       });
     }
 
-    if (!user.stripeCustomerId) {
+    if (!user.stripeCustomerId || !user.paymentMethodId) {
       user.stripeCustomerId = customerId;
+      user.paymentMethodId = paymentMethodId;
       await user.save();
     }
     // --- Create and confirm payment intent with Stripe ---
@@ -585,6 +586,7 @@ export const addExtraCharges = async (req, res) => {
       currency: "usd",
       payment_method_types: ["card"],
       customer: pickup.userId.stripeCustomerId,
+      payment_method: pickup.userId.paymentMethodId,
       confirm: true,
       description: `Extra Charges for ${pickup.PickupName}`,
       return_url: "retrunbuddies://payment-return",
