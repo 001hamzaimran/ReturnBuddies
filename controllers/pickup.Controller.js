@@ -576,7 +576,7 @@ export const addExtraCharges = async (req, res) => {
       });
     }
 
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntent = await stripeClient.paymentIntents.create({
       amount: Math.round(extraCharges * 100),
       currency: "usd",
       payment_method_types: ["card"],
