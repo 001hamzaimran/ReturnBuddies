@@ -87,6 +87,7 @@ export const createPickup = async (req, res) => {
       payment_method_types: ["card"],
       customer: user.stripeCustomerId,
       payment_method: paymentMethodId,
+      confirm: true,
       description: `Pickup Payment for ${PickupName}`,
       return_url: "retrunbuddies://payment-return",
       metadata: {
