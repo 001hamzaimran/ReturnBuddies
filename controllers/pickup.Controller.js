@@ -76,12 +76,17 @@ export const createPickup = async (req, res) => {
       });
     }
 
+    if (!user.stripeCustomerId) {
+      user.stripeCustomerId = customerId;
+      await user.save();
+    }
     // --- Create and confirm payment intent with Stripe ---
     const paymentIntent = await stripeClient.paymentIntents.create({
       amount: Math.round(total * 100),
       currency: "usd",
       payment_method_types: ["card"],
-      customer: customerId,
+      customer: user.stripeCustomerId,
+      payment_method: paymentMethodId,
       description: `Pickup Payment for ${PickupName}`,
       return_url: "retrunbuddies://payment-return",
       metadata: {

@@ -18,6 +18,10 @@ const UserSchema = new Schema(
         lastActive: { type: Date, default: Date.now },
       },
     ],
+    stripeCustomerId: {
+      type: String,
+      default: null,
+    },
     profile: {
       type: String,
       default:
