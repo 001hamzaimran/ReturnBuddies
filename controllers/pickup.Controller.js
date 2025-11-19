@@ -76,17 +76,18 @@ export const createPickup = async (req, res) => {
       });
     }
 
-    if (!user.stripeCustomerId || !user.paymentMethodId) {
-      user.stripeCustomerId = customerId;
-      user.paymentMethodId = paymentMethodId;
-      await user.save();
-    }
+    // if (!user.stripeCustomerId || !user.paymentMethodId) {
+    //   user.stripeCustomerId = customerId;
+    //   user.paymentMethodId = paymentMethodId;
+    //   await user.save();
+    // }
+
     // --- Create and confirm payment intent with Stripe ---
     const paymentIntent = await stripeClient.paymentIntents.create({
       amount: Math.round(total * 100),
       currency: "usd",
       payment_method_types: ["card"],
-      customer: user.stripeCustomerId,
+      customer: customerId,
       payment_method: paymentMethodId,
       confirm: true,
       description: `Pickup Payment for ${PickupName}`,
@@ -130,6 +131,8 @@ export const createPickup = async (req, res) => {
         paymentStatus: "completed",
         transactionId: paymentIntent.id,
         paidAt: new Date(),
+        customerId: customerId,
+        paymentMethodId: paymentMethodId,
       },
     });
 
@@ -560,8 +563,8 @@ export const addExtraCharges = async (req, res) => {
 
     if (!pickup) {
       return res.status(404).json({
-        success: false,
         status: 404,
+        success: false,
         message: "Pickup not found",
       });
     }
@@ -585,8 +588,8 @@ export const addExtraCharges = async (req, res) => {
       amount: Math.round(extraCharges * 100),
       currency: "usd",
       payment_method_types: ["card"],
-      customer: pickup.userId.stripeCustomerId,
-      payment_method: pickup.userId.paymentMethodId,
+      customer: pickup.Payment.customerId,
+      payment_method: pickup.Payment.paymentMethodId,
       confirm: true,
       description: `Extra Charges for ${pickup.PickupName}`,
       return_url: "retrunbuddies://payment-return",

@@ -100,7 +100,9 @@ const pickupSchema = new Schema(
       paymentMethod: String,
       paymentStatus: String,
       transactionId: String,
-      paidAt: Date
+      paidAt: Date,
+      customerId: String,
+      paymentMethodId: String,
     },
 
     isOversize: {

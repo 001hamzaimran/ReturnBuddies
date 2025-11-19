@@ -1,13 +1,11 @@
+import axios from "axios";
+import toast from "react-hot-toast";
 import React, { useState } from "react";
-import { FaGoogle, FaApple } from "react-icons/fa";
-import { FiArrowLeft } from "react-icons/fi";
-import { HiOutlineBookmark } from "react-icons/hi2";
+import useAuth from "../../hook/useAuth";
+import BaseUrl from "../../service/BaseUrl";
 import Logo from "../../assets/Images/Logo.png";
 import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import axios from "axios";
-import BaseUrl from "../../service/BaseUrl";
-import useAuth from "../../hook/useAuth";
+
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -16,34 +14,36 @@ export default function Login() {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-
-  const handleLogin = async () => {
+const [loading,setLoading]=useState(false)
+  const handleLogin = async () => {  
     try {
+      setLoading(true)
       const res = await axios.post(`${BaseUrl}/api/user/login`, value);
-      const data = res.data;
-      if (res.status == 200 && data.user.role == "admin") {
-        login({ user: data.user, token: data.token });
-        navigate("/admin/dashboard");
-
-        toast.success(data.message);
-      } else {
-        toast.error("Invalid credential");
+      console.log("res", res.data);
+  
+      const { status, message, user, token } = res.data;
+  
+      // ❌ If invalid credentials
+      if (status !== 200) {
+        return toast.error(message || "Invalid Credentials");
       }
+  
+      // ✅ Login success
+      login({ user, token }); 
+      navigate("/admin/dashboard");
+      toast.success(message);
+      
     } catch (error) {
-      console.log("erro", error);
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("Network error or server is unreachable.");
-      }
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong!";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
     }
-
-    // navigate('/admin/dashboard')
   };
+  
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-6 sm:p-10">
@@ -98,8 +98,9 @@ export default function Login() {
         <button
           className="w-full bg-gradient-to-r cursor-pointer from-[#b152ee] to-[#d28bff] text-white font-bold py-3 rounded-full hover:opacity-90 transition mb-4"
           onClick={handleLogin}
+          disabled={loading}
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
       </div>
     </div>
