@@ -551,11 +551,12 @@ export const addExtraCharges = async (req, res) => {
     const { id } = req.params;
     const { extraCharges, chargeDetail } = req.body;
 
-    if (!extraCharges) {
+    // Input validation
+    if (!extraCharges || isNaN(extraCharges) || extraCharges <= 0) {
       return res.status(400).json({
         success: false,
         status: 400,
-        message: "extraCharges is required",
+        message: "Valid extraCharges amount is required",
       });
     }
 
@@ -569,6 +570,7 @@ export const addExtraCharges = async (req, res) => {
       });
     }
 
+    // Status validation
     if (pickup.status === "Pickup Cancelled") {
       return res.status(400).json({
         success: false,
@@ -576,6 +578,7 @@ export const addExtraCharges = async (req, res) => {
         message: "Cannot add extra charges to a cancelled pickup",
       });
     }
+
     if (pickup.status !== "Inspected") {
       return res.status(400).json({
         success: false,
@@ -584,57 +587,107 @@ export const addExtraCharges = async (req, res) => {
       });
     }
 
+    // Validate payment information
+    if (!pickup.Payment?.customerId || !pickup.Payment?.paymentMethodId) {
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        message: "Payment information not found for this pickup",
+      });
+    }
+
+    const extraChargesAmount = Math.round(parseFloat(extraCharges) * 100);
+    
+    // Create payment intent
     const paymentIntent = await stripeClient.paymentIntents.create({
-      amount: Math.round(extraCharges * 100),
+      amount: extraChargesAmount,
       currency: "usd",
       payment_method_types: ["card"],
       customer: pickup.Payment.customerId,
       payment_method: pickup.Payment.paymentMethodId,
       confirm: true,
+      off_session: true, // Important for off-session payments
       description: `Extra Charges for ${pickup.PickupName}`,
       return_url: "retrunbuddies://payment-return",
       metadata: {
-        pickupId: String(pickup.PickupName),
-        userId: String(id),
+        pickupId: String(pickup._id),
+        pickupName: String(pickup.PickupName),
+        userId: String(pickup.userId?._id || pickup.userId),
         pickupType: String(pickup.pickupType),
         pickupDate: new Date(pickup.pickupDate).toISOString(),
         pickupTime: String(pickup.pickupTime),
+        chargeType: "extra_charge"
       },
     });
 
-    pickup.extraCharge = extraCharges;
-    pickup.chargeDetail = chargeDetail || "";
-    pickup.totalPrice += parseInt(extraCharges);
+    // Check payment status
+    if (paymentIntent.status !== "succeeded") {
+      return res.status(400).json({
+        success: false, 
+        message: "Payment failed",
+        paymentIntent: {
+          id: paymentIntent.id,
+          status: paymentIntent.status,
+          client_secret: paymentIntent.client_secret
+        }
+      });
+    }
 
+    // Update pickup details
+    const numericExtraCharges = parseFloat(extraCharges);
+    pickup.extraCharge = numericExtraCharges;
+    pickup.chargeDetail = chargeDetail || "";
+    pickup.totalPrice += numericExtraCharges;
+    
+    // Update status if needed (optional)
+    // pickup.status = "Extra Charges Added";
+
+    // Add to status history
     pickup.statusHistory.push({
       type: "extraCharge",
-      extraCharge: extraCharges,
+      status: "Extra Charges Added",
+      extraCharge: numericExtraCharges,
       chargeDetail: chargeDetail || "",
+      paymentIntentId: paymentIntent.id,
       updatedAt: new Date(),
     });
 
-    if (paymentIntent.status !== "succeeded") {
-      return res
-        .status(200)
-        .json({ success: false, message: "Payment failed", paymentIntent });
-    }
-
+    // Save pickup changes
     await pickup.save();
 
-    await ExtraChargeEmail(pickup?.userId?.email, paymentIntent, extraCharges);
+    // Send email notification
+    if (pickup?.userId?.email) {
+      await ExtraChargeEmail(pickup.userId.email, paymentIntent, numericExtraCharges);
+    }
 
     return res.status(200).json({
       success: true,
-      message: "extraCharges added successfully",
+      message: "Extra charges added successfully",
       data: pickup,
-      paymentIntent,
+      paymentIntent: {
+        id: paymentIntent.id,
+        status: paymentIntent.status,
+        amount: paymentIntent.amount,
+        currency: paymentIntent.currency
+      },
       status: 200,
     });
+
   } catch (error) {
     console.error("❌ Error adding extraCharges:", error);
+
+    // Handle Stripe specific errors
+    if (error.type?.startsWith('Stripe')) {
+      return res.status(400).json({
+        success: false,
+        message: `Payment error: ${error.message}`,
+      });
+    }
+
     return res.status(500).json({
       success: false,
-      message: "Server error while adding extraCharges",
+      message: "Server error while adding extra charges",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
