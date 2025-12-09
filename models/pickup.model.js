@@ -46,7 +46,7 @@ const pickupSchema = new Schema(
       {
         type: {
           type: String,
-          enum: ["status", "extraCharge", "Issue"], // differentiate
+          enum: ["status", "extraCharge","Issue"], // differentiate
           default: "status",
         },
         status: {

@@ -19,7 +19,6 @@ const [loading,setLoading]=useState(false)
     try {
       setLoading(true)
       const res = await axios.post(`${BaseUrl}/api/user/login`, value);
-      console.log("res", res.data);
   
       const { status, message, user, token } = res.data;
   

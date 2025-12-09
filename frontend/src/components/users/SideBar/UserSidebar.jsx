@@ -4,7 +4,6 @@ import { FiHome } from 'react-icons/fi';
 import Logo from '../../../assets/Images/logo.png';
 export default function UserSidebar() {
   const location=window.location.href
-  console.log('location',location)
   return (
    <aside className="w-64 bg-gray-900 text-white flex flex-col justify-between">
         <div>

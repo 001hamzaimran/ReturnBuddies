@@ -253,7 +253,6 @@ export default function PickupSlotsDashboard() {
       const { data } = await axios.get(
         API.getPickups(BASE_URL, dayData.date, slot.timeSlot)
       );
-      console.log("==>", data);
       let pickupsData = [];
       if (data.pickups) pickupsData = data.pickups;
       else if (data.pickup) pickupsData = [data.pickup];

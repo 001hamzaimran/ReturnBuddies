@@ -23,7 +23,6 @@ export default function Home() {
     );
     const data = res.data;
     setItems(data.items);
-    console.log("data", data);
   };
   F;
   const Image =

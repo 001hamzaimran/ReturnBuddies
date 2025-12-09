@@ -3,8 +3,6 @@ import ItemModal from "../models/Items.js";
 const AddItem = async (req, res) => {
   const { Item_Details, Return_Date } = req.body;
 
-  console.log("Files received:", req.files); // Debug print
-
   try {
     if (!Item_Details || !Return_Date) {
       return res.status(400).json({

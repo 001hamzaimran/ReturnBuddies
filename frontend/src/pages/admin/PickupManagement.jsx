@@ -62,7 +62,6 @@ export default function PickupManagement() {
       const data = await response.json();
       getAllPickups(); // Refresh the list after updating
       setSelectedPickup(null)
-      console.log(data);
     } catch (error) {
       console.error("Error updating status:", error);
     }
@@ -82,7 +81,6 @@ export default function PickupManagement() {
       if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();
       setPickups(data.data);
-      console.log(data.data);
       setTotalPickups(data.data.length);
       setCurrentPage(1);
       calculateCounts(data.data);
@@ -146,7 +144,6 @@ export default function PickupManagement() {
       const data = await response.json();
       getAllPickups(); // Refresh the list after updating
       setSelectedPickup(null)
-      console.log(data);
     } catch (error) {
       console.error("Error updating status:", error);
     }
@@ -163,12 +160,14 @@ export default function PickupManagement() {
         },
         body: JSON.stringify({ extraCharges, chargeDetail }),
       });
-      // if (!response.ok) throw new Error("Network response was not ok");
-      // const data = await response.json();
-      console.log(response);
-      getAllPickups(); // Refresh the list after updating
-      setSelectedPickup(null)
-      console.log(data);
+      
+      const { success, message, error } = await response.json();
+      console.log("error AddExtraCharges ==>", error)
+      console.log("message AddExtraCharges ==>", message)
+      if (success) {
+        getAllPickups(); // Refresh the list after updating
+        setSelectedPickup(null)
+      } 
     } catch (error) {
       console.error("Error updating status:", error);
     }

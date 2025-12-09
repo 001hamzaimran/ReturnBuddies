@@ -37,7 +37,6 @@ export default function Dashboard() {
       });
 
       const data = await response.json();
-      console.log(data);
 
       // ✅ Set data to state
       const formattedUsers = data.data.map((user, index) => ({

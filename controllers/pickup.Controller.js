@@ -597,6 +597,7 @@ export const addExtraCharges = async (req, res) => {
     }
 
     const extraChargesAmount = Math.round(parseFloat(extraCharges) * 100);
+    const numericExtraCharges = parseFloat(extraCharges);
     
     // Create payment intent
     const paymentIntent = await stripeClient.paymentIntents.create({
@@ -633,22 +634,34 @@ export const addExtraCharges = async (req, res) => {
       });
     }
 
-    // Update pickup details
-    const numericExtraCharges = parseFloat(extraCharges);
+    // Update pickup with extra charges and total price
+    // Ensure totalPrice exists and is a number
+    if (typeof pickup.totalPrice !== 'number' || isNaN(pickup.totalPrice)) {
+      pickup.totalPrice = 0;
+    }
+    
+    // Store the original total price for reference
+    const originalTotalPrice = pickup.totalPrice;
+    
+    // Add extra charge amount to total price
+    pickup.totalPrice = parseFloat((originalTotalPrice + numericExtraCharges).toFixed(2));
+    
+    // Update pickup with extra charge details
     pickup.extraCharge = numericExtraCharges;
     pickup.chargeDetail = chargeDetail || "";
-    pickup.totalPrice += numericExtraCharges;
     
-    // Update status if needed (optional)
+    // Optional: Update status
     // pickup.status = "Extra Charges Added";
-
+    
     // Add to status history
     pickup.statusHistory.push({
       type: "extraCharge",
-      status: "Extra Charges Added",
+      status: "Inspected",
       extraCharge: numericExtraCharges,
       chargeDetail: chargeDetail || "",
       paymentIntentId: paymentIntent.id,
+      originalTotalPrice: originalTotalPrice,
+      newTotalPrice: pickup.totalPrice,
       updatedAt: new Date(),
     });
 
@@ -663,7 +676,12 @@ export const addExtraCharges = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Extra charges added successfully",
-      data: pickup,
+      data: {
+        ...pickup.toObject(),
+        totalPrice: pickup.totalPrice,
+        extraCharge: pickup.extraCharge,
+        chargeDetail: pickup.chargeDetail
+      },
       paymentIntent: {
         id: paymentIntent.id,
         status: paymentIntent.status,
@@ -674,20 +692,21 @@ export const addExtraCharges = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Error adding extraCharges:", error);
+    console.log("❌ Error adding extraCharges ==>", error.message);
 
     // Handle Stripe specific errors
     if (error.type?.startsWith('Stripe')) {
       return res.status(400).json({
         success: false,
         message: `Payment error: ${error.message}`,
+        error: error.message
       });
     }
 
     return res.status(500).json({
       success: false,
       message: "Server error while adding extra charges",
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: error.message
     });
   }
 };
