@@ -60,8 +60,6 @@ export const getRoutificOrders = async (workspaceId, date) => {
       PickupName: { $in: deliveredOrderNumbers },
     });
 
-    console.log(`Fetched ${pickups.length} delivered pickups from Routific.`);
-
     // ✅ Update each pickup if status === "Pickup Requested"
     for (const pickup of pickups) {
       if (pickup.status === "Pickup Requested") {
@@ -76,7 +74,6 @@ export const getRoutificOrders = async (workspaceId, date) => {
         });
 
         await pickup.save();
-        console.log(`Pickup ${pickup.PickupName} updated to 'Picked Up'.`);
       }
     }
 

@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { FaTruck, FaWarehouse, FaShippingFast } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import PickupModal from "../../components/admin/PickupModal";
 import PickupStatus from "../../components/admin/PickupStatus";
 import PickupPagination from "../../components/admin/PickupPagination";
-import PickupModal from "../../components/admin/PickupModal";
 
 export default function PickupManagement() {
   const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -161,9 +160,7 @@ export default function PickupManagement() {
         body: JSON.stringify({ extraCharges, chargeDetail }),
       });
       
-      const { success, message, error } = await response.json();
-      console.log("error AddExtraCharges ==>", error)
-      console.log("message AddExtraCharges ==>", message)
+      const { success } = await response.json();
       if (success) {
         getAllPickups(); // Refresh the list after updating
         setSelectedPickup(null)
@@ -184,10 +181,8 @@ export default function PickupManagement() {
         body: JSON.stringify({ labelIssue: labelIssue }),
       });
       if (!response.ok) throw new Error("Network response was not ok");
-      const data = await response.json();
       getAllPickups(); // Refresh the list after updating
       setSelectedPickup(null)
-      console.log(data);
     } catch (error) {
       console.error("Error updating status:", error);
     }
@@ -205,10 +200,8 @@ export default function PickupManagement() {
         body: JSON.stringify({ pickupDate: newDate }),
       });
       if (!response.ok) throw new Error("Network response was not ok");
-      const data = await response.json();
       getAllPickups(); // Refresh the list after updating
       setSelectedPickup(null)
-      console.log(data);
     } catch (error) {
       console.error("Error updating status:", error);
     }

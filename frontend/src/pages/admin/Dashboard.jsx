@@ -67,10 +67,9 @@ export default function Dashboard() {
           "Content-Type": "application/json",
         },
       });
-      const data = await response.json();
-      console.log(data.data);
-      setCompletedPickupsCount(data.data.completedPickups);
-      setActivePickupsCount(data.data.notCompletedPickups);
+      const {data} = await response.json();
+      setCompletedPickupsCount(data.completedPickups);
+      setActivePickupsCount(data.notCompletedPickups);
     } catch (error) {
       console.error("Fetch error:", error);
       return 0;

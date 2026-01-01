@@ -13,12 +13,10 @@ import {
   FiMapPin,
   FiLoader,
 } from "react-icons/fi";
-import { date } from "zod";
 
 export default function WarehouseManagement() {
   const token = localStorage.getItem("token");
   const userId = JSON.parse(localStorage.getItem("user")).user._id;
-
   const [pickups, setPickups] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,8 +32,7 @@ export default function WarehouseManagement() {
   const renderMedia = (url, alt, height = "300px") => {
     if (!url) return <p className="text-gray-500">No file</p>;
 
-    const isPdf = url.toLowerCase().endsWith(".pdf");
-
+    const isPdf = url.toLowerCase().includes(".pdf");
     if (isPdf) {
       return (
         <object
@@ -68,10 +65,6 @@ export default function WarehouseManagement() {
       />
     );
   };
-
-  useEffect(() => {
-    console.log("Selected Product:", selectedProduct);
-  }, [selectedProduct]);
 
   // ✅ Fetch pickups from API
   const getAllPickups = async () => {
@@ -224,7 +217,6 @@ const filteredPickups = pickups.filter((pickup) => {
   const searchLower = searchTerm.toLowerCase();
   const userMatch = pickup.user?.name?.toLowerCase().includes(searchLower) ;
 
-  console.log("==>",pickup)
   const bundleMatch = pickup.pickupName.toLowerCase().includes(searchLower)
 
   const productMatch = pickup.bundles.some((bundle) =>
@@ -616,7 +608,7 @@ const filteredPickups = pickups.filter((pickup) => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
