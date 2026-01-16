@@ -106,6 +106,10 @@ app.get("/privacy-policy", (_, res) => {
 app.get("/term-and-condition", (_, res) => {
   res.sendFile(path.resolve("public/term-and-condition.html"));
 });
+
+app.get("/delete-account", (_, res) => {
+  res.sendFile(path.resolve("public/delete-account.html"));
+});
 routes.map((route) => app.use("/api", route));
 
 app.get("/", (_, res) => res.send("Hello World"));
